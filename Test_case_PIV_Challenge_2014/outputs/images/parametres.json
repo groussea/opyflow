@@ -1,0 +1,35 @@
+{
+    "filters_params": {
+        "DGF": 1.0, 
+        "vmin": null, 
+        "RadiusF": 10.0, 
+        "vmax": 70.0, 
+        "minNperRadius": 2.0, 
+        "maxDevinRadius": 3.0, 
+        "mask": null
+    }, 
+    "lk_params": {
+        "winSize": [
+            32, 
+            6
+        ], 
+        "maxLevel": 4, 
+        "criteria": [
+            3, 
+            50, 
+            0.03
+        ]
+    }, 
+    "interp_params": {
+        "kernel": "Gaussian", 
+        "scaleInterp": 1.0, 
+        "Sharpness": 2.0, 
+        "Radius": 15.0
+    }, 
+    "feature_params": {
+        "blockSize": 16, 
+        "minDistance": 4, 
+        "maxCorners": 70000, 
+        "qualityLevel": 0.09
+    }
+}
