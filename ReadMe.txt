@@ -1,8 +1,7 @@
 # About
 
 OpyFlow : Python package for Optical FLow measurements.
-OpyFlow is a Python package for Optical FLow measurements. It is based on openCV and
-VTK libraries to detect good features, calculate the flow on pixels and interpolate them on mesh
+It is based on openCV and VTK libraries to detect good features, calculate the flow on pixels and interpolate them on mesh
 (see explaination below). The package contain also some rendering tools built with matplotlib.
 
 
