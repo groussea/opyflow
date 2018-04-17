@@ -62,9 +62,9 @@ VTK
 The code use last versions of VTK and opencv.
 However, pip (Python Package Index) doesn't have the last vtk yet.
 It is also a bit tricky to compile the source directly from the vtk website. 
-However, the simplest way to install it is to use miniconda and the last updated sources from conda-forge.
+However, the simplest way to install it is to use miniconda oranaconda and the last updated sources from conda-forge.
 
-When miniconda is installed type in the commande prompt:
+When miniconda/anaconda is installed type in the commande prompt:
 
 conda create -n opyfenv python=2.7 vtk opencv matplotlib scipy tqdm (spyder) 
 source activate opyfenv
