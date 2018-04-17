@@ -20,7 +20,7 @@ import cv2
 plt.style.use('fivethirtyeight')
 plt.rcParams['axes.edgecolor']='0'
 plt.rcParams['axes.linewidth']=1.5
-plt.rc('text', usetex=True)
+#plt.rc('text', usetex=True) may be activated if you prefer a Latex rendering font
 plt.rc('font', family='arial')
 plt.rcParams['axes.facecolor']='white'
 plt.rcParams['figure.facecolor']='white'
