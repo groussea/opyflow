@@ -30,9 +30,16 @@ The package Folder opyf:
 The test Folder:
 --Test_case_PIV_Challenge_2014
     --CommandLines-Opyf-PIV-Challenge2014-Test.py
-
+    --CommandLines-Opyf-PIV-Challenge2014-Test_Simple.py
+    --mask.tiff
+    --images (folder)
+	--A_00001_a.tif
+	--A_00001_b.tif	
+	--ReadMe_Download_Images.txt (instruction to download the other images of the test)
+    --meanFlow.png (Results for the CommandLines)
+    --rms.png
 Basic command lines:
--CommandLines-Opyf-Default.py
+--CommandLines-Opyf-Default.py
 
 
 
@@ -46,7 +53,7 @@ A test on synthetic images is still required.
 
 ## Installation
 
-The package requires python and basic python package: csv, numpy, matplotlib
+The package requires python and basic python package: csv, numpy, matplotlib, tqdm
 
 The main dependencies are :
 
@@ -60,7 +67,7 @@ However, the simplest way to install it is to use miniconda and the last updated
 
 When miniconda is installed type in the commande prompt:
 
-conda create -n opyfenv python=2.7 vtk opencv matplotlib scipy (spyder) 
+conda create -n opyfenv python=2.7 vtk opencv matplotlib scipy tqdm (spyder) 
 source activate opyfenv
 
 And then run spyder or directly ipython in the command prompt
