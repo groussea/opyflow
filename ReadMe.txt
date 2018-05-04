@@ -1,4 +1,4 @@
-# About
+﻿# About
 
 OpyFlow : Python package for Optical FLow measurements.
 It is based on openCV and VTK libraries to detect good features, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explaination below). The package contain also some rendering tools built with matplotlib.
@@ -65,9 +65,11 @@ However, the simplest way to install it is to use miniconda oranaconda and the l
 
 When miniconda/anaconda is installed type in the commande prompt:
 
-conda create -n opyfenv python=2.7 vtk opencv matplotlib scipy tqdm (spyder) 
+conda create -n opyfenv vtk opencv matplotlib scipy tqdm (spyder) 
 source activate opyfenv
 
+These command lines will install the an environnement with python 3.6.
+The soft has been developped on python 2.7 and modifications are still required.
 And then run spyder or directly ipython in the command prompt
 
 it is also possible to use anaconda software to use a GUI.

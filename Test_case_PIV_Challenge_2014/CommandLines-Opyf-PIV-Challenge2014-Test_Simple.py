@@ -13,10 +13,10 @@ Created on Wed Nov 22 08:24:12 2017
 
 import sys, os
 
-folder_main='.'
+folder_main='C:/Users/EPFL-LHE/Documents/GitHub/opyflow/Test_case_PIV_Challenge_2014'
 os.chdir(folder_main)
 #Where is the opyf folder?
-sys.path.append('../opyf')
+sys.path.append('C:/Users/EPFL-LHE/Documents/GitHub/opyflow')
 import cv2
 import csv #not used directly in this script but needed
 import numpy as np
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import tqdm     
 import vtk #not used directly in this script but needed
 import json
-import opyf
+import opyf3 as opyf
 
 plt.close('all')
 
@@ -219,7 +219,7 @@ Vnul=[]
 
 #%% After a treatment with image J (or other image treatment software) we are able to take the binary image mask.tiff
 #The file is available in the local repository
-mask=cv2.imread('mask.tiff',cv2.IMREAD_ANYDEPTH)  
+mask=cv2.imread(folder_main+'/mask.tiff',cv2.IMREAD_ANYDEPTH)  
 
 mask=mask/255
 
@@ -312,6 +312,7 @@ for i in tqdm.trange(len(prev)):
          'Dim':[Hvis,Lvis],
          'unit':'px'}      
 #        For the momentwe didnt interpolate data on grid
+        import opyf3.Render 
         opyf.Render.opyfPlot(grid_x,grid_y,gridVx,gridVy,X,V,setPlot,vis=frame,namefig='Vel',**render_params)         
         plt.savefig(folder_img_output+'/Test_Step'+format(incr,'04.0f')+'.png',format='png',dpi=100)       
 

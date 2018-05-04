@@ -1,20 +1,18 @@
-#!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 """
-Created on Wed Nov 29 15:12:20 2017
+Created on Fri May  4 15:10:06 2018
 
-@author: gauthier
+@author: EPFL-LHE
 """
 
-import vtk
-import cv2
+#__all__== ["Filters", "custom_cmap", "Files","Filters","Interpolate","Render","Track"]
+#
 
 
-__all__=['Filters','Interpolate','Track','Render','Files']
-
-from Filters import *
-from Render import *
-from Track import *
-from Interpolate import *
-from Files import *
-from custom_cmap import *
+from opyf.Interpolate import *
+from opyf.Files import *
+from opyf.custom_cmap import *
+from opyf.Filters import *
+from opyf.Render import *
+from opyf.Filters import *
+from opyf.Track import *
