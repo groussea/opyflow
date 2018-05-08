@@ -174,7 +174,7 @@ def npGrid2TargetPoint3D(npGridx,npGridy,npGridz):
     pts[..., 1] = npGridy
     pts[..., 2] = npGridz
     pts = pts.transpose(2, 0, 1, 3).copy()
-    pts.shape = pts.size / 3, 3    
+    pts.shape = pts.size // 3, 3    
     return pts
 
 
