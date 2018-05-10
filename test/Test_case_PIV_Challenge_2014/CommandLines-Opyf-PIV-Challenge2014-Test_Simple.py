@@ -6,6 +6,8 @@ Created on Wed Nov 22 08:24:12 2017
 @author: Gauthier ROUSSEAU
 """
 
+#WARNING : to work properly you must run this script from 'Test_case_PIV_Challenge_2014' Folder 
+
 #python test file performed on the Case A of the PIV challenge 2014
 
 
@@ -13,10 +15,10 @@ Created on Wed Nov 22 08:24:12 2017
 
 import sys, os
 
-folder_main='/media/gauthier/Data_1/TAF/OPyF-Project/github/opyFlow/Test_case_PIV_Challenge_2014'
+folder_main='./'
 os.chdir(folder_main)
-#Where is the opyf folder?
-sys.path.append('/media/gauthier/Data_1/TAF/OPyF-Project/github/opyFlow')
+#if it is not installed where is the opyf folder?
+#sys.path.append('/media/gauthier/Data_1/TAF/OPyF-Project/github/opyFlow')
 import cv2
 import csv #not used directly in this script but needed
 import numpy as np

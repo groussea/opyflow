@@ -1,4 +1,4 @@
-﻿# About
+﻿## About
 
 OpyFlow : Python package for Optical FLow measurements.
 It is based on openCV and VTK libraries to detect good features, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explaination below). The package contain also some rendering tools built with matplotlib.
@@ -8,10 +8,23 @@ Authors: Gauthier Rousseau
 
 corresponding e-mail : gauthier.rousseau@gmail.com
 
+"""
+
+If you want to install the package on your environment run 
+
+python setup.py install 
+
+in your command prompt.
+
+Warning : if you don't have last versions of VTK and opencv python packages it will not work, see bellow installation section for details.
+
 ## Contents
 
 This archive is organized as follow:
 
+The setup file:
+
+--setup.py
 
 The package Folder opyf:
 --opyf
@@ -26,18 +39,27 @@ The package Folder opyf:
 
    
 The test Folder:
---Test_case_PIV_Challenge_2014
-    --CommandLines-Opyf-PIV-Challenge2014-Test.py
-    --CommandLines-Opyf-PIV-Challenge2014-Test_Simple.py
-    --mask.tiff
-    --images (folder)
-	--A_00001_a.tif
-	--A_00001_b.tif	
-	--ReadMe_Download_Images.txt (instruction to download the other images of the test)
-    --meanFlow.png (Results for the CommandLines)
-    --rms.png
+--test
+	--Test_case_PIV_Challenge_2014
+	    --CommandLines-Opyf-PIV-Challenge2014-Test.py
+	    --CommandLines-Opyf-PIV-Challenge2014-Test_Simple.py
+	    --mask.tiff
+	    --images (sample of 2 source images)
+		--A_00001_a.tif
+		--A_00001_b.tif	
+		--ReadMe_Download_Images.txt (instruction to download the other images of the test)
+	    --meanFlow.png (Results for the CommandLines)
+	    --rms.png
+	--Test_land_slide_youtube_video
+	    --OpyFlow_testcase_youtube_MA.py
+	    --OpyFlow_testcase_youtube_simple.py
+	    --mask.png
+	    --The video must be downloaded from youtube with the package pytube
+	    --ReadMe_download_a_youtube_video.txt (instruction to download the other images of the test)
+
+
 Basic command lines:
---CommandLines-Opyf-Default.py
+	--CommandLines-Opyf-Default.py
 
 
 
@@ -80,7 +102,7 @@ it is also possible to use anaconda software to use a GUI.
 It is possible to test the algorithm on test case A of the python challenge.
 
 tested on:
-Python version: 2.7
+Python version: 2.7 and 3.6
 VTK : 8.0.1
 opencv : 3.2
 numpy: 1.17
