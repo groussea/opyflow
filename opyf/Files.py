@@ -34,7 +34,7 @@ def read_csvField(csvpath):
     return data
     
 def read_csvTrack(csvpath):
-    f=open(csvpath,'rb')
+    f=open(csvpath,'r')
     reader  = csv.reader(f, csv.QUOTE_NONNUMERIC)   
     index=0
     headerTrack=[]
@@ -51,15 +51,19 @@ def read_csvTrack(csvpath):
     datasTrack=np.array(datasTrack)
     return headerTrack, datasTrack
  
-    
-    
+csvpath='D:/RousseauG/20180503/117_slope=0.57294_I=20_move_from_ 10_to_40mm_fps=420_ET=0.0005_T=15seconds_Dbeads=8mm/outputs/tracks_movingAV_step=2_filt.csv'    
+csvpath='D:/RousseauG/20180503/117_slope=0.57294_I=20_move_from_ 10_to_40mm_fps=420_ET=0.0005_T=15seconds_Dbeads=8mm/outputs/posBeads.csv'    
+
 def read_csv(csvpath,delimiter=','):
-    f=open(csvpath,'rb')
-    reader  = csv.reader(f, csv.QUOTE_NONNUMERIC,delimiter=delimiter)  
+ 
+    f=open(csvpath,'r')
+
+    reader  = csv.reader(f,delimiter=delimiter)  
 #    reader  = csv.reader(f,  dialect='excel')   
     index=0
     header=[]
     datas=[]
+   
     for row in reader: 
         if index==0:
             temp=[item for number, item in enumerate(row)]
@@ -68,9 +72,36 @@ def read_csv(csvpath,delimiter=','):
             temp=[float(item) for number, item in enumerate(row)]
             datas.append(temp)
         index+=1
+
     header=np.array(header)
+    datas=datas[1::2]
     datas=np.array(datas)
+    f.close()
     return header, datas
+
+def read_csv_new(csvpath,delimiter=','):
+ 
+    f=open(csvpath,'r')
+    reader  = csv.reader(f,delimiter=delimiter)  
+#    reader  = csv.reader(f,  dialect='excel')   
+    index=0
+    header=[]
+    datas=[]   
+    for row in reader: 
+        if index==0:
+            temp=[item for number, item in enumerate(row)]
+            header.append(temp)
+        if index>0:
+            temp=[float(item) for number, item in enumerate(row)]
+            datas.append(temp)
+        index+=1
+        
+    header=np.array(header)
+
+    datas=np.array(datas)
+    f.close()
+    return header, datas
+
 
 def write_csvTrack2D(csvTrackfile,X,V):
     f=open(csvTrackfile,'w')
@@ -123,7 +154,7 @@ def write_csvScalar3D(filename,X,variables):
     
     id = 0
 
-    for i in xrange(len(X)):
+    for i in range(len(X)):
         f.write(str(X[i][0]) +','+ str(X[i][1]) +','+ str(X[i][2]))
         f.write(varline(variables, id))
         id = id + 1

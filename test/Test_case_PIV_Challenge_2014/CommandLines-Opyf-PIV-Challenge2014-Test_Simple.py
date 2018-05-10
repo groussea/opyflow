@@ -13,10 +13,10 @@ Created on Wed Nov 22 08:24:12 2017
 
 import sys, os
 
-folder_main='C:/Users/EPFL-LHE/Documents/GitHub/opyflow/Test_case_PIV_Challenge_2014'
+folder_main='/media/gauthier/Data_1/TAF/OPyF-Project/github/opyFlow/Test_case_PIV_Challenge_2014'
 os.chdir(folder_main)
 #Where is the opyf folder?
-sys.path.append('C:/Users/EPFL-LHE/Documents/GitHub/opyflow')
+sys.path.append('/media/gauthier/Data_1/TAF/OPyF-Project/github/opyFlow')
 import cv2
 import csv #not used directly in this script but needed
 import numpy as np
@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 import tqdm     
 import vtk #not used directly in this script but needed
 import json
-import opyf3 as opyf
+import opyf
 
 plt.close('all')
 
@@ -312,7 +312,7 @@ for i in tqdm.trange(len(prev)):
          'Dim':[Hvis,Lvis],
          'unit':'px'}      
 #        For the momentwe didnt interpolate data on grid
-        import opyf3.Render 
+
         opyf.Render.opyfPlot(grid_x,grid_y,gridVx,gridVy,X,V,setPlot,vis=frame,namefig='Vel',**render_params)         
         plt.savefig(folder_img_output+'/Test_Step'+format(incr,'04.0f')+'.png',format='png',dpi=100)       
 

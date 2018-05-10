@@ -152,7 +152,7 @@ def opyfQuiverPointCloud(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
     #Select randomly N vectors
     if len(X)<nvec:
         N=len(X)
-        print 'only '+str(N)+'vectors plotted because lenX<' + str(nvec)
+        print('only '+str(N)+'vectors plotted because lenX<' + str(nvec))
     else:
         N=nvec
     scale=args.get('scale',None)
@@ -174,7 +174,7 @@ def opyfQuiverPointCloud(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
 def opyfQuiverPointCloudColored(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
     from matplotlib.collections import PatchCollection
     from matplotlib.colors import Normalize
-    if args.has_key('cmap') is not True:
+    if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm
     cmap=args.get('cmap',mpl.cm.coolwarm)
     del args['cmap']
@@ -183,7 +183,7 @@ def opyfQuiverPointCloudColored(X,V,fig=None,ax=None,nvec=3000,normalize=False,*
     #Select randomly N vectors
     if len(X)<nvec:
         N=len(X)
-        print 'only '+str(N)+'vectors plotted because lenX<' + str(nvec)
+        print('only '+str(N)+'vectors plotted because lenX<' + str(nvec))
     else:
         N=nvec
     
@@ -191,7 +191,7 @@ def opyfQuiverPointCloudColored(X,V,fig=None,ax=None,nvec=3000,normalize=False,*
     Xc=X[ind,:]
     Vc=V[ind,:]
     colors=(Vc[:,0]**2+Vc[:,1]**2)**0.5
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         vlim=args.get('vlim',[colors.min(),colors.max()])
         if vlim is None:
             vlim=[colors.min(),colors.max()]
@@ -477,7 +477,7 @@ def opyffigureandaxes(Hframe,Lframe,unit='px',Hfig=9,**args):
     return fig,ax
 
 def setcmap(Type,alpha=1.):
-    from custom_cmap import make_cmap
+    from opyf.custom_cmap import make_cmap
     if Type=='norme':
         colors = [(33./255,66./255,99./255,0.),(33./255,66./255,99./255,alpha),(1,1,0.3,alpha), (0.8,0,0,alpha), (0,0,0,alpha)]
         position = [0,0.01,0.05,0.5, 1]   
