@@ -1,6 +1,7 @@
 ﻿## About
 
 OpyFlow : Python package for Optical FLow measurements.
+
 It is based on openCV and VTK libraries to detect good features, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explaination below). The package contain also some rendering tools built with matplotlib.
 For flow calculations, it is mainly inspired on the openCV python sample lktrack.py.
 
@@ -10,13 +11,13 @@ corresponding e-mail : gauthier.rousseau@gmail.com
 
 """
 
-If you want to install the package on your environment run 
+If you want to install the package on your environment run :
 
 python setup.py install 
 
-in your command prompt.
+on your command prompt.
 
-Warning : if you don't have last versions of VTK and opencv python packages it will not work, see bellow installation section for details.
+Warning : if the last versions of VTK and openCV python packages are not installed in your environment it will not work. see bellow teh installation section for details.
 
 ## Contents
 
