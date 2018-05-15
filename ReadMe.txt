@@ -11,13 +11,22 @@ corresponding e-mail : gauthier.rousseau@gmail.com
 
 """
 
-If you want to install the package on your environment run :
+## Quick start
 
-python setup.py install 
+Assuming that you already have python installed (I recommand to use anacaonda to deal with depandancies).
 
-on your command prompt.
+from the package repository 'opyflow', If you want to install the package on your environment run :
 
-Warning : if the last versions of VTK and openCV python packages are not installed on your environment it will not work. see bellow the installation section for details.
+''python setup.py install'' 
+
+This should install opyf library and the main dependancies (vtk and opencv) automatically.
+
+After you may test:
+
+python /test/Test_case_PIV_Challenge_2014/CommandLines-Opyf-PIV-Challenge2014-Test_Simple.py
+
+If it does not work you can contact me please.
+
 
 ## Contents
 
