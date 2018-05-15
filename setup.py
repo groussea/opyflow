@@ -94,5 +94,5 @@ setup(
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed.
-    install_requires=['ipython','vtk','opencv-python','tqdm','matplotlib','scipy']
+    install_requires=['ipython','vtk','opencv-python','tqdm','matplotlib','scipy','pytube']
 )
