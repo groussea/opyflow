@@ -30,11 +30,11 @@ plt.rc('text', usetex=False)
 #command lines To save the online youtube  video of the land slide (need the pytube package)
 # 'pip install pytube' on the cmd prompt
 
-from pytube import YouTube
-#You may run this script for any video link from youtube
-yt=YouTube("https://www.youtube.com/watch?time_continue=2&v=5-nyAz484WA")
-stre=yt.streams.first()
-stre.download(folder_main)
+#from pytube import YouTube
+##You may run this script for any video link from youtube
+#yt=YouTube("https://www.youtube.com/watch?time_continue=2&v=5-nyAz484WA")
+#stre=yt.streams.first()
+#stre.download(folder_main)
 
 #%%
 plt.close('all')
@@ -117,7 +117,7 @@ lk_params = dict( winSize  = (16, 16),
 # =============================================================================
 
 
-mask=cv2.imread('/media/gauthier/Data_1/TAF/LandSlide/youtube example 2/mask.png')  
+mask=cv2.imread(folder_main+'/mask.png')  
 
 mask=mask[:,:,0]/255
 
@@ -154,12 +154,12 @@ render_params= dict(Ptype='norme',
 framecut=frameini[ROI[1]:(ROI[3]+ROI[1]),ROI[0]:(ROI[2]+ROI[0])]
 scaleinterp=interp_params['scaleInterp']
 [Ly,Cx,z]=framecut.shape
-resX=Cx/scaleinterp
-resY=Ly/scaleinterp
+resX=Cx//scaleinterp
+resY=Ly//scaleinterp
 
 grid_y, grid_x = np.mgrid[0:resY, 0:resX]
-grid_x=(grid_x+0.5)*np.float(ROI[2])/resX+ROI[0]
-grid_y=(grid_y+0.5)*np.float(ROI[3])/resY+ROI[1]
+grid_x=(grid_x+0.5)*np.float(ROI[2])//resX+ROI[0]
+grid_y=(grid_y+0.5)*np.float(ROI[3])//resY+ROI[1]
 
 gridVx,gridVy=np.zeros_like(grid_x),np.zeros_like(grid_x)
 

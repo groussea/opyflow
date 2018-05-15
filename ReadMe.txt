@@ -1,8 +1,9 @@
-﻿## About
+﻿
+## About
 
 OpyFlow : Python package for Optical FLow measurements.
 
-It is based on openCV and VTK libraries to detect good features, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explaination below). The package contains also some rendering tools built with matplotlib.
+It is based on openCV and VTK libraries to detect good features, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explanation below). The package contains also some rendering tools built with matplotlib.
 For flow calculations, it is mainly inspired on the openCV python sample lktrack.py.
 
 Author: Gauthier Rousseau
@@ -13,13 +14,13 @@ corresponding e-mail : gauthier.rousseau@gmail.com
 
 ## Quick start
 
-Assuming that you already have python installed (I recommand to use anacaonda to deal with depandancies).
+Assuming that you already have python installed (I recommend to use anacaonda to deal with dependencies).
 
-from the package repository 'opyflow', If you want to install the package on your environment run :
+from the package repository 'opyflow', If you want to install the package on your environment run:
 
 ''python setup.py install'' 
 
-This should install opyf library and the main dependancies (vtk and opencv) automatically.
+This should install opyf library and the main dependencies (vtk and opencv) automatically.
 
 After you may test:
 
@@ -93,15 +94,15 @@ VTK
 The code use last versions of VTK and opencv.
 However, pip (Python Package Index) doesn't have the last vtk yet.
 It is also a bit tricky to compile the source directly from the vtk website. 
-However, the simplest way to install it is to use miniconda oranaconda and the last updated sources from conda-forge.
+However, the simplest way to install it is to use miniconda or anaconda and the last updated sources from conda-forge.
 
-When miniconda/anaconda is installed type in the commande prompt:
+When miniconda/anaconda is installed type in the command prompt:
 
 conda create -n opyfenv vtk opencv matplotlib scipy tqdm (spyder) 
 source activate opyfenv
 
 These command lines will install the an environnement with python 3.6.
-The soft has been developped on python 2.7 and modifications are still required.
+The soft has been developed on python 2.7 and modifications are still required.
 And then run spyder or directly ipython in the command prompt
 
 it is also possible to use anaconda software to use a GUI.
@@ -117,4 +118,5 @@ VTK : 8.0.1
 opencv : 3.2
 numpy: 1.17
 matplotlib : 2.0.0
+
 

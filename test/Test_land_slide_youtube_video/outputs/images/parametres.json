@@ -1,42 +1,42 @@
 {
-    "filters_params": {
-        "DGF": 5.0, 
-        "vmin": null, 
-        "RadiusF": 20.0, 
-        "vmax": null, 
-        "maxDevinRadius": 2.5, 
-        "minNperRadius": 4.0
-    }, 
-    "render_params": {
-        "vlim": [
-            0, 
-            80
-        ], 
-        "scale": 1000, 
-        "Ptype": "norme"
-    }, 
     "lk_params": {
         "winSize": [
-            16, 
+            16,
             16
-        ], 
-        "maxLevel": 4, 
+        ],
+        "maxLevel": 4,
         "criteria": [
-            3, 
-            20, 
+            3,
+            20,
             0.06
         ]
-    }, 
-    "interp_params": {
-        "kernel": "Gaussian", 
-        "scaleInterp": 2, 
-        "Sharpness": 2.0, 
-        "Radius": 15.0
-    }, 
+    },
     "feature_params": {
-        "blockSize": 16, 
-        "minDistance": 5, 
-        "maxCorners": 40000, 
-        "qualityLevel": 0.001
+        "maxCorners": 40000,
+        "qualityLevel": 0.001,
+        "minDistance": 5,
+        "blockSize": 16
+    },
+    "filters_params": {
+        "vmin": null,
+        "vmax": null,
+        "RadiusF": 20.0,
+        "minNperRadius": 4.0,
+        "maxDevinRadius": 2.5,
+        "DGF": 5.0
+    },
+    "interp_params": {
+        "Radius": 15.0,
+        "Sharpness": 2.0,
+        "kernel": "Gaussian",
+        "scaleInterp": 2
+    },
+    "render_params": {
+        "Ptype": "norme",
+        "vlim": [
+            0,
+            80
+        ],
+        "scale": 1000
     }
 }

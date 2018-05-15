@@ -156,9 +156,9 @@ def opyfQuiverPointCloud(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
     else:
         N=nvec
     scale=args.get('scale',None)
-    if args.has_key('cmap') is True:
+    if 'cmap' in args:
         del args['cmap']
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         del args['vlim']
     ind=np.random.choice(np.arange(len(X)), N, replace = False)
     Xc=X[ind,:]
@@ -217,7 +217,7 @@ def opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32
     fig,ax=getax(fig=fig,ax=ax)
     import opyf
     from matplotlib.colors import Normalize
-    if args.has_key('cmap') is not True:
+    if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm
     cmap=args.get('cmap',mpl.cm.coolwarm)
     del args['cmap']
@@ -250,7 +250,7 @@ def opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32
     TargetPoints=opyf.Interpolate.npGrid2TargetPoint2D(new_grid_x,new_grid_y)
     Velocities=opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx,new_gridVy)    
     Norme=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         vlim=args.get('vlim',[Norme.min(),Norme.max()])
         if vlim is None:
             vlim=[Norme.min(),Norme.max()]
@@ -277,7 +277,7 @@ def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,re
     fig,ax=getax(fig=fig,ax=ax)
     import opyf
     from matplotlib.colors import Normalize
-    if args.has_key('cmap') is not True:
+    if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm
     cmap=args.get('cmap',mpl.cm.coolwarm)
     del args['cmap']
@@ -310,7 +310,7 @@ def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,re
     TargetPoints=opyf.Interpolate.npGrid2TargetPoint2D(new_grid_x,new_grid_y)
     Velocities=opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx,new_gridVy)    
     Norme=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         vlim=args.get('vlim',[Norme.min(),Norme.max()])
         if vlim is None:
             vlim=[Norme.min(),Norme.max()]
@@ -334,9 +334,9 @@ def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,re
 def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normalize=False,**args):
     fig,ax=getax(fig=fig,ax=ax)
     import opyf
-    if args.has_key('cmap') is True:
+    if 'cmap' in args:
         del args['cmap']
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         del args['vlim']
     #one over N
     #Select randomly N vectors
@@ -380,7 +380,7 @@ def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normal
 def opyfPointCloudColoredPatch(X,V,fig=None,ax=None,**args):
     from matplotlib.collections import PatchCollection
     fig,ax=getax(fig=fig,ax=ax,values=X)
-    if args.has_key('cmap') is not True:
+    if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm   
     clim=args.get('vlim',[np.min(V),np.max(V)]) 
     del args['vlim']
@@ -401,7 +401,7 @@ def opyfPointCloudColoredPatch(X,V,fig=None,ax=None,**args):
 def opyfPointCloudColoredScatter(X,V,fig=None,ax=None,cmapCS=mpl.cm.coolwarm,**args):
     from matplotlib.colors import Normalize
     fig,ax=getax(fig=fig,ax=ax)
-    if args.has_key('cmap') is True:
+    if 'cmap' in args:
         del args['cmap']
     norme=(V[:,0]**2+V[:,1]**2)**0.5
     norm = Normalize()
@@ -411,9 +411,9 @@ def opyfPointCloudColoredScatter(X,V,fig=None,ax=None,cmapCS=mpl.cm.coolwarm,**a
         vlim=[np.min(norme),np.max(norme)]
     args['vmin']=vlim[0]
     args['vmax']=vlim[1]
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         del args['vlim']
-    if args.has_key('markersize') is True:
+    if 'markersize' in args:
         del args['markersize']
 
 #    sc=ax.scatter(X[:,0], X[:,1],c=norme,color=cmapCS(norm(norme)),**args)          
@@ -424,9 +424,9 @@ def opyfPointCloudColoredScatter(X,V,fig=None,ax=None,cmapCS=mpl.cm.coolwarm,**a
 def opyfPointCloudScatter(X,V,fig=None,ax=None,**args):
     from matplotlib.collections import PatchCollection
     fig,ax=getax(fig=fig,ax=ax)
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         del args['vlim']
-    if args.has_key('markersize') is True:
+    if 'markersize' in args:
         del args['markersize']
     ax.scatter(X[:,0], X[:,1],**args)          
     
@@ -434,9 +434,9 @@ def opyfPointCloudScatter(X,V,fig=None,ax=None,**args):
 
 
 def opyfPointCloud(X,fig=None,ax=None,**args):
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         del args['vlim']
-    if args.has_key('cmap') is True:
+    if 'cmap' in args:
         del args['cmap']
     fig,ax=getax(fig=fig,ax=ax)  
     ax.plot(X[:,0],X[:,1],'.',**args)
@@ -534,10 +534,10 @@ def getax(fig=None,ax=None,values=None):
     
 def opyfField(grid_val,dConfig=None,fig=None,ax=None,ROI=None,extentr=None,**args):
     fig,ax=getax(fig=fig,ax=ax)
-    if args.has_key('cmap') is not True:
+    if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm
 
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         vlim=args.get('vlim',[grid_val.min(),grid_val.max()])
         if vlim is None:
             vlim=[grid_val.min(),grid_val.max()]
@@ -567,7 +567,7 @@ def opyfField2(grid_x,grid_y,Field,fig=None,ax=None,**args):
     from matplotlib.colors import Normalize
     import opyf
     fig,ax=getax(fig=fig,ax=ax)
-    if args.has_key('vlim') is True:
+    if 'vlim' in args:
         vlim=args.get('vlim',[Field.min(),Field.max()])
         if vlim is None:
             vlim=[Field.min(),Field.max()]
@@ -578,7 +578,7 @@ def opyfField2(grid_x,grid_y,Field,fig=None,ax=None,**args):
 
     args['vmin']=vlim[0]
     args['vmax']=vlim[1]
-    if args.has_key('cmap') is not True:
+    if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm
     cmap=args.get('cmap',mpl.cm.coolwarm)
     del args['cmap']
