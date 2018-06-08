@@ -54,32 +54,32 @@ def read_csvTrack(csvpath):
 csvpath='D:/RousseauG/20180503/117_slope=0.57294_I=20_move_from_ 10_to_40mm_fps=420_ET=0.0005_T=15seconds_Dbeads=8mm/outputs/tracks_movingAV_step=2_filt.csv'    
 csvpath='D:/RousseauG/20180503/117_slope=0.57294_I=20_move_from_ 10_to_40mm_fps=420_ET=0.0005_T=15seconds_Dbeads=8mm/outputs/posBeads.csv'    
 
+#def read_csv(csvpath,delimiter=','):
+# 
+#    f=open(csvpath,'r')
+#
+#    reader  = csv.reader(f,delimiter=delimiter)  
+##    reader  = csv.reader(f,  dialect='excel')   
+#    index=0
+#    header=[]
+#    datas=[]
+#   
+#    for row in reader: 
+#        if index==0:
+#            temp=[item for number, item in enumerate(row)]
+#            header.append(temp)
+#        if index>0:
+#            temp=[float(item) for number, item in enumerate(row)]
+#            datas.append(temp)
+#        index+=1
+#
+#    header=np.array(header)
+#    datas=datas[1::2]
+#    datas=np.array(datas)
+#    f.close()
+#    return header, datas
+
 def read_csv(csvpath,delimiter=','):
- 
-    f=open(csvpath,'r')
-
-    reader  = csv.reader(f,delimiter=delimiter)  
-#    reader  = csv.reader(f,  dialect='excel')   
-    index=0
-    header=[]
-    datas=[]
-   
-    for row in reader: 
-        if index==0:
-            temp=[item for number, item in enumerate(row)]
-            header.append(temp)
-        if index>0:
-            temp=[float(item) for number, item in enumerate(row)]
-            datas.append(temp)
-        index+=1
-
-    header=np.array(header)
-    datas=datas[1::2]
-    datas=np.array(datas)
-    f.close()
-    return header, datas
-
-def read_csv_new(csvpath,delimiter=','):
  
     f=open(csvpath,'r')
     reader  = csv.reader(f,delimiter=delimiter)  
@@ -183,14 +183,45 @@ def write_csvScalar1D(filename,X,variables):
     
     id = 0
 
-    for i in xrange(len(X)):
+    for i in range(len(X)):
         f.write(str(X[i]))
         f.write(varline(variables, id))
         id = id + 1
  
     f.close()
-  
     
+
+
+
+def write_csvScalar(filename,variables):
+
+    f = open(filename, "wt")
+ 
+    i=0
+    for v in variables:
+        if i==0:
+            f.write('"%s"' % v[0])
+        else:
+            f.write(',"%s"' % v[0])
+        i+=1
+    f.write('\n')
+ 
+
+    for i in range(len(variables[0][1])):
+        s = ""
+        ii=0
+        for v in variables:
+            if ii==0:
+                s = s + str(v[1][i])
+            else:
+                s = s + ',' +str(v[1][i])
+            ii+=1
+        s = s + '\n'
+        
+        f.write(s)
+
+ 
+    f.close()    
     
     
 def initializeSeqVec(seqIm_params,listD):

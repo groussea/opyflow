@@ -7,13 +7,16 @@ PURPOSE
     check out https://kuler.adobe.com/create.
 PROGRAMMER(S)
     Chris Slocum
+    Gauthier Rousseau
 REVISION HISTORY
     20130411 -- Initial version created
     20140313 -- Small changes made and code posted online
     20140320 -- Added the ability to set the position of each color
+    20180531 -- Added the alpha (transprency) + different customized color maps
+
 '''
 
-def make_cmap(colors, position=None, bit=False):
+def make_cmap(colors, position=None, bit=False,res=256):
     '''
     make_cmap takes a list of tuples which contain RGB values. The RGB
     values may either be in 8-bit [0 to 255] (in which bit must be set to
@@ -25,7 +28,7 @@ def make_cmap(colors, position=None, bit=False):
     '''
     import matplotlib as mpl
     import numpy as np
-    bit_rgb = np.linspace(0,1,256)
+    bit_rgb = np.linspace(0,1,res)
     if position == None:
         position = np.linspace(0,1,len(colors))
     else:
@@ -45,8 +48,13 @@ def make_cmap(colors, position=None, bit=False):
         cdict['green'].append((pos, color[1], color[1]))
         cdict['blue'].append((pos, color[2], color[2]))
         cdict['alpha'].append((pos, color[3], color[3]))
-    cmap = mpl.colors.LinearSegmentedColormap('my_colormap',cdict,256)
+    cmap = mpl.colors.LinearSegmentedColormap('my_colormap',cdict,res)
     return cmap
+
+
+
+
+
 
 #### An example of how to use make_cmap
 #import matplotlib.pyplot as plt
@@ -83,3 +91,113 @@ def make_cmap(colors, position=None, bit=False):
 #
 #plt.savefig("custom_cmap.png")
 #plt.show()
+
+
+def setcolorRGB(r,g,b,alpha=1.,brightness=1):
+    r=np.min([255,r*brightness])
+    g=np.min([255,g*brightness])
+    b=np.min([255,b*brightness])
+    return (r/255,g/255,b/255,alpha)
+#%%
+def make_cmap_customized(Palette='mountain',position=[0.0, 0.16, 0.2, 0.24, 0.4, 0.7, 0.8, 1],invert=False,alpha=1,brightness=1):
+    if Palette=='sunrise':
+        couleur7=setcolorRGB(0,0,0,alpha=alpha,brightness=brightness)
+        couleur6=setcolorRGB(64,50,79,alpha=alpha,brightness=brightness)
+        couleur5=setcolorRGB(107,64,110,alpha=alpha,brightness=brightness)
+        couleur4=setcolorRGB(141,76,125,alpha=alpha,brightness=brightness)
+        couleur3=setcolorRGB(172,85,122,alpha=alpha,brightness=brightness)
+        couleur2=setcolorRGB(210,124,124,alpha=alpha,brightness=brightness)
+        couleur1=setcolorRGB(240,206,125,alpha=alpha,brightness=brightness) 
+        couleur0=setcolorRGB(255,255,255,alpha=alpha,brightness=brightness)
+    elif Palette=='green':
+        couleur7=setcolorRGB(0,0,0,alpha=alpha,brightness=brightness)
+        couleur6=setcolorRGB(6,49,50,alpha=alpha,brightness=brightness)
+        couleur5=setcolorRGB(28,78,78,alpha=alpha,brightness=brightness)
+        couleur4=setcolorRGB(55,140,129,alpha=alpha,brightness=brightness)
+        couleur3=setcolorRGB(172,185,153,alpha=alpha,brightness=brightness)
+        couleur2=setcolorRGB(199,205,181,alpha=alpha,brightness=brightness)
+        couleur1=setcolorRGB(232,219,194,alpha=alpha,brightness=brightness) 
+        couleur0=setcolorRGB(255,255,255,alpha=alpha,brightness=brightness)
+    elif Palette=='mountain':
+        couleur7=setcolorRGB(0,0,0,alpha=alpha,brightness=brightness)
+        couleur6=setcolorRGB(45,52,70,alpha=alpha,brightness=brightness)
+        couleur5=setcolorRGB(89,76,96,alpha=alpha,brightness=brightness)
+        couleur4=setcolorRGB(145,101,118,alpha=alpha,brightness=brightness)
+        couleur3=setcolorRGB(212,119,127,alpha=alpha,brightness=brightness)
+        couleur2=setcolorRGB(212,153,154,alpha=alpha,brightness=brightness)
+        couleur1=setcolorRGB(238,189,184,alpha=alpha,brightness=brightness) 
+        couleur0=setcolorRGB(255,255,255,alpha=alpha,brightness=brightness)        
+    elif Palette=='prune':
+        couleur7=setcolorRGB(0,0,0,alpha=alpha,brightness=brightness)
+        couleur6=setcolorRGB(66,37,67,alpha=alpha,brightness=brightness)
+        couleur5=setcolorRGB(125,58,91,alpha=alpha,brightness=brightness)
+        couleur4=setcolorRGB(107,77,131,alpha=alpha,brightness=brightness)
+        couleur3=setcolorRGB(205,179,214,alpha=alpha,brightness=brightness)
+        couleur2=setcolorRGB(164,173,154,alpha=alpha,brightness=brightness)
+        couleur1=setcolorRGB(207,213,199,alpha=alpha,brightness=brightness) 
+        couleur0=setcolorRGB(255,255,255,alpha=alpha,brightness=brightness)
+    elif Palette=='asym_mountain5':
+        couleur7=setcolorRGB(45,52,70,alpha=alpha,brightness=brightness)
+        couleur6=setcolorRGB(110,86,96,alpha=alpha,brightness=brightness)
+        couleur5=setcolorRGB(135,90,115,alpha=alpha,brightness=brightness)
+        couleur4=setcolorRGB(145,101,118,alpha=alpha,brightness=brightness)   
+        couleur3=setcolorRGB(212,119,127,alpha=alpha,brightness=brightness)
+        couleur2=setcolorRGB(232,219,194,alpha=alpha,brightness=brightness) 
+        couleur1=setcolorRGB(167,213,229,alpha=alpha,brightness=brightness)    
+        couleur0=setcolorRGB(121,175,204,alpha=alpha,brightness=brightness)
+        
+    colors = [couleur0,couleur1,couleur2,couleur3,couleur4,couleur5,couleur6,couleur7]
+    if invert==True:
+        colors = np.flipud(colors)
+    cmap=make_cmap(colors, position=position,res=1000) 
+    return cmap
+
+
+#%%
+def make_cmap_customized_asym(Palette='asym_mountain_full',ratio=0.2,param=2,posR=1,posL=1,paramR=1,paramL=1,lightL=1.,invert=False,brightness=1):
+    
+    if Palette=='asym_mountain_full':
+        couleur10=setcolorRGB(45,52,70,brightness=brightness)
+        couleur9=setcolorRGB(145,101,118,brightness=brightness)
+        couleur8=setcolorRGB(212,119,127,brightness=brightness)
+        couleur7=setcolorRGB(213,153,153,brightness=brightness)
+        couleur6=setcolorRGB(232,172,171,brightness=brightness)        
+        couleur5=setcolorRGB(232,219,194,brightness=brightness) 
+        couleur4=setcolorRGB(167,213,229,brightness=brightness)
+        couleur3=setcolorRGB(121,175,204,brightness=brightness)        
+        couleur2=setcolorRGB(36,140,163,brightness=brightness) 
+        couleur1=setcolorRGB(0,70,135,brightness=brightness)   
+        couleur0=setcolorRGB(6,20,31,brightness=brightness)
+        
+        
+    position=np.linspace(0,1,11)  
+
+
+    position=0.5+0.5*np.absolute(((position-0.5)/0.5))**param
+    position[0:5]=1-position[0:5]
+    
+
+    position=position.tolist()
+    colors = [couleur0,couleur1,couleur2,couleur3,couleur4,couleur5,couleur6,couleur7,couleur8,couleur9,couleur10]
+    
+    if invert==True:
+        colors = np.flipud(colors)
+    cmap=make_cmap(colors, position=position,res=1000) 
+    #Rebluid a color vector to scale with the scalar
+    posL=np.array([0,0.2,0.4,0.6,0.8])
+    posL2=(posL)**paramL*ratio   
+    posR=np.array([0,0.2,0.4,0.6,0.8])
+    posR2=np.flip(1-(posR)**paramR*(1-ratio),axis=0)  
+    position2=np.concatenate([posL2,[ratio],posR2])
+    position2=position2.tolist()
+    #find the maximum
+    if ratio<0.5:
+        colorsR=cmap(np.linspace(0.5,1,6))
+        colorsL=cmap(np.linspace(0.5-ratio/(1-ratio)*0.5,0.5,6))
+    if ratio>=0.5:
+        colorsL=cmap(np.linspace(0,0.5,6))
+        colorsR=cmap(np.linspace(0.5,0.5+(1-ratio)/(ratio)*0.5,6))
+                
+    colors=np.concatenate([colorsL[:-1],colorsR]).tolist()
+    cmap=make_cmap(colors, position=position2,res=1000)
+    return cmap

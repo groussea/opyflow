@@ -330,7 +330,6 @@ def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,re
     return fig,ax,qv,sm
 
 
-
 def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normalize=False,**args):
     fig,ax=getax(fig=fig,ax=ax)
     import opyf
@@ -341,8 +340,8 @@ def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normal
     #one over N
     #Select randomly N vectors
     l,c=grid_x.shape
-    resx=grid_x[0,1]-grid_x[0,0]
-    resy=grid_y[1,0]-grid_y[0,0]
+    resx=np.absolute(grid_x[0,1]-grid_x[0,0])
+    resy=np.absolute(grid_y[1,0]-grid_y[0,0])
     densx=int(respx/resx)
     densy=int(respx/resy)
     lvec=np.arange(densy/2,l-densy/2,densy,dtype=int)+(l % densy)//2
