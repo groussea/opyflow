@@ -265,9 +265,9 @@ def opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32
     sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])    
     if normalize==False:
-        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0],-Velocities[:,1],color=cmap(norm(Norme)),**args) 
+        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0],Velocities[:,1],color=cmap(norm(Norme)),**args) 
     else:
-        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0]/Norme[:],-Velocities[:,1]/Norme[:],color=cmap(norm(Norme)),**args) 
+        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0]/Norme[:],Velocities[:,1]/Norme[:],color=cmap(norm(Norme)),**args) 
         
         
     return fig,ax,qv,sm
@@ -325,7 +325,7 @@ def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,re
     sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])    
 
-    qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0]/Norme[:],-Velocities[:,1]/Norme[:],color=cmap(norm(colors)),**args) 
+    qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0]/Norme[:],Velocities[:,1]/Norme[:],color=cmap(norm(colors)),**args) 
 
     return fig,ax,qv,sm
 
@@ -365,10 +365,10 @@ def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normal
     Velocities=opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx,new_gridVy)    
     colors=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5  
     if normalize==False:
-        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0],-Velocities[:,1],**args) 
+        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0],Velocities[:,1],**args) 
     else:
         Norme=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5
-        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0]/Norme,-Velocities[:,1]/Norme,**args) 
+        qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0]/Norme,Velocities[:,1]/Norme,**args) 
 
     return fig,ax,qv
 

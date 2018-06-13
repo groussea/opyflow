@@ -15,7 +15,7 @@ REVISION HISTORY
     20180531 -- Added the alpha (transprency) + different customized color maps
 
 '''
-
+import numpy as np
 def make_cmap(colors, position=None, bit=False,res=256):
     '''
     make_cmap takes a list of tuples which contain RGB values. The RGB
@@ -27,7 +27,7 @@ def make_cmap(colors, position=None, bit=False,res=256):
     position contains values from 0 to 1 to dictate the location of each color.
     '''
     import matplotlib as mpl
-    import numpy as np
+
     bit_rgb = np.linspace(0,1,res)
     if position == None:
         position = np.linspace(0,1,len(colors))
@@ -169,6 +169,19 @@ def make_cmap_customized_asym(Palette='asym_mountain_full',ratio=0.2,param=2,pos
         couleur1=setcolorRGB(0,70,135,brightness=brightness)   
         couleur0=setcolorRGB(6,20,31,brightness=brightness)
         
+    if Palette=='asym_mountain_green':
+        couleur10=setcolorRGB(45,52,70,brightness=brightness)
+        couleur9=setcolorRGB(145,101,118,brightness=brightness)
+        couleur8=setcolorRGB(212,119,127,brightness=brightness)
+        couleur7=setcolorRGB(213,153,153,brightness=brightness)
+        couleur6=setcolorRGB(232,172,171,brightness=brightness)        
+        couleur5=setcolorRGB(188,236,202,brightness=brightness) 
+        couleur4=setcolorRGB(167,213,229,brightness=brightness)
+        couleur3=setcolorRGB(121,175,204,brightness=brightness)        
+        couleur2=setcolorRGB(36,140,163,brightness=brightness) 
+        couleur1=setcolorRGB(0,70,135,brightness=brightness)   
+        couleur0=setcolorRGB(6,20,31,brightness=brightness)
+                
         
     position=np.linspace(0,1,11)  
 
