@@ -14,7 +14,7 @@ corresponding e-mail : gauthier.rousseau@gmail.com
 
 ## Quick start
 
-Assuming that you already have python installed (I recommend to use anaconda to deal with dependencies).
+Assuming that you already have python installed (version<=3.6, doesn't work for py3.7 yet, I recommend to use anaconda to deal with dependencies).
 
 from the package repository 'opyflow', If you want to install the package on your environment run:
 
