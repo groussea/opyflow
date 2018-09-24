@@ -99,8 +99,7 @@ filters_params = dict(vmin=4.,
                       RadiusF=20.,
                       minNperRadius=2.,
                       maxDevinRadius=2.5,
-                      DGF=3.,
-                      mask=None)
+                      DGF=3.)
 
 #To interpolate datas we use vtk librarie which provide in its last versions efficient 
 #Interpolation calculation
@@ -110,7 +109,7 @@ interp_params= dict (Radius=15.,
                      kernel='Gaussian',
                      scaleInterp=2)
 
-
+mask=None
 #Many rendering are possible here are 3 important parameters.
 # the lgortihm can plot 'horizontal', 'vertical' or norme field values
 #
@@ -190,7 +189,7 @@ for i in tqdm.trange(len(prev)):
     prev_gray,X,V=opyf.Track.opyfFlowGoodFlag(frame,prev_gray,feature_params,
                                               lk_params,ROI=ROI,vmax=filters_params['vmax'],vmin=filters_params['vmin'],
                                               csvTrack=folder_outputs+'/'+format(incr,'04.0f')+'.csv',
-                                              mask=filters_params['mask'],DGF=filters_params['DGF'])
+                                              mask=mask,DGF=filters_params['DGF'])
 
     if len(X)>0:
         #filters
@@ -212,7 +211,7 @@ for i in tqdm.trange(len(prev)):
         fig,ax=opyf.Render.opyfPlot(grid_x,grid_y,gridVx,gridVy,X,V,setPlot,vis=frame,**render_params) 
 #        figp,ax,qv,sm=opyf.Render.opyfQuiverPointCloudColored(Xdata,Vdata,ax=ax,** infoPlotQuiverPointCloud)
         plt.pause(0.1)
-    incr=+1
+    incr+=1
 #%% Perform filters on final vectors
 
 opyf.Render.opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata,Vdata,setPlot,vis=frame,namefig='Total',**render_params)         
