@@ -51,8 +51,6 @@ def read_csvTrack(csvpath):
     datasTrack=np.array(datasTrack)
     return headerTrack, datasTrack
  
-csvpath='D:/RousseauG/20180503/117_slope=0.57294_I=20_move_from_ 10_to_40mm_fps=420_ET=0.0005_T=15seconds_Dbeads=8mm/outputs/tracks_movingAV_step=2_filt.csv'    
-csvpath='D:/RousseauG/20180503/117_slope=0.57294_I=20_move_from_ 10_to_40mm_fps=420_ET=0.0005_T=15seconds_Dbeads=8mm/outputs/posBeads.csv'    
 
 #def read_csv(csvpath,delimiter=','):
 # 

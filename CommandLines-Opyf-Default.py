@@ -107,7 +107,7 @@ filters_params = dict(vmin=4.,
 interp_params= dict (Radius=15.,
                      Sharpness=2.,
                      kernel='Gaussian',
-                     scaleInterp=2)
+                     scaleInterp=1)
 
 mask=None
 #Many rendering are possible here are 3 important parameters.
@@ -141,8 +141,8 @@ setPlot={'DisplayVis':True,
 framecut=frameini[ROI[1]:(ROI[3]+ROI[1]),ROI[0]:(ROI[2]+ROI[0])]
 scaleinterp=interp_params['scaleInterp']
 [Ly,Cx,z]=framecut.shape
-resX=Cx/scaleinterp
-resY=Ly/scaleinterp
+resX=Cx//scaleinterp
+resY=Ly//scaleinterp
 
 grid_y, grid_x = np.mgrid[0:resY, 0:resX]
 grid_x=(grid_x+0.5)*np.float(ROI[2])/resX+ROI[0]
