@@ -14,9 +14,7 @@ corresponding e-mail : gauthier.rousseau@gmail.com
 
 ## Quick start
 
-Assuming that you already have python installed (version<=3.6, doesn't work for py3.7 yet, I recommend to use anaconda to deal with dependencies).
-
-from the package repository 'opyflow', If you want to install the package on your environment run:
+Assuming that you already have an environnement with python installed (<=3.7), run the following command from the package repository:
 
 ''python setup.py install'' 
 
@@ -26,7 +24,7 @@ After you may test:
 
 python /test/Test_case_PIV_Challenge_2014/CommandLines-Opyf-PIV-Challenge2014-Test_Simple.py
 
-If it does not work you can contact me please.
+For any problem, contact me please.
 
 
 ## Contents
