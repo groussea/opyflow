@@ -14,5 +14,4 @@ from opyf.Files import *
 from opyf.custom_cmap import *
 from opyf.Filters import *
 from opyf.Render import *
-from opyf.Filters import *
 from opyf.Track import *

@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 Created on Thu May 10 15:46:23 2018
@@ -8,9 +8,6 @@ Created on Thu May 10 15:46:23 2018
 
 #from distutils.core import setup
 
-#import numpy as np
-
-from setuptools import setup
 
 
 #def readme(fname):
@@ -66,7 +63,7 @@ setup(
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        'Development Status :: 3 - Alpha',
+        'Development Status :: 4 - Beta',
 
         # Indicate who your project is intended for
         'Intended Audience :: Developers',
@@ -94,5 +91,5 @@ setup(
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed.
-    install_requires=['ipython','vtk','opencv-python','tqdm','matplotlib','scipy','pytube']
+    install_requires=['ipython','vtk','opencv-python','tqdm','h5py','matplotlib','scipy','pytube']
 )

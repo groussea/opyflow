@@ -5,9 +5,10 @@ Created on Sun Dec  3 19:00:40 2017
 
 @author: Gauthier ROUSSEAU
 """
-import os
+import os, sys
 import csv
 import numpy as np
+import h5py
 
 
 
@@ -318,9 +319,7 @@ def tecplot_ReadRectilinearMesh(filename):
 #    f.write('Zone I=' + pad(str(len(Xvec)),6) + ',J=' + pad(str(len(Yvec)),6))
 
 #    f.write(', F=POINT\n')
- 
-
-    
+   
     id = 0
     for j in xrange(len(Yvec)):
         for i in xrange(len(Xvec)):
@@ -342,3 +341,85 @@ def tecplot_reader(filetec,headerlines=2):
     output = np.array(arrays)
 
     return output
+
+
+def hdf5_WriteRectilinearMesh3D(filename,vecX,vecY,vecZ,variables,chunks=True,compression="gzip", compression_opts=4):
+    #test if the array length correspon to the 3D numpy matrices. By convention column are X and lines are Y and p are Z
+    for v in variables: 
+        l,c,p=v[1].shape
+        if len(vecX)!=c or len(vecY)!=l or len(vecZ)!=p:
+            print('the numpy array should respect this convention with respect to the data matrices : column are X and lines are Y and depth are Z')
+            sys.exit('array error')
+    with h5py.File(filename, 'w') as f:
+        g1=f.create_group('coordinates')
+        g1.attrs['description']='Coordinates are stored as 1D array since the grid in rectilinear'
+        g1.create_dataset('Z', data=vecZ,chunks=chunks,compression=compression, compression_opts=compression_opts)
+        g1.create_dataset('X', data=vecX,chunks=chunks,compression=compression, compression_opts=compression_opts)
+        g1.create_dataset('Y', data=vecY,chunks=chunks,compression=compression, compression_opts=compression_opts)
+        g2=f.create_group('variables')
+        g2.attrs['description']='3 dimensionnal matricies with the time or z in the third dimension of the space'
+        for v in variables:             
+            g2.create_dataset(v[0], data=v[1],chunks=chunks,compression=compression, compression_opts=compression_opts)
+        print('[log] Data saved in '+filename)
+
+def hdf5_ReadRectilinearMesh3D(filename):
+    with h5py.File(filename, 'r') as f:
+        vecX=f['coordinates/X'][:]
+        vecY=f['coordinates/Y'][:]
+        vecZ=f['coordinates/Z'][:]
+        variables=[]
+        for vk in f['variables'].keys():
+            variables.append([vk,f['variables'][vk][:]])
+       
+    return vecX,vecY,vecZ,variables
+
+
+        
+def hdf5_WriteUnstructured2DTimeserie(filename,Time,PointsSelected,VelSelected,chunks=True,compression="gzip", compression_opts=4):
+
+    with h5py.File(filename, 'w') as f:
+        f.create_dataset('time',data=Time,chunks=chunks,compression=compression, compression_opts=compression_opts)
+        g=f.create_group('velocities') 
+        for t,v in zip(Time,VelSelected):                     
+            g.create_dataset(str(t), data=v[:,0:2],chunks=chunks,compression=compression, compression_opts=compression_opts)       
+        g=f.create_group('coordinates')  
+        for t,p in zip(Time,PointsSelected):                     
+            g.create_dataset(str(t), data=p[:,0:2],chunks=chunks,compression=compression, compression_opts=compression_opts)            
+    print('[log] Data saved in '+filename)        
+ 
+def hdf5_ReadUnstructured2DTimeserie(filename):
+    with h5py.File(filename, 'r') as f:
+        Time=f['time'][:]
+        grp=f['velocities']
+        VelSelected=[i[:] for i in grp.values()]
+        grp=f['coordinates']
+        PointsSelected=[i[:] for i in grp.values()]
+
+    return Time,PointsSelected,VelSelected
+
+#
+#def hdf5__WriteUnstructured3D(filename,vecX,vecY,vecZ,variables):
+#    variables=(("Vx", VT_mean[:,0]),("Vy",VT_mean[:,1]),("flag",flag))
+#    Ux=opyf.Interpolate.npTargetPoints2Grid3D(Velfinal[:,0],hg,wg,Ntot)
+#    Uy=opyf.Interpolate.npTargetPoints2Grid3D(Velfinal[:,1],hg,wg,Ntot)
+#
+#    Uy=opyf.Interpolate.npTargetPoints2Grid3D(Uy,resX,resY,resZ)            
+#    hg,wg            
+#    ts1=time.time()
+#
+#    vecX=grid_x_PIVC[0,:]
+#    vecY=grid_y_PIVC[:,0]
+#    Time=(vec[0:-1:2]+(vec[1]-vec[0])/2)/sdictE['fps'] #The time is also centered on the middle
+#    with h5py.File(filename, 'w') as f:
+#        g1=f.create_group('coordinates')
+#        g1['description']='Coordinates are stored as 1D array since the grid in rectilinear'
+#        g1.create_dataset('Time/Z', data=Time)
+#        g1.create_dataset('X', data=vecX)
+#        g1.create_dataset('Y', data=vecY)
+#        g2=f.create_group('variables')
+#        g2['description']='3 dimensionnal matricies with the time or z in the third dimension of the space'
+#        for v in variables:             
+#            g2.create_dataset(v[0], data=v[1])
+    
+    
+    
