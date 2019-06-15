@@ -21,7 +21,7 @@ plt.style.use('fivethirtyeight')
 plt.rcParams['axes.edgecolor']='0'
 plt.rcParams['axes.linewidth']=1.5
 #plt.rc('text', usetex=True) may be activated if you prefer a Latex rendering font
-plt.rc('font', family='arial')
+#plt.rc('font', family='arial')
 plt.rcParams['axes.facecolor']='white'
 plt.rcParams['figure.facecolor']='white'
 plt.rcParams['savefig.facecolor']='white'
@@ -44,6 +44,7 @@ def opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata,Vdata,setPlot,vis=None,Ptype='nor
         cmap=setcmap(Ptype,alpha=alpha)
         
     normalize=args.get('normalize',False)
+    extentr=args.get('extentr',setPlot['extentFrame'])
     infoPlotQuiver={'cmap':cmap,
           'width' :width,
           'alpha':alpha,
@@ -59,27 +60,26 @@ def opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata,Vdata,setPlot,vis=None,Ptype='nor
 
         
  
-    fig,ax=opyffigureandaxes(setPlot['Dim'][0],setPlot['Dim'][1],Hfig=9,unit=setPlot['unit'],num=namefig)
+    fig,ax=opyffigureandaxes(extent=setPlot['extentFrame'],Hfig=9,unit=setPlot['unit'],num=namefig)
     if setPlot['DisplayVis']==True and vis is not None:  
         if ROIvis is not None:
             vis=vis[ROIvis[1]:(ROIvis[3]+ROIvis[1]),ROIvis[0]:(ROIvis[2]+ROIvis[0])]
         vis =CLAHEbrightness(vis,0)  
         if len(np.shape(vis))==3:           
-            ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=[0,setPlot['Dim'][1],setPlot['Dim'][0],0],zorder=0) 
+            ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=extentr,zorder=0) 
         else:
-            ax.imshow(vis,extent=[0,setPlot['Dim'][1],setPlot['Dim'][0],0],zorder=0,cmap=mpl.cm.gray) 
+            ax.imshow(vis,extent=extentr,zorder=0,cmap=mpl.cm.gray) 
  
     Field=setField(gridVx,gridVy,Ptype) 
     
     
     
     if setPlot['DisplayField']==True:
-        resx=grid_x[0,1]-grid_x[0,0]
-        resy=grid_y[1,0]-grid_y[0,0]
-
-        ROI=[np.min(grid_x)-resx/2,np.min(grid_y)-resy/2,np.max(grid_x)-np.min(grid_x)+resx/2,np.max(grid_y)-np.min(grid_y)+resy/2]
+        resx=np.absolute(grid_x[0,1]-grid_x[0,0])
+        resy=np.absolute(grid_y[1,0]-grid_y[0,0])
+        extent=[grid_x[0,0]-resx/2,grid_x[0,-1]+resx/2,grid_y[-1,0]-resy/2,grid_y[0,0]+resy/2]
 #        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
-        figp,ax,im=opyfField(Field,ax=ax,ROI=ROI,extentr=[0,setPlot['Dim'][1],setPlot['Dim'][0],0],**infoPlotField)
+        figp,ax,im=opyfField(Field,ax=ax,extent=extent,extentr=extentr,**infoPlotField)
 
    
         figp,cb=opyfColorBar(fig,im,label=Ptype+' velocity (in '+setPlot['unit']+'/DeltaT)')
@@ -454,7 +454,9 @@ def opyfColorBar(fig,im,label='Magnitude [px/Dt]',**args):
 
 
     
-def opyffigureandaxes(Hframe,Lframe,unit='px',Hfig=9,**args):
+def opyffigureandaxes(extent=[0,1,0,1],unit='px',Hfig=9,**args):
+    Hframe=np.absolute(extent[3]-extent[2])
+    Lframe=np.absolute(extent[1]-extent[2])
     Lfig=Lframe*Hfig/Hframe   
     #Location of the plot
     coefy=0.0004
@@ -471,8 +473,8 @@ def opyffigureandaxes(Hframe,Lframe,unit='px',Hfig=9,**args):
     fig.add_axes(ax)
     plt.ylabel('Y['+unit+']')
     plt.xlabel('X['+unit+']')  
-    ax.set_xlim(0,Lframe)
-    ax.set_ylim(Hframe,0)
+    ax.set_xlim(extent[0],extent[1])
+    ax.set_ylim(extent[2],extent[3])
     return fig,ax
 
 def setcmap(Type,alpha=1.):
@@ -531,7 +533,7 @@ def getax(fig=None,ax=None,values=None):
 ##        fig.show()    
     return fig,ax
     
-def opyfField(grid_val,dConfig=None,fig=None,ax=None,ROI=None,extentr=None,**args):
+def opyfField(grid_val,dConfig=None,fig=None,ax=None,extent=None,extentr=None,**args):
     fig,ax=getax(fig=fig,ax=ax)
     if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm
@@ -548,11 +550,6 @@ def opyfField(grid_val,dConfig=None,fig=None,ax=None,ROI=None,extentr=None,**arg
     args['vmin']=vlim[0]
     args['vmax']=vlim[1]
         
-    if ROI is not None:
-        extent=np.array([ROI[0],ROI[2]+ROI[0],ROI[3]+ROI[1],ROI[1]])
-    else:
-        extent=None
-
     im=ax.imshow(grid_val,extent=extent,**args)
 
     if extentr is not None: 

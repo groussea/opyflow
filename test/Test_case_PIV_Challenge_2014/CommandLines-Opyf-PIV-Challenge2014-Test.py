@@ -309,7 +309,7 @@ for i in tqdm.trange(len(prev)):
          'QuiverOnPoints':False,
          'DisplayContour':False,
          'ScaleVectors':None,
-         'Dim':[Hvis,Lvis],
+         'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
          'unit':'px'}      
 #        For the momentwe didnt interpolate data on grid
         opyf.Render.opyfPlot(grid_x,grid_y,gridVx,gridVy,X,V,setPlot,vis=frame,namefig='Total2',**render_params)         
@@ -330,7 +330,7 @@ setPlot={'DisplayVis':True,
  'QuiverOnPoints':False,
  'DisplayContour':False,
  'ScaleVectors':None,
- 'Dim':[Hvis,Lvis],
+ 'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
  'unit':'px'}      
 #        For the momentwe didnt interpolate data on grid
 opyf.Render.opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata2,Vdata2,setPlot,vis=frame,namefig='Total2',**render_params) 
@@ -381,7 +381,7 @@ setPlot={'DisplayVis':True,
  'QuiverOnPoints':False,
  'DisplayContour':False,
  'ScaleVectors':None,
- 'Dim':[Hvis,Lvis],
+ 'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
  'unit':'px'}   
 
 render_params= dict(Ptype='horizontal',
@@ -546,7 +546,7 @@ for i in tqdm.trange(len(prev)):
                  'DisplayContour':False,
                  'ScaleVectors':None,
                  'Text':True,
-                 'Dim':[Hvis,Lvis],
+                 'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
                  'ROI':ROI,
                  'unit':'px'} 
         cmap=opyf.setcmap('norme',alpha=0.5)
@@ -582,7 +582,7 @@ setPlot={'DisplayVis':True,
          'DisplayContour':False,
          'ScaleVectors':None,
          'Text':True,
-         'Dim':[Hvis,Lvis],
+         'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
          'ROI':ROI,
          'unit':'px'} 
 render_params= dict(Ptype='horizontal',
@@ -606,7 +606,7 @@ ROI=[np.min(grid_x)-resx/2,np.min(grid_y)-resy/2,np.max(grid_x)-np.min(grid_x)+r
 #        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
 
 
-figp,ax,im=opyf.Render.opyfField(gridVx_rms,ax=ax,ROI=ROI,extentr=[0,setPlot['Dim'][1],setPlot['Dim'][0],0],cmap=cmap,vlim=render_params['vlim'])
+figp,ax,im=opyf.Render.opyfField(gridVx_rms,ax=ax,ROI=ROI,extentr=setPlot['extentFrame'],cmap=cmap,vlim=render_params['vlim'])
 figp,cb=opyf.Render.opyfColorBar(fig,im,label=' DX rms (in '+setPlot['unit']+'/DeltaT)')
 cb.set_alpha(0.8)
 cb.draw_all()

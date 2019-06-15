@@ -1,6 +1,7 @@
 $ cat .gitignore
 *.[oa]
 *~
+*.pyc
 /opyf.egg-info
 /build
 /dist

@@ -129,7 +129,7 @@ setPlot={'DisplayVis':True,
  'QuiverOnPoints':False,
  'DisplayContour':False,
  'ScaleVectors':None,
- 'Dim':[Hvis,Lvis],
+ 'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
  'unit':'px'}      
 
 
@@ -233,7 +233,7 @@ setPlot={'DisplayVis':True,
          'QuiverOnPoints':False,
          'DisplayContour':False,
          'ScaleVectors':None,
-         'Dim':[Hvis,Lvis],
+         'extentFrame':[0,Lvis,Hvis,0],
          'ROI':ROI,
          'unit':'px'}        
 
@@ -274,7 +274,7 @@ setPlot={'DisplayVis':True,
          'DisplayContour':False,
          'ScaleVectors':None,
          'Text':True,
-         'Dim':[Hvis,Lvis],
+         'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
          'ROI':ROI,
          'unit':'px'} 
 cmap=opyf.setcmap('norme',alpha=0.5)

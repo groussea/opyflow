@@ -311,7 +311,7 @@ for i in tqdm.trange(len(prev)):
          'QuiverOnPoints':False,
          'DisplayContour':False,
          'ScaleVectors':None,
-         'Dim':[Hvis,Lvis],
+         'extentFrame':[0,Lvis,Hvis,0], #Warning : in Image convention the y0 is on the up left corner
          'unit':'px'}      
 #        For the momentwe didnt interpolate data on grid
 
