@@ -361,7 +361,7 @@ def hdf5_WriteRectilinearMesh3D(filename,vecX,vecY,vecZ,variables,chunks=True,co
         for v in variables:             
             g2.create_dataset(v[0], data=v[1],chunks=chunks,compression=compression, compression_opts=compression_opts)
         print('[log] Data saved in '+filename)
-
+        
 def hdf5_ReadRectilinearMesh3D(filename):
     with h5py.File(filename, 'r') as f:
         vecX=f['coordinates/X'][:]
@@ -372,6 +372,29 @@ def hdf5_ReadRectilinearMesh3D(filename):
             variables.append([vk,f['variables'][vk][:]])
        
     return vecX,vecY,vecZ,variables
+
+def hdf5_Write(filename,coordinates,variables,chunks=True,compression="gzip", compression_opts=4):
+    with h5py.File(filename, 'w') as f:
+        g1=f.create_group('coordinates')
+        g1.attrs['description']='Coordinates'
+        for c in coordinates:             
+            g1.create_dataset(c[0], data=c[1],chunks=chunks,compression=compression, compression_opts=compression_opts)        
+        g2=f.create_group('variables')
+        g2.attrs['description']='matricies'
+        for v in variables:             
+            g2.create_dataset(v[0], data=v[1],chunks=chunks,compression=compression, compression_opts=compression_opts)
+        print('[log] Data saved in '+filename)
+
+def hdf5_Read(filename):
+    with h5py.File(filename, 'r') as f:
+        coordinates=[]
+        for vk in f['coordinates'].keys():
+            coordinates.append([vk,f['coordinates'][vk][:]])
+        variables=[]
+        for vk in f['variables'].keys():
+            variables.append([vk,f['variables'][vk][:]])
+       
+    return coordinates,variables
 
 
         
@@ -398,28 +421,6 @@ def hdf5_ReadUnstructured2DTimeserie(filename):
     return Time,PointsSelected,VelSelected
 
 #
-#def hdf5__WriteUnstructured3D(filename,vecX,vecY,vecZ,variables):
-#    variables=(("Vx", VT_mean[:,0]),("Vy",VT_mean[:,1]),("flag",flag))
-#    Ux=opyf.Interpolate.npTargetPoints2Grid3D(Velfinal[:,0],hg,wg,Ntot)
-#    Uy=opyf.Interpolate.npTargetPoints2Grid3D(Velfinal[:,1],hg,wg,Ntot)
-#
-#    Uy=opyf.Interpolate.npTargetPoints2Grid3D(Uy,resX,resY,resZ)            
-#    hg,wg            
-#    ts1=time.time()
-#
-#    vecX=grid_x_PIVC[0,:]
-#    vecY=grid_y_PIVC[:,0]
-#    Time=(vec[0:-1:2]+(vec[1]-vec[0])/2)/sdictE['fps'] #The time is also centered on the middle
-#    with h5py.File(filename, 'w') as f:
-#        g1=f.create_group('coordinates')
-#        g1['description']='Coordinates are stored as 1D array since the grid in rectilinear'
-#        g1.create_dataset('Time/Z', data=Time)
-#        g1.create_dataset('X', data=vecX)
-#        g1.create_dataset('Y', data=vecY)
-#        g2=f.create_group('variables')
-#        g2['description']='3 dimensionnal matricies with the time or z in the third dimension of the space'
-#        for v in variables:             
-#            g2.create_dataset(v[0], data=v[1])
-    
+
     
     
