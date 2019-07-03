@@ -420,7 +420,10 @@ def hdf5_ReadUnstructured2DTimeserie(filename):
 
     return Time,PointsSelected,VelSelected
 
-#
+
+def findFileExt(folder,ext='.png'):
+    arr = [x for x in os.listdir(folder) if x.endswith(ext)]
+    return arr
 
     
     

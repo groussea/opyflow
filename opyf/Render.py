@@ -85,11 +85,11 @@ def opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata,Vdata,setPlot,vis=None,Ptype='nor
         figp,cb=opyfColorBar(fig,im,label=Ptype+' velocity (in '+setPlot['unit']+'/DeltaT)')
 
     if setPlot['QuiverOnFieldColored']==True:
-        figp,ax,qv,sm=opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,ax=ax,respx=respx,normalize=normalize,**infoPlotQuiver)
+        figp,ax,qv,sm=opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,ax=ax,res=respx,normalize=normalize,**infoPlotQuiver)
         figp,cb=opyfColorBar(fig,sm,label=Ptype+' velocity (in '+setPlot['unit']+'/DeltaT)')
 
     if setPlot['QuiverOnField']==True:
-        figp,ax,qv=opyfQuiverField(grid_x,grid_y,gridVx,gridVy,ax=ax,respx=respx,normalize=normalize,**infoPlotQuiver)
+        figp,ax,qv=opyfQuiverField(grid_x,grid_y,gridVx,gridVy,ax=ax,res=respx,normalize=normalize,**infoPlotQuiver)
 
 
     if setPlot['DisplayPointsColored']==True:
@@ -114,6 +114,83 @@ def opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata,Vdata,setPlot,vis=None,Ptype='nor
 
     return fig,ax
 
+def opyfPlotRectilinear(vecX,vecY,gridVx,gridVy,setPlot,Xdata=None,Vdata=None,vis=None,Ptype='norme',namefig='Opyf',vlim=None,scale=None,cmap=None,alpha=0.6,width=0.002,nvec=3000,res=32,ROIvis=None,**args):
+    
+    grid_x = np.ones((len(vecY),1)) * vecX
+    grid_y = (np.ones((len(vecX),1)) * vecY).T
+    if cmap is None:
+        cmap=setcmap(Ptype,alpha=alpha)
+        
+    normalize=args.get('normalize',False)
+    extentr=args.get('extentr',setPlot['extentFrame'])
+    infoPlotQuiver={'cmap':cmap,
+          'width' :width,
+          'alpha':alpha,
+          'vlim':vlim,
+          'scale':scale} 
+
+    infoPlotPointCloud={'cmap':cmap,
+          'alpha':alpha,
+          'vlim':vlim}
+    infoPlotField={'cmap': cmap,                    
+                    'vlim':vlim}
+    
+
+        
+ 
+    fig,ax=opyffigureandaxes(extent=setPlot['extentFrame'],Hfig=9,unit=setPlot['unit'][0],num=namefig)
+    if setPlot['DisplayVis']==True and vis is not None:  
+        if ROIvis is not None:
+            vis=vis[ROIvis[1]:(ROIvis[3]+ROIvis[1]),ROIvis[0]:(ROIvis[2]+ROIvis[0])]
+        vis =CLAHEbrightness(vis,0)  
+        if len(np.shape(vis))==3:           
+            ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=extentr,zorder=0) 
+        else:
+            ax.imshow(vis,extent=extentr,zorder=0,cmap=mpl.cm.gray) 
+ 
+    Field=setField(gridVx,gridVy,Ptype) 
+    
+    
+    
+    if setPlot['DisplayField']==True:
+        resx=np.absolute(grid_x[0,1]-grid_x[0,0])
+        resy=np.absolute(grid_y[1,0]-grid_y[0,0])
+        extent=[grid_x[0,0]-resx/2,grid_x[0,-1]+resx/2,grid_y[-1,0]-resy/2,grid_y[0,0]+resy/2]
+#        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
+        figp,ax,im=opyfField(Field,ax=ax,extent=extent,extentr=extentr,**infoPlotField)
+
+   
+        figp,cb=opyfColorBar(fig,im,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1] +')')
+
+    if setPlot['QuiverOnFieldColored']==True:
+        figp,ax,qv,sm=opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,ax=ax,res=res,normalize=normalize,**infoPlotQuiver)
+        figp,cb=opyfColorBar(fig,sm,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
+
+    if setPlot['QuiverOnField']==True:
+        figp,ax,qv=opyfQuiverField(grid_x,grid_y,gridVx,gridVy,ax=ax,res=res,normalize=normalize,**infoPlotQuiver)
+
+
+    if setPlot['DisplayPointsColored']==True and Xdata is not None and Vdata is not None:
+        figp,ax,sc=opyfPointCloudColoredScatter(Xdata,Vdata,ax=ax,s=10,cmapCS=cmap,**infoPlotPointCloud)
+        figp,cb=opyfColorBar(fig,sc,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
+        cb.set_alpha(0.8)
+        cb.draw_all()
+#
+    if setPlot['DisplayPoints']==True and Xdata is not None and Vdata is not None:
+        figp,ax=opyfPointCloudScatter(Xdata,Vdata,ax=ax,s=10,color='k',**infoPlotPointCloud)
+
+        
+ 
+    if setPlot['QuiverOnPoints']==True and Xdata is not None and Vdata is not None:
+       figp,ax,qv=opyfQuiverPointCloud(Xdata,Vdata,ax=ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
+
+    if setPlot['QuiverOnPointsColored']==True and Xdata is not None and Vdata is not None:
+       figp,ax,qv,sc=opyfQuiverPointCloudColored(Xdata,Vdata,ax=ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
+       figp,cb=opyfColorBar(fig,sc,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
+       cb.set_alpha(0.8)
+       cb.draw_all()
+
+    return fig,ax
 
 
 
@@ -164,10 +241,10 @@ def opyfQuiverPointCloud(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
     Xc=X[ind,:]
     Vc=V[ind,:]
     if normalize==False:
-        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0],-Vc[:,1],**args) 
+        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0],Vc[:,1],**args) 
     else:
         Norme=(Vc[:,0]**2+Vc[:,1]**2)**0.5
-        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0]/Norme,-Vc[:,1]/Norme,**args) 
+        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0]/Norme,Vc[:,1]/Norme,**args) 
     return fig,ax,qv
 
 
@@ -205,14 +282,14 @@ def opyfQuiverPointCloudColored(X,V,fig=None,ax=None,nvec=3000,normalize=False,*
     sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([]) 
     if normalize == False:
-        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0],-Vc[:,1],color=cmap(norm(colors)),**args) 
+        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0],Vc[:,1],color=cmap(norm(colors)),**args) 
     else:
-        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0]/colors,-Vc[:,1]/colors,color=cmap(norm(colors)),**args) 
+        qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0]/colors,Vc[:,1]/colors,color=cmap(norm(colors)),**args) 
         
     return fig,ax,qv,sm
 
 
-def opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normalize=False,**args):
+def opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,res=32,normalize=False,**args):
 
     fig,ax=getax(fig=fig,ax=ax)
     import opyf
@@ -226,10 +303,10 @@ def opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32
     #one over N
     #Select randomly N vectors
     l,c=grid_x.shape
-    resx=grid_x[0,1]-grid_x[0,0]
-    resy=grid_y[1,0]-grid_y[0,0]
-    densx=int(np.round(respx/resx))
-    densy=int(np.round(respx/resy))
+    resx=np.absolute(grid_x[0,1]-grid_x[0,0])
+    resy=np.absolute(grid_y[1,0]-grid_y[0,0])
+    densx=int(np.round(res/resx))
+    densy=int(np.round(res/resy))
     lvec=np.arange(densy/2,l-densy/2,densy,dtype=int)+(l % densy)//2
     cvec=np.arange(densx/2,c-densx/2,densx,dtype=int)+(l % densx)//2
     new_grid_x=np.zeros(len(lvec))
@@ -272,7 +349,7 @@ def opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32
         
     return fig,ax,qv,sm
 
-def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,**args):
+def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,res=32,**args):
 
     fig,ax=getax(fig=fig,ax=ax)
     import opyf
@@ -286,10 +363,10 @@ def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,re
     #one over N
     #Select randomly N vectors
     l,c=grid_x.shape
-    resx=grid_x[0,1]-grid_x[0,0]
-    resy=grid_y[1,0]-grid_y[0,0]
-    densx=int(np.round(respx/resx))
-    densy=int(np.round(respx/resy))
+    resx=np.absolute(grid_x[0,1]-grid_x[0,0])
+    resy=np.absolute(grid_y[1,0]-grid_y[0,0])
+    densx=int(np.round(res/resx))
+    densy=int(np.round(res/resy))
     lvec=np.arange(densy/2,l-densy/2,densy,dtype=int)+(l % densy)//2
     cvec=np.arange(densx/2,c-densx/2,densx,dtype=int)+(l % densx)//2
     new_grid_x=np.zeros(len(lvec))
@@ -330,7 +407,7 @@ def opyfQuiverFieldColoredScaled(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,re
     return fig,ax,qv,sm
 
 
-def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normalize=False,**args):
+def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,res=32,normalize=False,**args):
     fig,ax=getax(fig=fig,ax=ax)
     import opyf
     if 'cmap' in args:
@@ -342,8 +419,8 @@ def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,respx=32,normal
     l,c=grid_x.shape
     resx=np.absolute(grid_x[0,1]-grid_x[0,0])
     resy=np.absolute(grid_y[1,0]-grid_y[0,0])
-    densx=int(respx/resx)
-    densy=int(respx/resy)
+    densx=int(res/resx)
+    densy=int(res/resy)
     lvec=np.arange(densy/2,l-densy/2,densy,dtype=int)+(l % densy)//2
     cvec=np.arange(densx/2,c-densx/2,densx,dtype=int)+(l % densx)//2
     new_grid_x=np.zeros(len(lvec))
@@ -456,7 +533,7 @@ def opyfColorBar(fig,im,label='Magnitude [px/Dt]',**args):
     
 def opyffigureandaxes(extent=[0,1,0,1],unit='px',Hfig=9,**args):
     Hframe=np.absolute(extent[3]-extent[2])
-    Lframe=np.absolute(extent[1]-extent[2])
+    Lframe=np.absolute(extent[1]-extent[0])
     Lfig=Lframe*Hfig/Hframe   
     #Location of the plot
     coefy=0.0004

@@ -25,10 +25,15 @@ import opyf
 plt.close('all')
 
 
-#Where are the images?
+#Where are the images? (if video file use the example './test/Test_land_slide_youtube_video')
 folder_main='.'
 os.chdir(folder_main)
 folder_src=folder_main+'/images'
+
+#create the list of images
+listD=os.listdir(folder_src)
+listD=np.sort(listD)
+
 
 #Create a folder to save outputs (csv files, vtk files, images)
 folder_outputs=folder_main+'/outputs'
@@ -38,15 +43,15 @@ opyf.mkdir2(folder_outputs)
 #create an image output folder
 folder_img_output=folder_outputs+'/images'
 opyf.mkdir2(folder_img_output)
-listD=os.listdir(folder_src)
-listD=np.sort(listD)
 
 
-#Calculate the main proprieties of the frames
+
+
+#Calculate the main properties of frames
 frameini=cv2.imread(folder_src+'/'+listD[0])
 Hvis,Lvis,p=frameini.shape
 ROI=[0,0,frameini.shape[1],frameini.shape[0]]
-#It is possible to specify the ROI to accelerate the treatment
+#specify ROI to accelerate the treatment
 #ROI=[0,602,2799,1252]
 
 
@@ -55,10 +60,12 @@ ROI=[0,0,frameini.shape[1],frameini.shape[0]]
 seqIm_params=dict(seqType='ABAB',
                   shift=5)
 
-#this fuctntion will produce 2 vectors
-#select will select the index of the selected frame in listD
-#prev is a boolean vector which indicate if there is an image to consider before or not
+
 select,prev=opyf.Files.initializeSeqVec(seqIm_params,listD)
+
+#initializeSeqVec fuctntion produces 2 vectors
+#'select' : are indexes of the selected frame in listD
+#'prev' is a boolean vector which indicate if there is an image to consider before or not for the algorithm
 
 #Parameters for the Good Feature to Track algorithm (Shi-Tomasi Corner Detector) 
 #the more we consider corners, the more we are able to reproduce the velocity
