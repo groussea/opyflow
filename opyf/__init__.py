@@ -15,3 +15,4 @@ from opyf.custom_cmap import *
 from opyf.Filters import *
 from opyf.Render import *
 from opyf.Track import *
+from opyf.Analyzer import *

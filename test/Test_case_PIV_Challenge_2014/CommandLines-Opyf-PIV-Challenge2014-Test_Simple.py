@@ -272,7 +272,6 @@ for i in tqdm.trange(len(prev)):
     #Good feature + flow calculatition
     prev_gray,X,V=opyf.Track.opyfFlowGoodFlag(frame,prev_gray,feature_params,
                                               lk_params,ROI=ROI,vmax=filters_params['vmax'],vmin=filters_params['vmin'],
-                                              csvTrack=None,
                                               mask=mask,DGF=filters_params['DGF'])
 
 

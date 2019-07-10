@@ -110,7 +110,14 @@ def write_csvTrack2D(csvTrackfile,X,V):
         writer.writerow({'N' : i+1,'X' : X[i][0],'Y' : X[i][1],'Vx' : V[i][0],'Vy': V[i][1]}) 
     f.close()
     
-    
+def csv_WriteUnstructured2DTimeserie(csvTrackfile,Time,X,V):
+    f=open(csvTrackfile,'w')
+    writer = csv.DictWriter(f, fieldnames= ['Time','X','Y','Vx','Vy'])
+    writer.writeheader()
+    for x,v,t in zip(X,V,Time):
+        for i in range(len(x)):
+            writer.writerow({'Time' : t,'X' : x[i][0],'Y' : x[i][1],'Vx' : v[i][0],'Vy': v[i][1]}) 
+    f.close()    
     
     
     

@@ -8,14 +8,11 @@ Created on Wed Nov 29 09:39:27 2017
 
 import numpy as np
 import matplotlib.pyplot as plt
-import pylab
 import matplotlib as mpl
 import cv2
 
 
-#fig,ax=opyffigureandaxes(scalefig,vis[:,:,0],'New',setPlot['unit'])
-#ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=[0,Lvis*setPlot['scale'],Hvis*setPlot['scale'],0],zorder=0) 
-##  
+
     
 plt.style.use('fivethirtyeight')
 plt.rcParams['axes.edgecolor']='0'
@@ -31,12 +28,7 @@ plt.rc('font', size=10)
 def ir(A):
     return int(np.round(A))
 
-def opyfFigure():
-    fig=plt.figure()
-    thismanager = plt.get_current_fig_manager()
-    thismanager.window.setGeometry(2000,200,1200, 900)
-    return fig
-    
+
 
 def opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata,Vdata,setPlot,vis=None,Ptype='norme',namefig='Opyf',vlim=None,scale=None,cmap=None,alpha=0.6,width=0.002,nvec=3000,respx=32,ROIvis=None,**args):
 
@@ -193,43 +185,49 @@ def opyfPlotRectilinear(vecX,vecY,gridVx,gridVy,setPlot,Xdata=None,Vdata=None,vi
     return fig,ax
 
 class opyfDisplayer:   
-    def __init__(self,**setPlot): 
-        self.setPlot={'DisplayVis':setPlot.get('DisplayVis',False), # If the frame availaible
-             'DisplayField':setPlot.get('DisplayField',False),
-             'QuiverOnFieldColored':setPlot.get('QuiverOnFieldColored',False),
-             'QuiverOnField':setPlot.get('QuiverOnField',False),
-             'DisplayPointsColored':setPlot.get('DisplayPointsColored',False),
-             'DisplayPoints':setPlot.get('DisplayPoints',False),
-             'QuiverOnPointsColored':setPlot.get('QuiverOnPointsColored',False),
-             'QuiverOnPoints':setPlot.get('QuiverOnPoints',False),
-             'ScaleVectors':setPlot.get('ScaleVectors',0.1),
-             'vecX':setPlot.get('vecX',[]),
-             'vecY':setPlot.get('vecY',[]),
-             'extentFrame':setPlot.get('extentFrame',[0,1,0,1]), 
-             'unit':setPlot.get('unit',['','deltaT']),
-             'Hfig':setPlot.get('Hfig',9),
-             'num':setPlot.get('num','opyfPlot'),
-             'grid':setPlot.get('grid',True),
-             'vlim':setPlot.get('vlim',None)} 
+    def __init__(self,**args): 
+        self.paramDisp={'DisplayVis':args.get('DisplayVis',False), # If the frame availaible
+             'DisplayField':args.get('DisplayField',False),
+             'QuiverOnFieldColored':args.get('QuiverOnFieldColored',False),
+             'QuiverOnField':args.get('QuiverOnField',False),
+             'DisplayPointsColored':args.get('DisplayPointsColored',False),
+             'DisplayPoints':args.get('DisplayPoints',False),
+             'QuiverOnPointsColored':args.get('QuiverOnPointsColored',False),
+             'QuiverOnPoints':args.get('QuiverOnPoints',False)}
+        self.paramPlot={'ScaleVectors':args.get('ScaleVectors',0.1),
+             'vecX':args.get('vecX',[]),
+             'vecY':args.get('vecY',[]),
+             'extentFrame':args.get('extentFrame',[0,1,0,1]), 
+             'unit':args.get('unit',['','deltaT']),
+             'Hfig':args.get('Hfig',9),
+             'num':args.get('num','opyfPlot'),
+             'grid':args.get('grid',True),
+             'vlim':args.get('vlim',None)} 
 
 
-        if (self.setPlot['DisplayField']==True or
-        self.setPlot['QuiverOnFieldColored']==True or
-        self.setPlot['QuiverOnField']==True): 
-            if (len(self.setPlot['vecX'])>0 and len(self.setPlot['vecY'])>0):
-                self.setPlot['type']='Rectilinear'
-                self.grid_x = np.ones((len(setPlot['vecY']),1)) * setPlot['vecX']
-                self.grid_y = (np.ones((len(setPlot['vecX']),1)) * setPlot['vecY']).T
-                if self.setPlot['extentFrame']==[0,1,0,1]:
-                    self.setPlot['extentFrame']=[setPlot['vecX'][0],setPlot['vecX'][-1],setPlot['vecY'][-1],setPlot['vecY'][0]]
-            else:
-                print('provide vecX and vecY arguments to initialize a rectilinear plot')
+        if (len(self.paramPlot['vecX'])>0 and len(self.paramPlot['vecY'])>0):
+            self.setGridXandGridY(self.paramPlot['vecX'],self.paramPlot['vecY'])
+                
+#            print('vecX and vecY have not been specified')
         plt.ioff()     
         
-        self.fig,self.ax= opyffigureandaxes(extent=self.setPlot['extentFrame'],Hfig=self.setPlot['Hfig'],unit=self.setPlot['unit'][0],num='opyfPlot')
-           
-    def plot(self,gridVx=None,gridVy=None,Xdata=None,Vdata=None,vis=None,Hfig=9,Ptype='norme',namefig='Opyf',scale=None,cmap=None,alpha=0.6,width=0.002,nvec=3000,res=32,ROIvis=None,**args):
+        self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opyfPlot')
+#        self.setExtent(self.paramPlot['extentFrame'])
+
+    def setGridXandGridY(self,vecX,vecY):
+        self.grid_x = np.ones((len(vecY),1)) * vecX
+        self.grid_y = (np.ones((len(vecX),1)) * vecY).T
+        if self.paramPlot['extentFrame']==[0,1,0,1]:
+            self.paramPlot['extentFrame']=[vecX[0],vecX[-1],vecY[-1],vecY[0]]
+            
+    def setExtent(self,extent):
+        self.ax.set_xlim(extent[0],extent[1])
+        self.ax.set_ylim(extent[2],extent[3])
+        self.paramPlot['extentFrame']=extent
         
+    def plot(self,Field=None,gridVx=None,gridVy=None,Xdata=None,Vdata=None,vis=None,Ptype='norme',Hfig=8,namefig='Opyf',scale=None,cmap=None,alpha=0.6,width=0.002,nvec=3000,res=32,
+             c='k',s=10,ROIvis=None,**args):
+        plt.ion()
         if len(self.ax.collections)>0:
             del self.ax.collections[:]
         if len(self.ax.lines)>0:   
@@ -238,14 +236,14 @@ class opyfDisplayer:
             del self.ax.images[:]
         if len(self.fig.axes)>1:
             del self.fig.axes[1].collections[:]
-#            self.fig,self.ax= opyffigureandaxes(extent=self.setPlot['extentFrame'],Hfig=self.setPlot['Hfig'],unit=self.setPlot['unit'][0],num='opfPlot')
+#            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opfPlot')
 
         if cmap is None:
             cmap=setcmap(Ptype,alpha=alpha)
             
         normalize=args.get('normalize',False)
-        extentr=args.get('extentr',self.setPlot['extentFrame'])
-        vlim=args.get('vlim',self.setPlot['vlim'])
+        extentr=args.get('extentr',self.paramPlot['extentFrame'])
+        vlim=args.get('vlim',self.paramPlot['vlim'])
         infoPlotQuiver={'cmap':cmap,
               'width' :width,
               'alpha':alpha,
@@ -262,7 +260,7 @@ class opyfDisplayer:
             
             
         
-        if self.setPlot['DisplayVis']==True and vis is not None:  
+        if self.paramDisp['DisplayVis']==True and vis is not None:  
             if ROIvis is not None:
                 vis=vis[ROIvis[1]:(ROIvis[3]+ROIvis[1]),ROIvis[0]:(ROIvis[2]+ROIvis[0])]
             vis =CLAHEbrightness(vis,0)  
@@ -270,12 +268,10 @@ class opyfDisplayer:
                 self.ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=extentr,zorder=0) 
             else:
                 self.ax.imshow(vis,extent=extentr,zorder=0,cmap=mpl.cm.gray) 
-        if  gridVx is not None and gridVy is not None:
-            Field=setField(gridVx,gridVy,Ptype) 
+
+  
             
-            
-            
-        if self.setPlot['DisplayField']==True:
+        if self.paramDisp['DisplayField']==True and Field is not None:
             resx=np.absolute(self.grid_x[0,1]-self.grid_x[0,0])
             resy=np.absolute(self.grid_y[1,0]-self.grid_y[0,0])
             extent=[self.grid_x[0,0]-resx/2,self.grid_x[0,-1]+resx/2,self.grid_y[-1,0]-resy/2,self.grid_y[0,0]+resy/2]
@@ -283,37 +279,131 @@ class opyfDisplayer:
             self.fig,self.ax,self.im=opyfField(Field,ax=self.ax,extent=extent,extentr=extentr,**infoPlotField)
     
        
-            self.fig,self.cb=opyfColorBar(self.fig,self.im,label=Ptype+' velocity (in '+self.setPlot['unit'][0]+'/'+self.setPlot['unit'][1] +')')
+            self.fig,self.cb=opyfColorBar(self.fig,self.im,label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] +')')
     
-        if self.setPlot['QuiverOnFieldColored']==True:
+        if self.paramDisp['QuiverOnFieldColored']==True:
             self.fig,self.ax,self.qv,self.sm=opyfQuiverFieldColored(self.grid_x,self.grid_y,gridVx,gridVy,ax=self.ax,res=res,normalize=normalize,**infoPlotQuiver)
-            self.fig,cb=opyfColorBar(self.fig,self.sm,label=Ptype+' velocity (in '+self.setPlot['unit'][0]+'/'+self.setPlot['unit'][1]+ ')')
+            self.fig,self.cb=opyfColorBar(self.fig,self.sm,label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1]+ ')')
     
-        if self.setPlot['QuiverOnField']==True:
-            self.fig,self.ax,qv=opyfQuiverField(self.grid_x,self.grid_y,gridVx,gridVy,ax=self.ax,res=res,normalize=normalize,**infoPlotQuiver)
+        if self.paramDisp['QuiverOnField']==True:
+            self.fig,self.ax,qv=opyfQuiverField(self.grid_x,self.grid_y,gridVx,gridVy,ax=self.ax,res=res,normalize=normalize,color=c,**infoPlotQuiver)
     
     
-        if self.setPlot['DisplayPointsColored']==True and Xdata is not None and Vdata is not None:
+        if self.paramDisp['DisplayPointsColored']==True and Xdata is not None and Vdata is not None:
             self.fig,self.ax,self.sc=opyfPointCloudColoredScatter(Xdata,Vdata,ax=self.ax,s=10,cmapCS=cmap,**infoPlotPointCloud)
-            self.fig,self.cb=opyfColorBar(self.fig,self.sc,label=Ptype+' velocity (in '+self.setPlot['unit'][0]+'/'+self.setPlot['unit'][1]+ ')')
+            self.fig,self.cb=opyfColorBar(self.fig,self.sc,label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1]+ ')')
             self.cb.set_alpha(0.8)
             self.cb.draw_all()
     #
-        if self.setPlot['DisplayPoints']==True and Xdata is not None and Vdata is not None:
-            self.fig,self.ax=opyfPointCloudScatter(Xdata,Vdata,ax=self.ax,s=10,color='k',**infoPlotPointCloud)
+        if self.paramDisp['DisplayPoints']==True and Xdata is not None and Vdata is not None:
+            self.fig,self.ax=opyfPointCloudScatter(Xdata,Vdata,ax=self.ax,s=s,color=c,**infoPlotPointCloud)
     
             
      
-        if self.setPlot['QuiverOnPoints']==True and Xdata is not None and Vdata is not None:
-           self.fig,self.ax,qv=opyfQuiverPointCloud(Xdata,Vdata,ax=self.ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
+        if self.paramDisp['QuiverOnPoints']==True and Xdata is not None and Vdata is not None:
+           self.fig,self.ax,qv=opyfQuiverPointCloud(Xdata,Vdata,ax=self.ax,nvec=nvec,color=c,normalize=normalize,**infoPlotQuiver)
     
-        if self.setPlot['QuiverOnPointsColored']==True and Xdata is not None and Vdata is not None:
+        if self.paramDisp['QuiverOnPointsColored']==True and Xdata is not None and Vdata is not None:
            self.fig,self.ax,self.qv,sc=opyfQuiverPointCloudColored(Xdata,Vdata,ax=self.ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
-           self.fig,cb=opyfColorBar(self.fig,sc,label=Ptype+' velocity (in '+self.setPlot['unit'][0]+'/'+self.setPlot['unit'][1]+ ')')
+           self.fig,self.cb=opyfColorBar(self.fig,sc,label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1]+ ')')
            self.cb.set_alpha(0.8)
            self.cb.draw_all()
         self.fig.show()
+        
+        
+    def FieldInitializer(self,vecX,vecY,Field):
+        if (len(self.paramPlot['vecX'])==0 and vecX is not None and vecY is None) or (len(self.paramPlot['vecX'])==0 and vecX is not None and vecY is None):
+            print('If you initialize with new coordinates you must specifiy vecX and vecY')
+        if len(self.paramPlot['vecX'])==0 and vecX is not None and vecY is not None:
+            self.paramPlot['vecX']=vecX
+            self.paramPlot['vecY']=vecY
+            plt.close('all')
+            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opyfPlot')
+              
+        if len(self.paramPlot['vecX'])==0 and vecX==None:
+            print('--- WARNING---')
+            print('vecX and vecY are not specified in paramPlot or in the arguments of the function')
+            print('vecX represent the coordinates of the columns of the field and vecY the coordinates of the lines')
+            self.paramPlot['vecX']=np.arange(len(Field[0,:]))
+            self.paramPlot['vecY']=np.arange(len(Field[:,0]))
+            self.setGridXandGridY(self.paramPlot['vecX'],self.paramPlot['vecY'])
+            print('In these conditions, the coordinates are set to a distonace of 1 between each lines or columns')
+            self.setGridXandGridY(self.paramPlot['vecX'],self.paramPlot['vecY'])
+            plt.close('all')
+            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opyfPlot')
+            self.ax.set_ylabel(r'Y[no unit]')
 
+
+    def plotField(self,Field,vecX=None,vecY=None,vis=None,**args):
+        self.FieldInitializer(vecX,vecY,Field)
+        for key, value in self.paramDisp.items():
+            if key=='DisplayField':
+                self.paramDisp[key]=True
+            else:
+                self.paramDisp[key]=False
+
+        if vis is not None:
+            self.paramDisp['DisplayVis']=True
+            
+        self.plot(Field=Field,vis=vis,**args)
+        
+    def plotQuiverField(self,gridVx,gridVy,color=False,vecX=None,vecY=None,vis=None,**args):
+        self.FieldInitializer(vecX,vecY,gridVx)
+        
+        for key, value in self.paramDisp.items():
+            if key=='QuiverOnField' and color==False:
+                self.paramDisp[key]=True
+            elif key=='QuiverOnFieldColored' and color==True:
+                self.paramDisp[key]=True
+            else:
+                self.paramDisp[key]=False
+       
+        if vis is not None:
+            self.paramDisp['DisplayVis']=True
+            
+        self.plot(gridVx=gridVx,gridVy=gridVy,vis=vis,**args)
+ 
+    def plotQuiverUnstructured(self,Xdata,Vdata,color=False,vis=None,**args):
+        
+        
+        for key, value in self.paramDisp.items():
+            if key=='QuiverOnPoints' and color==False:
+                self.paramDisp[key]=True
+            elif key=='QuiverOnPointsColored' and color==True:
+                self.paramDisp[key]=True
+            else:
+                self.paramDisp[key]=False
+        
+        
+        if vis is not None:
+            self.paramDisp['DisplayVis']=True
+            
+        if self.paramPlot['extentFrame']==[0,1,0,1]:
+            self.paramPlot['extentFrame']=[np.min(Xdata[:,0]),np.max(Xdata[:,0]),np.min(Xdata[:,1]),np.max(Xdata[:,1])]
+            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opyfPlot')
+ 
+        self.plot(Xdata=Xdata,Vdata=Vdata,vis=vis,**args)
+
+    def plotPointsUnstructured(self,Xdata,Vdata,color=False,vis=None,**args):
+        
+        for key, value in self.paramDisp.items():
+            if key=='DisplayPoints' and color==False:
+                self.paramDisp[key]=True
+            elif key=='DisplayPointsColored' and color==True:
+                self.paramDisp[key]=True
+            else:
+                self.paramDisp[key]=False
+        
+        
+        if vis is not None:
+            self.paramDisp['DisplayVis']=True
+            
+        if self.paramPlot['extentFrame']==[0,1,0,1]:
+            self.paramDisp['extentFrame']=[np.min(Xdata[:,0]),np.max(Xdata[:,0]),np.min(Xdata[:,1]),np.max(Xdata[:,1])]
+            plt.close('all')
+            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opyfPlot')
+ 
+        self.plot(Xdata=Xdata,Vdata=Vdata,vis=vis,**args)
 
 
 
@@ -350,10 +440,10 @@ def opyfQuiverPointCloud(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
     #one over N
     #Select randomly N vectors
     if len(X)<nvec:
-        N=len(X)
-        print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
+        N=len(X)        
     else:
         N=nvec
+        print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
 #    scale=args.get('scale',None)
     if 'cmap' in args:
         del args['cmap']
@@ -362,6 +452,8 @@ def opyfQuiverPointCloud(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
     ind=np.random.choice(np.arange(len(X)), N, replace = False)
     Xc=X[ind,:]
     Vc=V[ind,:]
+    if ax.get_ylim()[0]>ax.get_ylim()[1]:
+        Vc[:,1]=-Vc[:,1]
     if normalize==False:
         qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0],Vc[:,1],**args) 
     else:
@@ -371,7 +463,7 @@ def opyfQuiverPointCloud(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
 
 
 def opyfQuiverPointCloudColored(X,V,fig=None,ax=None,nvec=3000,normalize=False,**args):
-    from matplotlib.collections import PatchCollection
+
     from matplotlib.colors import Normalize
     if 'cmap' not in args:
         args['cmap']= mpl.cm.coolwarm
@@ -381,10 +473,10 @@ def opyfQuiverPointCloudColored(X,V,fig=None,ax=None,nvec=3000,normalize=False,*
     #one over N
     #Select randomly N vectors
     if len(X)<nvec:
-        N=len(X)
-        print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
+        N=len(X)        
     else:
         N=nvec
+        print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
     
     ind=np.random.choice(np.arange(len(X)), N, replace = False)
     Xc=X[ind,:]
@@ -403,6 +495,8 @@ def opyfQuiverPointCloudColored(X,V,fig=None,ax=None,nvec=3000,normalize=False,*
     norm.vmax=vlim[1]
     sm = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([]) 
+    if ax.get_ylim()[0]>ax.get_ylim()[1]:
+        Vc[:,1]=-Vc[:,1]
     if normalize == False:
         qv=ax.quiver(Xc[:,0],Xc[:,1],Vc[:,0],Vc[:,1],color=cmap(norm(colors)),**args) 
     else:
@@ -653,27 +747,34 @@ def opyfColorBar(fig,im,label='Magnitude [px/Dt]',**args):
 
 
     
-def opyffigureandaxes(extent=[0,1,0,1],unit='px',Hfig=9,**args):
+def opyffigureandaxes(extent=[0,1,0,1],unit='px',Hfig=9,sizemax=17,**args):
     Hframe=np.absolute(extent[3]-extent[2])
     Lframe=np.absolute(extent[1]-extent[0])
     Lfig=Lframe*Hfig/Hframe   
     #Location of the plot
 #    coefy=0.0004
-    exty=0.75
-    extx=Lframe*exty*Hfig/Lfig/Hframe
-    axiswindow=[(1-extx)/2+0.02, 0.2, extx, exty]
+    
     
     num=args.get('num','opyf-Figure')
     if num=='opyf-Figure':
         plt.close(num)
-    fig=plt.figure(figsize=(Lfig, Hfig),**args)
-    fig.clf()  
+    A=np.array([Lfig,Hfig])
+    if np.max(A)>sizemax:
+        coeff=sizemax/A[np.argmax(A)]
+        A=coeff*A
+    exty=0.65
+    extx=Lframe*exty*A[1]/A[0]/Hframe
+    axiswindow=[(1-extx)/2+0.02, 0.25, extx, exty]
+    
+    fig=plt.figure(figsize=(A[0], A[1]),**args) 
     ax = plt.Axes(fig, axiswindow)
     fig.add_axes(ax)
-    plt.ylabel('Y['+unit+']')
-    plt.xlabel('X['+unit+']')  
+    ax.set_ylabel('Y['+unit+']')
+#    plt.xlabel('X['+unit+']')  
+    ax.axis('equal')    
     ax.set_xlim(extent[0],extent[1])
     ax.set_ylim(extent[2],extent[3])
+
     
     return fig,ax
 
@@ -685,7 +786,7 @@ def setcmap(Type,alpha=1.):
         cmap=make_cmap(colors, position=position) 
         cmap.set_under('g')
         cmap.set_over('g')
-    elif Type=='horizontal' or setPlot['Type']=='vertical':
+    elif Type=='horizontal' or paramPlot['Type']=='vertical':
         colors = [(11./255,22./255,33./255,1),(33./255,66./255,99./255,1),(103./255,230./255,93./255,0.3), (0.7,0,0,1),(1.,0,0,1)]
         position = [0.,0.4, 0.5, 0.6,1.]               
         cmap=make_cmap(colors, position=position)   

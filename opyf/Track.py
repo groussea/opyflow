@@ -62,13 +62,7 @@ def opyfTrack(tracks,frame,prev_gray,incr,feature_params,lk_params,**args):
         X=np.float32([tr[-1] for tr in tracks])           
         V=np.float32([tr[-1] for tr in tracks])-np.float32([tr[-2] for tr in tracks])
         Npart=np.arange(len(X))
-        if csvTrack is not None:
-            f=open(csvTrack,'w')
-            writer = csv.DictWriter(f, fieldnames= ['N','X','Y','Ux','Uy'])
-            writer.writeheader()
-            for Ni in Npart:
-                writer.writerow({'N' : Ni+1,'X' : X[Ni][0],'Y' : X[Ni][1],'Ux' : V[Ni][0],'Uy': V[Ni][1]}) 
-            f.close()
+        
     if incr % 50. == 0:
         mask1 = np.zeros_like(frame_gray)
         mask1[:] = 255
@@ -167,15 +161,9 @@ def opyfFlowGoodFlag(frame,prev_gray,feature_params,lk_params,**args):
                     continue
             X.append([x,y])
             V.append([vx,vy])
-        Npart=np.arange(len(X))
+
 #        csvTrack=folder_outputs+'/'+format(incr,'04.0f')+'.csv'
-        if csvTrack is not None:
-            f=open(csvTrack,'w')
-            writer = csv.DictWriter(f, fieldnames= ['N','X','Y','Ux','Uy'])
-            writer.writeheader()
-            for Ni in Npart:
-                writer.writerow({'N' : Ni+1,'X' : X[Ni][0],'Y' : X[Ni][1],'Ux' : V[Ni][0],'Uy': V[Ni][1]}) 
-            f.close()          
+         
     X=np.array(X)
     V=np.array(V) 
     if ROI is not None and len(X)>0:
