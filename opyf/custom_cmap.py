@@ -18,7 +18,7 @@ REVISION HISTORY
 import numpy as np
 def make_cmap(colors, position=None, bit=False,res=256):
     '''
-    make_cmap takes a list of tuples which contain RGB values. The RGB
+    make_cmap takes a list of tuples which contain RGBA values. The RGBA
     values may either be in 8-bit [0 to 255] (in which bit must be set to
     True when called) or arithmetic [0 to 1] (default). make_cmap returns
     a cmap with equally spaced colors.

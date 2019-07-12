@@ -432,5 +432,17 @@ def findFileExt(folder,ext='.png'):
     arr = [x for x in os.listdir(folder) if x.endswith(ext)]
     return arr
 
+def writeImageProcessingParamsJSON(fulldict,outFolder='.',filename=None):
+    import json
+
+    if filename is None:
+        filename='params_image_processing'
+    
+    fileFormat='json'
+    out_file = open(outFolder+'/'+filename+'.'+fileFormat,"w")
+    # (the 'indent=4' is optional, but makes it more readable)
+    json.dump(fulldict,out_file, indent=4)      
+    print('[log] parameters of the image processing saved in '+outFolder+'/'+filename+'.'+fileFormat)                              
+    out_file.close()   
     
     

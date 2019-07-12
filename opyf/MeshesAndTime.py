@@ -18,3 +18,9 @@ def setVecTime(framedeb=0,step=1,shift=1,Ntot=2):
     prev=np.arange(0,len(vec))%2==1
    
     return vec,prev
+
+def setGridToInterpolateOn(pixLeft,pixRight,stepHor,pixUp,pixDown,stepVert):
+    grid_y, grid_x= np.mgrid[pixUp:pixDown:stepVert,pixLeft:pixRight:stepHor]
+    grid_Vx, grid_Vy=np.zeros_like(grid_y),np.zeros_like(grid_x)
+    Hgrid,Lgrid=grid_y.shape
+    return grid_y, grid_x, grid_Vy, grid_Vx, Hgrid, Lgrid

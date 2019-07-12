@@ -8,7 +8,7 @@ For flow calculations, it is mainly inspired on the openCV python sample lktrack
 
 Author: Gauthier Rousseau
 
-This package has been developed in the course of my PhD at EPFL to study [Turbulent flows over rough permeable beds](https://infoscience.epfl.ch/record/264790/files/EPFL_TH9327.pdf)]. Outputs are visible in the manuscript and also on this [Video](https://www.youtube.com/watch?v=JmwE-kL0kTk) where videos and paraview animations have been rendered thanks to opyf outputs.
+This package has been developed in the course of my PhD at EPFL to study [Turbulent flows over rough permeable beds](https://infoscience.epfl.ch/record/264790/files/EPFL_TH9327.pdf). Outputs are visible in the manuscript and also on this [Video](https://www.youtube.com/watch?v=JmwE-kL0kTk) where videos and paraview animations have been rendered thanks to opyf outputs.
 
 corresponding e-mail : gauthier.rousseau@gmail.com
 

@@ -186,6 +186,7 @@ def opyfPlotRectilinear(vecX,vecY,gridVx,gridVy,setPlot,Xdata=None,Vdata=None,vi
 
 class opyfDisplayer:   
     def __init__(self,**args): 
+   
         self.paramDisp={'DisplayVis':args.get('DisplayVis',False), # If the frame availaible
              'DisplayField':args.get('DisplayField',False),
              'QuiverOnFieldColored':args.get('QuiverOnFieldColored',False),
@@ -194,6 +195,7 @@ class opyfDisplayer:
              'DisplayPoints':args.get('DisplayPoints',False),
              'QuiverOnPointsColored':args.get('QuiverOnPointsColored',False),
              'QuiverOnPoints':args.get('QuiverOnPoints',False)}
+        
         self.paramPlot={'ScaleVectors':args.get('ScaleVectors',0.1),
              'vecX':args.get('vecX',[]),
              'vecY':args.get('vecY',[]),
@@ -347,13 +349,13 @@ class opyfDisplayer:
             
         self.plot(Field=Field,vis=vis,**args)
         
-    def plotQuiverField(self,gridVx,gridVy,color=False,vecX=None,vecY=None,vis=None,**args):
+    def plotQuiverField(self,gridVx,gridVy,displayColor=False,vecX=None,vecY=None,vis=None,**args):
         self.FieldInitializer(vecX,vecY,gridVx)
         
         for key, value in self.paramDisp.items():
-            if key=='QuiverOnField' and color==False:
+            if key=='QuiverOnField' and displayColor==False:
                 self.paramDisp[key]=True
-            elif key=='QuiverOnFieldColored' and color==True:
+            elif key=='QuiverOnFieldColored' and displayColor==True:
                 self.paramDisp[key]=True
             else:
                 self.paramDisp[key]=False
@@ -363,17 +365,16 @@ class opyfDisplayer:
             
         self.plot(gridVx=gridVx,gridVy=gridVy,vis=vis,**args)
  
-    def plotQuiverUnstructured(self,Xdata,Vdata,color=False,vis=None,**args):
+    def plotQuiverUnstructured(self,Xdata,Vdata,displayColor=False,vis=None,**args):
         
         
         for key, value in self.paramDisp.items():
-            if key=='QuiverOnPoints' and color==False:
+            if key=='QuiverOnPoints' and displayColor==False:
                 self.paramDisp[key]=True
-            elif key=='QuiverOnPointsColored' and color==True:
+            elif key=='QuiverOnPointsColored' and displayColor==True:
                 self.paramDisp[key]=True
             else:
-                self.paramDisp[key]=False
-        
+                self.paramDisp[key]=False        
         
         if vis is not None:
             self.paramDisp['DisplayVis']=True
@@ -393,8 +394,7 @@ class opyfDisplayer:
                 self.paramDisp[key]=True
             else:
                 self.paramDisp[key]=False
-        
-        
+                
         if vis is not None:
             self.paramDisp['DisplayVis']=True
             
@@ -656,7 +656,7 @@ def opyfQuiverField(grid_x,grid_y,gridVx,gridVy,fig=None,ax=None,res=32,normaliz
      
     TargetPoints=opyf.Interpolate.npGrid2TargetPoint2D(new_grid_x,new_grid_y)
     Velocities=opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx,new_gridVy)    
-    colors=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5  
+#    colors=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5  
     if normalize==False:
         qv=ax.quiver(TargetPoints[:,0],TargetPoints[:,1],Velocities[:,0],Velocities[:,1],**args) 
     else:
@@ -714,7 +714,7 @@ def opyfPointCloudColoredScatter(X,V,fig=None,ax=None,cmapCS=mpl.cm.coolwarm,**a
     return fig,ax,sc
 
 def opyfPointCloudScatter(X,V,fig=None,ax=None,**args):
-    from matplotlib.collections import PatchCollection
+
     fig,ax=getax(fig=fig,ax=ax)
     if 'vlim' in args:
         del args['vlim']
@@ -755,8 +755,8 @@ def opyffigureandaxes(extent=[0,1,0,1],unit='px',Hfig=9,sizemax=17,**args):
 #    coefy=0.0004
     
     
-    num=args.get('num','opyf-Figure')
-    if num=='opyf-Figure':
+    num=args.get('num','opyfPlot')
+    if num=='opyfPlot':
         plt.close(num)
     A=np.array([Lfig,Hfig])
     if np.max(A)>sizemax:

@@ -13,18 +13,16 @@ Created on Wed Nov 22 08:24:12 2017
 
 #### 1 #### Initialisation
 
-import sys, os
+import  sys, os
 
 folder_main='./'
 os.chdir(folder_main)
 #if it is not installed where is the opyf folder?
 #sys.path.append('/media/gauthier/Data_1/TAF/OPyF-Project/github/opyFlow')
 import cv2
-import csv #not used directly in this script but needed
 import numpy as np
 import matplotlib.pyplot as plt
 import tqdm     
-import vtk #not used directly in this script but needed
 import json
 import opyf
 
