@@ -106,83 +106,7 @@ def opyfPlot(grid_x,grid_y,gridVx,gridVy,Xdata,Vdata,setPlot,vis=None,Ptype='nor
 
     return fig,ax
 
-def opyfPlotRectilinear(vecX,vecY,gridVx,gridVy,setPlot,Xdata=None,Vdata=None,vis=None,Hfig=9,Ptype='norme',namefig='Opyf',vlim=None,scale=None,cmap=None,alpha=0.6,width=0.002,nvec=3000,res=32,ROIvis=None,**args):
-    
-    grid_x = np.ones((len(vecY),1)) * vecX
-    grid_y = (np.ones((len(vecX),1)) * vecY).T
-    if cmap is None:
-        cmap=setcmap(Ptype,alpha=alpha)
-        
-    normalize=args.get('normalize',False)
-    extentr=args.get('extentr',setPlot['extentFrame'])
-    infoPlotQuiver={'cmap':cmap,
-          'width' :width,
-          'alpha':alpha,
-          'vlim':vlim,
-          'scale':scale} 
 
-    infoPlotPointCloud={'cmap':cmap,
-          'alpha':alpha,
-          'vlim':vlim}
-    infoPlotField={'cmap': cmap,                    
-                    'vlim':vlim}
-    
-
-        
- 
-    fig,ax=opyffigureandaxes(extent=setPlot['extentFrame'],Hfig=Hfig,unit=setPlot['unit'][0],num=namefig)
-    if setPlot['DisplayVis']==True and vis is not None:  
-        if ROIvis is not None:
-            vis=vis[ROIvis[1]:(ROIvis[3]+ROIvis[1]),ROIvis[0]:(ROIvis[2]+ROIvis[0])]
-        vis =CLAHEbrightness(vis,0)  
-        if len(np.shape(vis))==3:           
-            ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=extentr,zorder=0) 
-        else:
-            ax.imshow(vis,extent=extentr,zorder=0,cmap=mpl.cm.gray) 
- 
-    Field=setField(gridVx,gridVy,Ptype) 
-    
-    
-    
-    if setPlot['DisplayField']==True:
-        resx=np.absolute(grid_x[0,1]-grid_x[0,0])
-        resy=np.absolute(grid_y[1,0]-grid_y[0,0])
-        extent=[grid_x[0,0]-resx/2,grid_x[0,-1]+resx/2,grid_y[-1,0]-resy/2,grid_y[0,0]+resy/2]
-#        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
-        figp,ax,im=opyfField(Field,ax=ax,extent=extent,extentr=extentr,**infoPlotField)
-
-   
-        figp,cb=opyfColorBar(fig,im,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1] +')')
-
-    if setPlot['QuiverOnFieldColored']==True:
-        figp,ax,qv,sm=opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,ax=ax,res=res,normalize=normalize,**infoPlotQuiver)
-        figp,cb=opyfColorBar(fig,sm,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
-
-    if setPlot['QuiverOnField']==True:
-        figp,ax,qv=opyfQuiverField(grid_x,grid_y,gridVx,gridVy,ax=ax,res=res,normalize=normalize,**infoPlotQuiver)
-
-
-    if setPlot['DisplayPointsColored']==True and Xdata is not None and Vdata is not None:
-        figp,ax,sc=opyfPointCloudColoredScatter(Xdata,Vdata,ax=ax,s=10,cmapCS=cmap,**infoPlotPointCloud)
-        figp,cb=opyfColorBar(fig,sc,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
-        cb.set_alpha(0.8)
-        cb.draw_all()
-#
-    if setPlot['DisplayPoints']==True and Xdata is not None and Vdata is not None:
-        figp,ax=opyfPointCloudScatter(Xdata,Vdata,ax=ax,s=10,color='k',**infoPlotPointCloud)
-
-        
- 
-    if setPlot['QuiverOnPoints']==True and Xdata is not None and Vdata is not None:
-       figp,ax,qv=opyfQuiverPointCloud(Xdata,Vdata,ax=ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
-
-    if setPlot['QuiverOnPointsColored']==True and Xdata is not None and Vdata is not None:
-       figp,ax,qv,sc=opyfQuiverPointCloudColored(Xdata,Vdata,ax=ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
-       figp,cb=opyfColorBar(fig,sc,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
-       cb.set_alpha(0.8)
-       cb.draw_all()
-
-    return fig,ax
 
 class opyfDisplayer:   
     def __init__(self,**args): 
@@ -215,7 +139,7 @@ class opyfDisplayer:
         
         self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opyfPlot')
 #        self.setExtent(self.paramPlot['extentFrame'])
-
+        plt.ion()
     def setGridXandGridY(self,vecX,vecY):
         self.grid_x = np.ones((len(vecY),1)) * vecX
         self.grid_y = (np.ones((len(vecX),1)) * vecY).T
@@ -229,7 +153,7 @@ class opyfDisplayer:
         
     def plot(self,Field=None,gridVx=None,gridVy=None,Xdata=None,Vdata=None,vis=None,Ptype='norme',Hfig=8,namefig='Opyf',scale=None,cmap=None,alpha=0.6,width=0.002,nvec=3000,res=32,
              c='k',s=10,ROIvis=None,**args):
-        plt.ion()
+
         if len(self.ax.collections)>0:
             del self.ax.collections[:]
         if len(self.ax.lines)>0:   
@@ -238,13 +162,16 @@ class opyfDisplayer:
             del self.ax.images[:]
         if len(self.fig.axes)>1:
             del self.fig.axes[1].collections[:]
+            del self.fig.axes[1].artists[:]
+
+
 #            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opfPlot')
 
         if cmap is None:
             cmap=setcmap(Ptype,alpha=alpha)
             
         normalize=args.get('normalize',False)
-        extentr=args.get('extentr',self.paramPlot['extentFrame'])
+        extentVis=args.get('extentVis',self.paramPlot['extentFrame'])
         vlim=args.get('vlim',self.paramPlot['vlim'])
         infoPlotQuiver={'cmap':cmap,
               'width' :width,
@@ -267,18 +194,18 @@ class opyfDisplayer:
                 vis=vis[ROIvis[1]:(ROIvis[3]+ROIvis[1]),ROIvis[0]:(ROIvis[2]+ROIvis[0])]
             vis =CLAHEbrightness(vis,0)  
             if len(np.shape(vis))==3:           
-                self.ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=extentr,zorder=0) 
+                self.ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=extentVis,zorder=0) 
             else:
-                self.ax.imshow(vis,extent=extentr,zorder=0,cmap=mpl.cm.gray) 
+                self.ax.imshow(vis,extent=extentVis,zorder=0,cmap=mpl.cm.gray) 
 
   
             
         if self.paramDisp['DisplayField']==True and Field is not None:
             resx=np.absolute(self.grid_x[0,1]-self.grid_x[0,0])
             resy=np.absolute(self.grid_y[1,0]-self.grid_y[0,0])
-            extent=[self.grid_x[0,0]-resx/2,self.grid_x[0,-1]+resx/2,self.grid_y[-1,0]-resy/2,self.grid_y[0,0]+resy/2]
+            extent=[self.grid_x[0,0]-resx,self.grid_x[0,-1]+resx,self.grid_y[-1,0]+resy/2,self.grid_y[0,0]-resy]
     #        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
-            self.fig,self.ax,self.im=opyfField(Field,ax=self.ax,extent=extent,extentr=extentr,**infoPlotField)
+            self.fig,self.ax,self.im=opyfField(Field,ax=self.ax,extent=extent,extentr=extentVis,**infoPlotField)
     
        
             self.fig,self.cb=opyfColorBar(self.fig,self.im,label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] +')')
@@ -385,12 +312,12 @@ class opyfDisplayer:
  
         self.plot(Xdata=Xdata,Vdata=Vdata,vis=vis,**args)
 
-    def plotPointsUnstructured(self,Xdata,Vdata,color=False,vis=None,**args):
+    def plotPointsUnstructured(self,Xdata,Vdata,displayColor=False,vis=None,**args):
         
         for key, value in self.paramDisp.items():
-            if key=='DisplayPoints' and color==False:
+            if key=='DisplayPoints' and displayColor==False:
                 self.paramDisp[key]=True
-            elif key=='DisplayPointsColored' and color==True:
+            elif key=='DisplayPointsColored' and displayColor==True:
                 self.paramDisp[key]=True
             else:
                 self.paramDisp[key]=False
@@ -918,3 +845,82 @@ def CLAHEbrightness(frame,value,tileGridSize=(2,2),clipLimit=2):
     vis=np.where((255 - vis) < value,255,vis+value)
 
     return vis    
+
+
+def opyfPlotRectilinear(vecX,vecY,gridVx,gridVy,setPlot,Xdata=None,Vdata=None,vis=None,Hfig=9,Ptype='norme',namefig='Opyf',vlim=None,scale=None,cmap=None,alpha=0.6,width=0.002,nvec=3000,res=32,ROIvis=None,**args):
+    
+    grid_x = np.ones((len(vecY),1)) * vecX
+    grid_y = (np.ones((len(vecX),1)) * vecY).T
+    if cmap is None:
+        cmap=setcmap(Ptype,alpha=alpha)
+        
+    normalize=args.get('normalize',False)
+    extentr=args.get('extentr',setPlot['extentFrame'])
+    infoPlotQuiver={'cmap':cmap,
+          'width' :width,
+          'alpha':alpha,
+          'vlim':vlim,
+          'scale':scale} 
+
+    infoPlotPointCloud={'cmap':cmap,
+          'alpha':alpha,
+          'vlim':vlim}
+    infoPlotField={'cmap': cmap,                    
+                    'vlim':vlim}
+    
+
+        
+ 
+    fig,ax=opyffigureandaxes(extent=setPlot['extentFrame'],Hfig=Hfig,unit=setPlot['unit'][0],num=namefig)
+    if setPlot['DisplayVis']==True and vis is not None:  
+        if ROIvis is not None:
+            vis=vis[ROIvis[1]:(ROIvis[3]+ROIvis[1]),ROIvis[0]:(ROIvis[2]+ROIvis[0])]
+        vis =CLAHEbrightness(vis,0)  
+        if len(np.shape(vis))==3:           
+            ax.imshow(cv2.cvtColor(vis, cv2.COLOR_BGR2RGB),extent=extentr,zorder=0) 
+        else:
+            ax.imshow(vis,extent=extentr,zorder=0,cmap=mpl.cm.gray) 
+ 
+    Field=setField(gridVx,gridVy,Ptype) 
+    
+    
+    
+    if setPlot['DisplayField']==True:
+        resx=np.absolute(grid_x[0,1]-grid_x[0,0])
+        resy=np.absolute(grid_y[1,0]-grid_y[0,0])
+        extent=[grid_x[0,0]-resx/2,grid_x[0,-1]+resx/2,grid_y[-1,0]-resy/2,grid_y[0,0]+resy/2]
+#        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
+        figp,ax,im=opyfField(Field,ax=ax,extent=extent,extentr=extentr,**infoPlotField)
+
+   
+        figp,cb=opyfColorBar(fig,im,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1] +')')
+
+    if setPlot['QuiverOnFieldColored']==True:
+        figp,ax,qv,sm=opyfQuiverFieldColored(grid_x,grid_y,gridVx,gridVy,ax=ax,res=res,normalize=normalize,**infoPlotQuiver)
+        figp,cb=opyfColorBar(fig,sm,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
+
+    if setPlot['QuiverOnField']==True:
+        figp,ax,qv=opyfQuiverField(grid_x,grid_y,gridVx,gridVy,ax=ax,res=res,normalize=normalize,**infoPlotQuiver)
+
+
+    if setPlot['DisplayPointsColored']==True and Xdata is not None and Vdata is not None:
+        figp,ax,sc=opyfPointCloudColoredScatter(Xdata,Vdata,ax=ax,s=10,cmapCS=cmap,**infoPlotPointCloud)
+        figp,cb=opyfColorBar(fig,sc,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
+        cb.set_alpha(0.8)
+        cb.draw_all()
+#
+    if setPlot['DisplayPoints']==True and Xdata is not None and Vdata is not None:
+        figp,ax=opyfPointCloudScatter(Xdata,Vdata,ax=ax,s=10,color='k',**infoPlotPointCloud)
+
+        
+ 
+    if setPlot['QuiverOnPoints']==True and Xdata is not None and Vdata is not None:
+       figp,ax,qv=opyfQuiverPointCloud(Xdata,Vdata,ax=ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
+
+    if setPlot['QuiverOnPointsColored']==True and Xdata is not None and Vdata is not None:
+       figp,ax,qv,sc=opyfQuiverPointCloudColored(Xdata,Vdata,ax=ax,nvec=nvec,normalize=normalize,**infoPlotQuiver)
+       figp,cb=opyfColorBar(fig,sc,label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1]+ ')')
+       cb.set_alpha(0.8)
+       cb.draw_all()
+
+    return fig,ax

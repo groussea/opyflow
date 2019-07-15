@@ -124,7 +124,6 @@ def opyfFlowGoodFlag(frame,prev_gray,feature_params,lk_params,**args):
     X=[]
     V=[]
     mask=args.get('mask',None)
-    csvTrack=args.get('csvTrack',None)
     vmin=args.get('vmin',-np.inf)
     if vmin==None:
         vmin=-np.inf
