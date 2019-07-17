@@ -99,14 +99,19 @@ class Analyzer():
         else:
             self.ROImeasure=[pixLeft,pixUp,pixRight-pixLeft,pixDown-pixUp]
         self.grid_y, self.grid_x,self.gridVx, self.gridVy,  self.Hgrid, self.Lgrid=MeshesAndTime.setGridToInterpolateOn(pixLeft,pixRight,stepHor,pixUp,pixDown,stepVert)
+        if self.scaled==True:         
+            self.grid_y, self.grid_x= -(self.grid_y-self.origin[1])*self.scale, (self.grid_x-self.origin[0])*self.scale  
         self.vecX=self.grid_x[0,:]
         self.vecY=self.grid_y[:,0]
+        self.XT=Interpolate.npGrid2TargetPoint2D(self.grid_x,self.grid_y)
         self.XT=Interpolate.npGrid2TargetPoint2D(self.grid_x,self.grid_y)
         self.paramPlot['vecX']=self.vecX
         self.paramPlot['vecY']=self.vecY
         self.opyfDisp=Render.opyfDisplayer(**self.paramPlot) 
         self.Ux,self.Uy=np.zeros((self.Hgrid,self.Lgrid)),np.zeros((self.Hgrid,self.Lgrid))
         self.gridMask=np.ones((self.Hgrid,self.Lgrid))
+
+            
         
     def set_imageParams(self,**args):        
         self.rangeOfPixels=args.get('rangeOfPixels',[0,255])
@@ -149,6 +154,9 @@ class Analyzer():
                     else:
                         print('--> measure diplacements between frame [' +file_prev +'] and [' +str(i) +']')             
             self.Time=self.vec[0:-1:2]    
+            #initilize self.vis with the first frame of the set
+            self.readFrame(self.vec[0])
+            
 
     def initializeAveragedFrameFromFile(self,file,imreadOption=1):
         frameav=cv2.imread(file,imreadOption)  
@@ -181,11 +189,7 @@ class Analyzer():
 #                frameav=frameav+frame
 #            frameav=frameav/incr    
 #            self.frameAv=frameav
-            
-    def runGFTandDisp(self,pr,i):
-        if pr==False:
-            self.prev_gray=None
-        #    frame=frame[:,:,1]
+    def readFrame(self,i):
         if self.processingMode=='image sequence':
             l=self.listD[i]
             self.vis=cv2.imread(self.folder_src+'/'+l,self.imreadOption) #2 for tiff images
@@ -193,6 +197,13 @@ class Analyzer():
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, i) 
             ret, self.vis = self.cap.read()
         self.vis=self.vis[self.ROI[1]:(self.ROI[3]+self.ROI[1]),self.ROI[0]:(self.ROI[2]+self.ROI[0])]
+        
+    def stepGoodFeaturesToTrackandOpticalFlow(self,pr,i):
+        if pr==False:
+            self.prev_gray=None
+            
+        self.readFrame(i)
+       
         gray=Tools.convertToGrayScale(self.vis)
         
         if self.rangeOfPixels!=[0,255] or self.frameAv is not None:
@@ -218,7 +229,7 @@ class Analyzer():
                                              DGF=self.filters_params['DGF'])   
 
         
-        if len(self.X)>0:
+        if pr==True:
             
 # filters ###### important since we have a low quality level for the Good Feature to track and a high Distance Good Flag
             if self.filters_params['minNperRadius']>0:
@@ -263,7 +274,7 @@ class Analyzer():
 
 
         for pr,i in zip(self.prev,self.vec):
-            self.runGFTandDisp(pr,i)
+            self.stepGoodFeaturesToTrackandOpticalFlow(pr,i)
             if len(self.X)>0:
 
                 self.Xdata.append(self.X)
@@ -286,7 +297,7 @@ class Analyzer():
     def  extractGoodFeaturesPositionsDisplacementsAndInterpolate(self,display=False,saveImgPath=None,Type='norme',imgFormat='png',**args):
         self.reset()
         for pr,i in zip(self.prev,self.vec):
-            self.runGFTandDisp(pr,i)
+            self.stepGoodFeaturesToTrackandOpticalFlow(pr,i)
             if len(self.X)>0:                
                 self.Xdata.append(self.X)
                 self.Vdata.append(self.V)
@@ -317,6 +328,7 @@ class Analyzer():
             print('datas already scaled')
         else:
             self.scaled=True
+            
             if origin is not None:
                 self.origin=origin
             else:
@@ -328,10 +340,10 @@ class Analyzer():
             
             self.Vdata=[V*self.scale*self.fps/self.paramVecTime['step'] for V in self.Vdata]
             self.Xdata=[(X-np.array(self.origin))*self.scale for X in self.Xdata]
-                    
+            self.Ux,self.Uy= self.Ux*self.scale*self.fps/self.paramVecTime['step'],self.Uy*self.scale*self.fps/self.paramVecTime['step']        
             self.vecX=(self.vecX-self.origin[0])*self.scale
             self.vecY=(self.vecY-self.origin[1])*self.scale
-            self.Ux,self.Uy= self.Ux*self.scale*self.fps/self.paramVecTime['step'],self.Uy*self.scale*self.fps/self.paramVecTime['step']
+            
             self.grid_y, self.grid_x= (self.grid_y-self.origin[1])*self.scale, (self.grid_x-self.origin[0])*self.scale
             self.invertYaxis()    
             self.XT=Interpolate.npGrid2TargetPoint2D(self.grid_x,self.grid_y)
@@ -347,7 +359,7 @@ class Analyzer():
                                  -(self.paramPlot['extentFrame'][2]-self.origin[1])*self.scale,
                                  -(self.paramPlot['extentFrame'][3]-self.origin[1])*self.scale,], 
                  'unit':unit,
-                 'vlim':[vlim*self.scale*self.fps for vlim in self.paramPlot['vlim']]}
+                 'vlim':[vlim*self.scale*self.fps/self.paramVecTime['step'] for vlim in self.paramPlot['vlim']]}
           
             self.opyfDisp=Render.opyfDisplayer(**self.paramPlot) 
 
@@ -442,7 +454,10 @@ class videoAnalyser(Analyzer):
         self.processingMode='video' 
         self.video_src=video_src                
         self.cap = cv2.VideoCapture(self.video_src)
-        self.ret, self.frameInit = self.cap.read()   
+        self.ret, self.frameInit = self.cap.read() 
+        if self.ret==False:
+            print('Error: the video file path might be wrong')
+            sys.exit()
         self.frameInit=Tools.convertToGrayScale(self.frameInit)
         self.number_of_frames=int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         Analyzer.__init__(self,**args)

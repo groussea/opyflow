@@ -161,8 +161,7 @@ class opyfDisplayer:
         if len(self.ax.images)>0:   
             del self.ax.images[:]
         if len(self.fig.axes)>1:
-            del self.fig.axes[1].collections[:]
-            del self.fig.axes[1].artists[:]
+            self.fig.axes[1].remove()
 
 
 #            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opfPlot')
@@ -206,8 +205,7 @@ class opyfDisplayer:
             extent=[self.grid_x[0,0]-resx,self.grid_x[0,-1]+resx,self.grid_y[-1,0]+resy/2,self.grid_y[0,0]-resy]
     #        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
             self.fig,self.ax,self.im=opyfField(Field,ax=self.ax,extent=extent,extentr=extentVis,**infoPlotField)
-    
-       
+
             self.fig,self.cb=opyfColorBar(self.fig,self.im,label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] +')')
     
         if self.paramDisp['QuiverOnFieldColored']==True:
@@ -697,7 +695,7 @@ def opyffigureandaxes(extent=[0,1,0,1],unit='px',Hfig=9,sizemax=17,**args):
     ax = plt.Axes(fig, axiswindow)
     fig.add_axes(ax)
     ax.set_ylabel('Y['+unit+']')
-#    plt.xlabel('X['+unit+']')  
+    ax.set_xlabel('X['+unit+']')  
     ax.axis('equal')    
     ax.set_xlim(extent[0],extent[1])
     ax.set_ylim(extent[2],extent[3])
