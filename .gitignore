@@ -5,5 +5,6 @@ $ cat .gitignore
 /opyf.egg-info
 /build
 /dist
+/opyf/__pycache__
 test/Test_land_slide_youtube_video/Val Parghera Zeitraffer Mai 2013 - Januar 2015.mp4
 

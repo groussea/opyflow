@@ -11,223 +11,211 @@ import numpy as np
 import time
 from vtk.util.numpy_support import vtk_to_numpy
 
+
 def opyfBuildLocatorandStuff2D(X):
     # Create points array which are positions to probe data with
     # FindClosestPoint(), We also create an array to hold the results of this
-    # probe operation and 
-    #This array is the same array since we want to find the closest neighbor 
-    #The strategy will be to find the 2 closest point since one of them will be the same point
-    #And we consider the second one, the farthest
-    npPoints=X
+    # probe operation and
+    # This array is the same array since we want to find the closest neighbor
+    # The strategy will be to find the 2 closest point since one of them will be the same point
+    # And we consider the second one, the farthest
+    npPoints = X
     points = vtk.vtkPoints()
     points.SetDataTypeToDouble()
     probePoints = vtk.vtkPoints()
     probePoints.SetDataTypeToDouble()
-    
-    for [x,y] in npPoints:  
-        points.InsertNextPoint(x,y,0.)
-        probePoints.InsertNextPoint(x,y,0.)
-    
+
+    for [x, y] in npPoints:
+        points.InsertNextPoint(x, y, 0.)
+        probePoints.InsertNextPoint(x, y, 0.)
+
     polydata = vtk.vtkPolyData()
     polydata.SetPoints(points)
     points.ComputeBounds()
-        
+
     staticLocator = vtk.vtkStaticPointLocator()
     staticLocator.SetDataSet(polydata)
     staticLocator.SetNumberOfPointsPerBucket(5)
     staticLocator.AutomaticOn()
-    
-    staticLocator.BuildLocator()
-    
-    
 
+    staticLocator.BuildLocator()
 
     return staticLocator, points, probePoints
+
 
 def opyfBuildLocatorandStuff3D(X):
 
-    npPoints=X
+    npPoints = X
     points = vtk.vtkPoints()
     points.SetDataTypeToDouble()
     probePoints = vtk.vtkPoints()
     probePoints.SetDataTypeToDouble()
-    
-    for [x,y,z] in npPoints:  
-        points.InsertNextPoint(x,y,z)
-        probePoints.InsertNextPoint(x,y,z)
-    
+
+    for [x, y, z] in npPoints:
+        points.InsertNextPoint(x, y, z)
+        probePoints.InsertNextPoint(x, y, z)
+
     polydata = vtk.vtkPolyData()
     polydata.SetPoints(points)
     points.ComputeBounds()
-        
+
     staticLocator = vtk.vtkStaticPointLocator()
     staticLocator.SetDataSet(polydata)
     staticLocator.SetNumberOfPointsPerBucket(5)
     staticLocator.AutomaticOn()
-    
-    staticLocator.BuildLocator()
-    
-    
 
+    staticLocator.BuildLocator()
 
     return staticLocator, points, probePoints
-        
-    
+
+
 def opyfFindClosestPointandDistance(X):
 
+    staticLocator, points, probePoints = opyfBuildLocatorandStuff2D(X)
 
-    staticLocator, points, probePoints=opyfBuildLocatorandStuff2D(X)
-    
-    staticClosestN = vtk.vtkIdList()   
-    ind=np.zeros(len(X),dtype=np.int)
-    D=np.zeros(len(X))
+    staticClosestN = vtk.vtkIdList()
+    ind = np.zeros(len(X), dtype=np.int)
+    D = np.zeros(len(X))
     math = vtk.vtkMath()
-    x = [0,0,0]
-    p = [0,0,0]
+    x = [0, 0, 0]
+    p = [0, 0, 0]
     staticClosestN = vtk.vtkIdList()
     for i in range(len(X)):
-        staticLocator.FindClosestNPoints(2, probePoints.GetPoint(i), staticClosestN)
-        ind[i]=staticClosestN.GetId(1)  #we then select the furthest point
-        points.GetPoint(ind[i],x)
-        points.GetPoint(i,p)
-        D[i]=math.Distance2BetweenPoints(x,p)**0.5
-        
+        staticLocator.FindClosestNPoints(
+            2, probePoints.GetPoint(i), staticClosestN)
+        ind[i] = staticClosestN.GetId(1)  # we then select the furthest point
+        points.GetPoint(ind[i], x)
+        points.GetPoint(i, p)
+        D[i] = math.Distance2BetweenPoints(x, p)**0.5
 
-    return ind,D
+    return ind, D
 
-    
+
 def opyfFindClosestPointandDistance3D(X):
 
+    staticLocator, points, probePoints = opyfBuildLocatorandStuff3D(X)
 
-    staticLocator, points, probePoints=opyfBuildLocatorandStuff3D(X)
-    
-    staticClosestN = vtk.vtkIdList()   
-    ind=np.zeros(len(X),dtype=np.int)
-    D=np.zeros(len(X))
+    staticClosestN = vtk.vtkIdList()
+    ind = np.zeros(len(X), dtype=np.int)
+    D = np.zeros(len(X))
     math = vtk.vtkMath()
-    x = [0,0,0]
-    p = [0,0,0]
+    x = [0, 0, 0]
+    p = [0, 0, 0]
     staticClosestN = vtk.vtkIdList()
     for i in range(len(X)):
-        staticLocator.FindClosestNPoints(2, probePoints.GetPoint(i), staticClosestN)
-        ind[i]=staticClosestN.GetId(1)  #we then select the furthest point
-        points.GetPoint(ind[i],x)
-        points.GetPoint(i,p)
-        D[i]=math.Distance2BetweenPoints(x,p)**0.5
-        
+        staticLocator.FindClosestNPoints(
+            2, probePoints.GetPoint(i), staticClosestN)
+        ind[i] = staticClosestN.GetId(1)  # we then select the furthest point
+        points.GetPoint(ind[i], x)
+        points.GetPoint(i, p)
+        D[i] = math.Distance2BetweenPoints(x, p)**0.5
 
-    return ind,D
-
-
+    return ind, D
 
 
-
-
-
-#Exclude isolated points the strategy will be to exclude point at a distance bigger
+# Exclude isolated points the strategy will be to exclude point at a distance bigger
 #    than D=50
 
-#Creation of a function which delete the vector lines if Crit>climmax or Crit<climmin.
+# Creation of a function which delete the vector lines if Crit>climmax or Crit<climmin.
 # Crit is an array of criterion
-def opyfDeletePointCriterion(Vect,Crit,climmin=-np.inf,climmax=np.inf):
-    booln=(Crit<climmin) | (Crit>climmax)
-    indDel=np.where(booln)
-    
-    newVect=np.delete(Vect,indDel,0)
-    
+def opyfDeletePointCriterion(Vect, Crit, climmin=-np.inf, climmax=np.inf):
+    booln = (Crit < climmin) | (Crit > climmax)
+    indDel = np.where(booln)
+
+    newVect = np.delete(Vect, indDel, 0)
+
     return newVect
 
-#Exclude outliers, exclude outliers that present statistically a big difference with neighbors
-def opyfFindPointsWithinRadiusandDeviation(X,Value,R):
+# Exclude outliers, exclude outliers that present statistically a big difference with neighbors
 
-    staticLocator, points, probePoints=opyfBuildLocatorandStuff2D(X)
-       
 
-    Dev=np.zeros(len(X))
-    Npoints=np.zeros(len(X),dtype=int)
+def opyfFindPointsWithinRadiusandDeviation(X, Value, R):
+
+    staticLocator, points, probePoints = opyfBuildLocatorandStuff2D(X)
+
+    Dev = np.zeros(len(X))
+    Npoints = np.zeros(len(X), dtype=int)
     PointswhithinRadius = vtk.vtkIdList()
-    stD=np.zeros(len(X))
+    stD = np.zeros(len(X))
     print('Find Point with in Radius processing [may take a while if X large]')
     for i in range(len(X)):
-        
-        if (i)%(np.round(len(X)/10.))==0:
+
+        if (i) % (np.round(len(X)/10.)) == 0:
             print('Processing ---- '+str((i)*100/len(X)+1)+'%')
             time.sleep(0.001)
-        staticLocator.FindPointsWithinRadius(R, probePoints.GetPoint(i), PointswhithinRadius)
-        tempind=[]
-        Npoints[i]=PointswhithinRadius.GetNumberOfIds()
+        staticLocator.FindPointsWithinRadius(
+            R, probePoints.GetPoint(i), PointswhithinRadius)
+        tempind = []
+        Npoints[i] = PointswhithinRadius.GetNumberOfIds()
         for j in range(PointswhithinRadius.GetNumberOfIds()):
             tempind.append(PointswhithinRadius.GetId(j))
-        stD[i]=np.std(Value[tempind])
-        if np.mean(Value[tempind])==Value[i]:
-            Dev[i]=0
+        stD[i] = np.std(Value[tempind])
+        if np.mean(Value[tempind]) == Value[i]:
+            Dev[i] = 0
         else:
-            Dev[i]=np.abs(Value[i]-np.mean(Value[tempind]))/stD[i]
-        
+            Dev[i] = np.abs(Value[i]-np.mean(Value[tempind]))/stD[i]
 
-    return Dev,Npoints,stD
+    return Dev, Npoints, stD
 
 
-def opyfFindPointsWithinRadiusandDeviation3D(X,Value,R):
+def opyfFindPointsWithinRadiusandDeviation3D(X, Value, R):
 
-    staticLocator, points, probePoints=opyfBuildLocatorandStuff3D(X)
-       
+    staticLocator, points, probePoints = opyfBuildLocatorandStuff3D(X)
 
-    Dev=np.zeros(len(X))
-    Npoints=np.zeros(len(X),dtype=int)
+    Dev = np.zeros(len(X))
+    Npoints = np.zeros(len(X), dtype=int)
     PointswhithinRadius = vtk.vtkIdList()
-    stD=np.zeros(len(X))
+    stD = np.zeros(len(X))
     print('Find Point with in Radius processing (may take a while if X large)')
     for i in range(len(X)):
-        
-        if (i)%(np.round(len(X)/10.))==0:
+
+        if (i) % (np.round(len(X)/10.)) == 0:
             print('Processing ---- '+str((i)*100/len(X)+1)+'%')
             time.sleep(0.001)
-        staticLocator.FindPointsWithinRadius(R, probePoints.GetPoint(i), PointswhithinRadius)
-        tempind=[]
-        Npoints[i]=PointswhithinRadius.GetNumberOfIds()
+        staticLocator.FindPointsWithinRadius(
+            R, probePoints.GetPoint(i), PointswhithinRadius)
+        tempind = []
+        Npoints[i] = PointswhithinRadius.GetNumberOfIds()
         for j in range(PointswhithinRadius.GetNumberOfIds()):
             tempind.append(PointswhithinRadius.GetId(j))
-        stD[i]=np.std(Value[tempind])
-        if np.mean(Value[tempind])==Value[i]:
-            Dev[i]=0
+        stD[i] = np.std(Value[tempind])
+        if np.mean(Value[tempind]) == Value[i]:
+            Dev[i] = 0
         else:
-            Dev[i]=np.abs(Value[i]-np.mean(Value[tempind]))/stD[i]
-        
+            Dev[i] = np.abs(Value[i]-np.mean(Value[tempind]))/stD[i]
 
-    return Dev,Npoints,stD
-
+    return Dev, Npoints, stD
 
 
-#%%
-def opyfFindBlobs3D(scalars,th1,th2=None,R=1.,minArea=None,CenterType='barycenter'):
+# %%
+def opyfFindBlobs3D(scalars, th1, th2=None, R=1., minArea=None, CenterType='barycenter'):
     if th2 is None:
-        th2=np.max(scalars)
+        th2 = np.max(scalars)
 
-    [h, w, p]=scalars.shape
+    [h, w, p] = scalars.shape
     scalars = scalars.T.copy()
-    scalars=scalars.ravel()
+    scalars = scalars.ravel()
 #    (scalars>=th1)*(scalars<=th2)
 #    indth=np.where((scalars>=th1)*(scalars<=th2))
-    #Points XYZ
-    x, y, z = np.mgrid[0:h, 0:w,0:p]
+    # Points XYZ
+    x, y, z = np.mgrid[0:h, 0:w, 0:p]
     pts = np.empty(z.shape + (3,), dtype=float)
     pts[..., 0] = x
     pts[..., 1] = y
     pts[..., 2] = z
     pts = pts.transpose(2, 1, 0, 3).copy()
     pts.shape = pts.size / 3, 3
-    
-    #VTK
+
+    # VTK
     points = vtk.vtkPoints()
-    points.SetDataTypeToDouble()    
-    
-    for [x,y,z] in pts:  
-        points.InsertNextPoint(x,y,z)
-        
+    points.SetDataTypeToDouble()
+
+    for [x, y, z] in pts:
+        points.InsertNextPoint(x, y, z)
+
     Scalarsvtk = vtk.vtkFloatArray()
-    
-    for s in scalars:  
+
+    for s in scalars:
         Scalarsvtk.InsertNextValue(s)
     Ids = vtk.vtkIdList()
 
@@ -235,176 +223,170 @@ def opyfFindBlobs3D(scalars,th1,th2=None,R=1.,minArea=None,CenterType='barycente
 #    polydata=vtk.vtkUnstructuredGrid()
     polydata.SetPoints(points)
     polydata.GetPointData().SetScalars(Scalarsvtk)
-    
-    
+
     ThresholdIn = vtk.vtkThresholdPoints()
     ThresholdIn.SetInputData(polydata)
-    #ThresholdIn.ThresholdByLower(230.)
-    ThresholdIn.ThresholdBetween(th1,th2)
-    
+    # ThresholdIn.ThresholdByLower(230.)
+    ThresholdIn.ThresholdBetween(th1, th2)
+
     ThresholdIn.Update()
-    
-    PointsThresh=ThresholdIn.GetOutput().GetPoints()
+
+    PointsThresh = ThresholdIn.GetOutput().GetPoints()
 
     staticLocator = vtk.vtkStaticPointLocator()
     staticLocator.SetDataSet(ThresholdIn.GetOutput())
     staticLocator.SetNumberOfPointsPerBucket(5)
     staticLocator.AutomaticOn()
-    
+
     staticLocator.BuildLocator()
-    
 
-      
+    S = ThresholdIn.GetOutput().GetPointData().GetArray(0)
+    nppointsArr = vtk_to_numpy(S)
 
-    S=ThresholdIn.GetOutput().GetPointData().GetArray(0)
-    nppointsArr=vtk_to_numpy(S) 
-        
-    idspointsThresh=np.arange(0,PointsThresh.GetNumberOfPoints())
-    entitiy=0
-    i=idspointsThresh[0]
-    idsStored=np.array([])
-    ids1=[0]    
- 
-    C=1
-    blob3D=[]
-    indstore=0
+    idspointsThresh = np.arange(0, PointsThresh.GetNumberOfPoints())
+    entitiy = 0
+    i = idspointsThresh[0]
+    idsStored = np.array([])
+    ids1 = [0]
 
-    while len(idspointsThresh)>0:
-        C=1
-        while C==1:
-            ids2=[]
-            l=len(idsStored)
+    C = 1
+    blob3D = []
+    indstore = 0
+
+    while len(idspointsThresh) > 0:
+        C = 1
+        while C == 1:
+            ids2 = []
+            l = len(idsStored)
             for i in ids1:
                 PointswhithinRadius = vtk.vtkIdList()
-                staticLocator.FindPointsWithinRadius(R, PointsThresh.GetPoint(i), PointswhithinRadius)
-            
+                staticLocator.FindPointsWithinRadius(
+                    R, PointsThresh.GetPoint(i), PointswhithinRadius)
+
                 for j in range(PointswhithinRadius.GetNumberOfIds()):
-                    tempid=PointswhithinRadius.GetId(j)
-                    if len(np.where(idsStored==tempid)[0])==0:
-                        idsStored=np.append(idsStored,np.int(tempid))
-                        ids2.append(tempid) 
-                        indDel=np.where(idspointsThresh==tempid)
-                        idspointsThresh=np.delete(idspointsThresh,indDel,0)
-        
-                                    
-            if len(idsStored)==l:
-                C=0
+                    tempid = PointswhithinRadius.GetId(j)
+                    if len(np.where(idsStored == tempid)[0]) == 0:
+                        idsStored = np.append(idsStored, np.int(tempid))
+                        ids2.append(tempid)
+                        indDel = np.where(idspointsThresh == tempid)
+                        idspointsThresh = np.delete(idspointsThresh, indDel, 0)
+
+            if len(idsStored) == l:
+                C = 0
                 blob3D.append(idsStored[indstore:].astype(int))
-                indstore=len(idsStored)
-                entitiy+=1
-                if len(idspointsThresh)>0:
-                    ids1=[idspointsThresh[0]]
+                indstore = len(idsStored)
+                entitiy += 1
+                if len(idspointsThresh) > 0:
+                    ids1 = [idspointsThresh[0]]
             else:
-                ids1=ids2
+                ids1 = ids2
 
+    C = np.zeros((len(blob3D), 3))
 
-    C=np.zeros((len(blob3D),3))
+    AreaBlob = []
+    X = vtk_to_numpy(PointsThresh.GetData())
+    blob3Dout = []
+    for i in range(len(blob3D)):
+        ind = blob3D[i]
 
-    AreaBlob=[]
-    X=vtk_to_numpy(PointsThresh.GetData()) 
-    blob3Dout=[]
-    for i in range(len(blob3D)):      
-        ind=blob3D[i]           
-
-        Xblob=X[ind]
+        Xblob = X[ind]
         blob3Dout.append(Xblob)
-        pxInts=nppointsArr[ind]
-        if CenterType=='barycenter':
-            C[i,:]=np.sum(Xblob*np.array([pxInts,pxInts,pxInts]).T,axis=0)/(np.sum(pxInts))
-        elif CenterType=='geometric':
-            C[i,:]=np.sum(Xblob,axis=0)/(np.float(len(pxInts)))
+        pxInts = nppointsArr[ind]
+        if CenterType == 'barycenter':
+            C[i, :] = np.sum(
+                Xblob*np.array([pxInts, pxInts, pxInts]).T, axis=0)/(np.sum(pxInts))
+        elif CenterType == 'geometric':
+            C[i, :] = np.sum(Xblob, axis=0)/(np.float(len(pxInts)))
         AreaBlob.append(len(Xblob))
-    AreaBlob=np.array(AreaBlob)
-    blob3Dout=np.array(blob3Dout)
+    AreaBlob = np.array(AreaBlob)
+    blob3Dout = np.array(blob3Dout)
     if minArea is not None:
-        C=C[np.where(AreaBlob>minArea)]
-        blob3Dout=blob3Dout[np.where(AreaBlob>minArea)]
-        AreaBlob=AreaBlob[np.where(AreaBlob>minArea)]
-        
-    return blob3Dout,C,AreaBlob
+        C = C[np.where(AreaBlob > minArea)]
+        blob3Dout = blob3Dout[np.where(AreaBlob > minArea)]
+        AreaBlob = AreaBlob[np.where(AreaBlob > minArea)]
+
+    return blob3Dout, C, AreaBlob
 
 
+def opyfFindBlobs3D_structured(scalars, th1, th2=None, R=1., minArea=None, CenterType='barycenter'):
 
-def opyfFindBlobs3D_structured(scalars,th1,th2=None,R=1.,minArea=None,CenterType='barycenter'):
-
-#Usually slower than unstructured above with vtk tools
+    # Usually slower than unstructured above with vtk tools
     if th2 is None:
-        th2=np.max(scalars)
+        th2 = np.max(scalars)
 
-    [h, w, p]=scalars.shape
+    [h, w, p] = scalars.shape
 #    (scalars>=th1)*(scalars<=th2)
 #    indth=np.where((scalars>=th1)*(scalars<=th2))
-    #Points XYZ
-    x, y, z = np.mgrid[0:h, 0:w,0:p]
-    
-    indth=np.array(np.where((scalars>th1)*(scalars<th2)))
+    # Points XYZ
+    x, y, z = np.mgrid[0:h, 0:w, 0:p]
 
-   
-    #VTK
+    indth = np.array(np.where((scalars > th1)*(scalars < th2)))
 
+    # VTK
 
-    binarry=np.array(np.where((scalars>th1)*(scalars<th2),1,0),dtype='?')
-    entitiy=0
-    i=indth[:,0] 
-    idsStored=[tuple(i)]
-    binarry[idsStored[0]]=False
-    ids1=[indth[:,0]]  
-    C=1
-    blob3D=[]
-    indstore=0
-    kernel=[(-1,0,0),(1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1)]
-    incr=0
-    while len(indth)>0:
-        C=1
-        while C==1:
-            ids2=[]
-            l=len(idsStored)
-            for i in ids1:              
-                for ii in range(0,6):
-                    indtemp=tuple(i+kernel[ii])
-                    if 0<=indtemp[0]<h and 0<=indtemp[1]<w and 0<=indtemp[2]<p:
-                        v=binarry[indtemp]
-                        if v==True :
+    binarry = np.array(
+        np.where((scalars > th1)*(scalars < th2), 1, 0), dtype='?')
+    entitiy = 0
+    i = indth[:, 0]
+    idsStored = [tuple(i)]
+    binarry[idsStored[0]] = False
+    ids1 = [indth[:, 0]]
+    C = 1
+    blob3D = []
+    indstore = 0
+    kernel = [(-1, 0, 0), (1, 0, 0), (0, 1, 0),
+              (0, -1, 0), (0, 0, 1), (0, 0, -1)]
+    incr = 0
+    while len(indth) > 0:
+        C = 1
+        while C == 1:
+            ids2 = []
+            l = len(idsStored)
+            for i in ids1:
+                for ii in range(0, 6):
+                    indtemp = tuple(i+kernel[ii])
+                    if 0 <= indtemp[0] < h and 0 <= indtemp[1] < w and 0 <= indtemp[2] < p:
+                        v = binarry[indtemp]
+                        if v == True:
                             idsStored.append(tuple(i+kernel[ii]))
                             ids2.append(indtemp)
-                            binarry[indtemp]=False
-            indth=np.array(np.where(binarry==True))
-        
-                                    
-            if len(idsStored)==l:
-                C=0
+                            binarry[indtemp] = False
+            indth = np.array(np.where(binarry == True))
+
+            if len(idsStored) == l:
+                C = 0
                 blob3D.append(idsStored)
-                entitiy+=1
-                if len(indth[0])>0:
-                    ids1=[indth[:,0]]
-                    idsStored=[tuple(ids1[0])]
-                    binarry[idsStored[0]]=False
+                entitiy += 1
+                if len(indth[0]) > 0:
+                    ids1 = [indth[:, 0]]
+                    idsStored = [tuple(ids1[0])]
+                    binarry[idsStored[0]] = False
             else:
-                ids1=np.array(ids2)
-            incr+=1
+                ids1 = np.array(ids2)
+            incr += 1
 
+    C = np.zeros((len(blob3D), 3))
 
-    C=np.zeros((len(blob3D),3))
+    AreaBlob = []
+    X = vtk_to_numpy(PointsThresh.GetData())
+    blob3Dout = []
+    for i in range(len(blob3D)):
+        ind = blob3D[i]
 
-    AreaBlob=[]
-    X=vtk_to_numpy(PointsThresh.GetData()) 
-    blob3Dout=[]
-    for i in range(len(blob3D)):      
-        ind=blob3D[i]           
-
-        Xblob=X[ind]
+        Xblob = X[ind]
         blob3Dout.append(Xblob)
-        pxInts=nppointsArr[ind]
-        if CenterType=='barycenter':
-            C[i,:]=np.sum(Xblob*np.array([pxInts,pxInts,pxInts]).T,axis=0)/(np.sum(pxInts))
-        elif CenterType=='geometric':
-            C[i,:]=np.sum(Xblob,axis=0)/(np.float(len(pxInts)))
+        pxInts = nppointsArr[ind]
+        if CenterType == 'barycenter':
+            C[i, :] = np.sum(
+                Xblob*np.array([pxInts, pxInts, pxInts]).T, axis=0)/(np.sum(pxInts))
+        elif CenterType == 'geometric':
+            C[i, :] = np.sum(Xblob, axis=0)/(np.float(len(pxInts)))
         AreaBlob.append(len(Xblob))
-    AreaBlob=np.array(AreaBlob)
-    blob3Dout=np.array(blob3Dout)
+    AreaBlob = np.array(AreaBlob)
+    blob3Dout = np.array(blob3Dout)
     if minArea is not None:
-        C=C[np.where(AreaBlob>minArea)]
-        blob3Dout=blob3Dout[np.where(AreaBlob>minArea)]
-        AreaBlob=AreaBlob[np.where(AreaBlob>minArea)]
-        
-    return blob3Dout,C,AreaBlob
+        C = C[np.where(AreaBlob > minArea)]
+        blob3Dout = blob3Dout[np.where(AreaBlob > minArea)]
+        AreaBlob = AreaBlob[np.where(AreaBlob > minArea)]
+
+    return blob3Dout, C, AreaBlob
