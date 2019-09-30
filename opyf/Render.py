@@ -140,7 +140,6 @@ class opyfDisplayer:
 
 #            print('vecX and vecY have not been specified')
         plt.ioff()
-
         self.fig, self.ax = opyffigureandaxes(
             extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num='opyfPlot')
 #        self.setExtent(self.paramPlot['extentFrame'])

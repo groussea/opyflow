@@ -3,27 +3,8 @@
 """
 Created on Thu May 10 15:46:23 2018
 
-@author: gauthier
+@author: Gauthier Rousseau
 """
-
-#from distutils.core import setup
-
-
-
-#def readme(fname):
-#    with open(fname, 'r') as f:
-#        return f.read()
-#
-#setup(
-#    name = 'opyf',
-#    version = '0.1',
-#    description = 'Calculate optical flow on videos and image sequences',
-#    long_description = readme('ReadMe.txt'),
-#    author = 'Gauthier ROUSSEAU',
-#    author_email = 'gauthier.rousseau@gmail.com',
-#    url = 'https://github.com/groussea/opyflow',
-#    packages = ['opyf'],
-#)
 
 # Always prefer setuptools over distutils
 from setuptools import setup, find_packages
@@ -74,7 +55,7 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        
+
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.3',
         'Programming Language :: Python :: 3.4',
@@ -91,5 +72,6 @@ setup(
 
     # List run-time dependencies here.  These will be installed by pip when
     # your project is installed.
-    install_requires=['ipython','vtk','opencv-python','tqdm','h5py','matplotlib','scipy','pytube']
+    install_requires=['ipython', 'vtk', 'opencv-python',
+                      'tqdm', 'h5py', 'matplotlib', 'scipy', 'pytube']
 )

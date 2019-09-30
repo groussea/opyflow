@@ -3,7 +3,7 @@
 """
 Created on Wed Jul 10 08:59:41 2019
 
-@author: gauthier ROUSSEAU
+@author: Gauthier ROUSSEAU
 """
 
 import os
@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 
 class Analyzer():
     def __init__(self, **args):
+        plt.ioff()
         self.scaled = False
         self.ROI = args.get(
             'imageROI', [0, 0, self.frameInit.shape[1], self.frameInit.shape[0]])
@@ -24,11 +25,10 @@ class Analyzer():
         self.Hvis, self.Lvis = self.cropFrameInit.shape
         self.mask = np.ones(self.cropFrameInit.shape)
         self.frameAv = np.zeros(self.cropFrameInit.shape)
-
-        self.set_goodFeaturesToTrackParams(**args)
-        self.set_opticalFlowParams(**args)
-        self.set_filtersParams(**args)
-        self.set_interpolationParams(**args)
+        self.set_goodFeaturesToTrackParams()
+        self.set_opticalFlowParams()
+        self.set_filtersParams()
+        self.set_interpolationParams()
         self.vlimPx = args.get('vlim', [-np.inf, np.inf])
 
         self.reset()
@@ -48,37 +48,54 @@ class Analyzer():
                           'num': args.get('num', 'opyfPlot'),
                           'grid': args.get('grid', True),
                           'vlim': args.get('vlim', [0, 40])}
-        self.setGridToInterpolateOn(0, self.Lvis, 4, 0, self.Hvis, 4)
+        self.set_gridToInterpolateOn(0, self.Lvis, 4, 0, self.Hvis, 4)
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
 
-        self.setVecTime(**args)
+        self.set_vecTime()
         print('number of frames : ' + str(self.number_of_frames))
+        # plt.ion()
 
-    def set_goodFeaturesToTrackParams(self, **args):
+    def set_goodFeaturesToTrackParams(self, maxCorners=40000, qualityLevel=0.005,
+                                      minDistance=5, blockSize=16):
 
-        self.feature_params = dict(maxCorners=args.get('maxCorners', 40000),
-                                   qualityLevel=args.get(
-                                       'qualityLevel', 0.005),
-                                   minDistance=args.get('minDistance', 5),
-                                   blockSize=args.get('blockSize', 16))
+        self.feature_params = dict(maxCorners=maxCorners,
+                                   qualityLevel=qualityLevel,
+                                   minDistance=minDistance,
+                                   blockSize=blockSize)
+        print('')
+        print('Good Features To Track Parameters:')
+        for x in self.feature_params:
+            print('\t- ', x, ':', self.feature_params[x])
 
-    def set_opticalFlowParams(self, **args):
+    def set_opticalFlowParams(self, winSize=(16, 16), maxLevel=3, criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 50, 0.03)):
 
-        self.lk_params = dict(winSize=args.get('winSize', (16, 16)),
-                              maxLevel=args.get('maxLevel', 3),
-                              criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 50, 0.03))
+        self.lk_params = dict(winSize=winSize,
+                              maxLevel=maxLevel,
+                              criteria=criteria)
+        print('')
+        print('Optical Flow Parameters:')
+        for x in self.lk_params:
+            print('\t- ', x, ':', self.lk_params[x])
 
-    def set_filtersParams(self, **args):
-        self.filters_params = dict(RadiusF=args.get('RadiusF', 30),
-                                   minNperRadius=args.get('minNperRadius', 0),
-                                   maxDevinRadius=args.get(
-                                       'maxDevinRadius', np.inf),
-                                   DGF=args.get('wayBackGoodFlag', np.inf))
+    def set_filtersParams(self, RadiusF=30, minNperRadius=0, maxDevInRadius=np.inf, wayBackGoodFlag=np.inf):
+        self.filters_params = dict(RadiusF=RadiusF,
+                                   minNperRadius=minNperRadius,
+                                   maxDevInRadius=maxDevInRadius,
+                                   DGF=wayBackGoodFlag)
 
-    def set_interpolationParams(self, **args):
-        self.interp_params = dict(Radius=args.get('Radius', 30),  # it is not necessary to perform unterpolation on a high radius since we have a high number of values
-                                  Sharpness=args.get(' Sharpness', 8),
-                                  kernel=args.get(' kernel', 'Gaussian'))
+        print('')
+        print('Filters Params:')
+        for x in self.filters_params:
+            print('\t- ', x, ':', self.filters_params[x])
+
+    def set_interpolationParams(self, Radius=30, Sharpness=8, kernel='Gaussian'):
+        self.interp_params = dict(Radius=Radius,  # it is not necessary to perform unterpolation on a high radius since we have a high number of values
+                                  Sharpness=Sharpness,
+                                  kernel=kernel)
+        print('')
+        print('Interpolation Parameters:')
+        for x in self.interp_params:
+            print('\t- ', x, ':', self.interp_params[x])
 
     def set_vlim(self, vlim):
         if self.scaled == False:
@@ -89,8 +106,11 @@ class Analyzer():
 
         self.paramPlot['vlim'] = vlim
         self.opyfDisp = Render.opyfDisplayer(**self.paramPlot)
+        print('Velocity limits: ', vlim[0])
+        print('\t minimum norm velocity: ', vlim[0])
+        print('\t maximum norm velocity: ', vlim[1])
 
-    def setGridToInterpolateOn(self, pixLeft=0, pixRight=0, stepHor=2, pixUp=0, pixDown=0, stepVert=2, ROI=None, stepGrid=None):
+    def set_gridToInterpolateOn(self, pixLeft=0, pixRight=0, stepHor=2, pixUp=0, pixDown=0, stepVert=2, ROI=None, stepGrid=None):
         if pixRight == 0:
             pixRight = self.Lvis
         if pixDown == 0:
@@ -103,7 +123,7 @@ class Analyzer():
                 ROI[2], ROI[1],  ROI[1]+ROI[3]
         else:
             self.ROImeasure = [pixLeft, pixUp, pixRight-pixLeft, pixDown-pixUp]
-        self.grid_y, self.grid_x, self.gridVx, self.gridVy,  self.Hgrid, self.Lgrid = MeshesAndTime.setGridToInterpolateOn(
+        self.grid_y, self.grid_x, self.gridVx, self.gridVy,  self.Hgrid, self.Lgrid = MeshesAndTime.set_gridToInterpolateOn(
             pixLeft, pixRight, stepHor, pixUp, pixDown, stepVert)
         if self.scaled == True:
             self.grid_y, self.grid_x = - \
@@ -122,27 +142,27 @@ class Analyzer():
 
     def set_imageParams(self, **args):
         self.rangeOfPixels = args.get('rangeOfPixels', [0, 255])
-        self.imreadOption = args.get('imreadOption', 0)
+        self.imreadOption = args.get('imreadOption', 1)
         if self.imreadOption == 'ANYDEPTH':
             self.imreadOption = 2
 
-    def setVecTime(self, **args):
-        self.paramVecTime = {'starting_frame': args.get('starting_frame', 0),
-                             'step': args.get('step', 1),
-                             'shift': args.get('shift', 1),
-                             'Ntot': args.get('Ntot', 1)}
+    def set_vecTime(self, starting_frame=0, step=1, shift=1, Ntot=1):
+        self.paramVecTime = {'starting_frame': starting_frame,
+                             'step': step,
+                             'shift': shift,
+                             'Ntot':  Ntot}
 
-        self.vec, self.prev = MeshesAndTime.setVecTime(framedeb=self.paramVecTime['starting_frame'],
-                                                       step=self.paramVecTime['step'],
-                                                       shift=self.paramVecTime['shift'],
-                                                       Ntot=self.paramVecTime['Ntot'])
+        self.vec, self.prev = MeshesAndTime.set_vecTime(framedeb=self.paramVecTime['starting_frame'],
+                                                        step=self.paramVecTime['step'],
+                                                        shift=self.paramVecTime['shift'],
+                                                        Ntot=self.paramVecTime['Ntot'])
         if self.vec[-1] > self.number_of_frames:
             print('----- Error ----')
             print('Your processing plan is not compatible with the frame set')
             print(
                 'Consider that [starting_frame+step+(Ntot-1)*shift]  must be smaller than the number of frames')
             sys.exit()
-        print('[The following image processing plan has been set]')
+        print('\n[The following image processing plan has been set]')
         if self.processingMode == 'image sequence':
             for pr, i in zip(self.prev, self.vec):
                 if pr == False:
@@ -208,6 +228,37 @@ class Analyzer():
         self.vis = self.vis[self.ROI[1]:(
             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
 
+    # TODO  def stepDeepFlow(self, pr, i):
+        # self.readFrame(i)
+        # from deepmatching import deepmatching
+        # from deepflow2 import deepflow2
+        # if pr == False:
+        #     self.prev_col = None
+        # else:
+        #     self.matches = deepmatching(self.prev_col, self.vis)
+        #     self.flow = deepflow2(self.prev_col, self.vis,
+        #                           self.matches, '-sintel')
+        # self.prev_col = np.copy(self.vis)
+
+    # def extractDeepFlow(self, display=False, saveImgPath=None, Type='norme', imgFormat='png', **args):
+    #     self.reset()
+    #     for pr, i in zip(self.prev, self.vec):
+    #         self.stepDeepFlow(pr, i)
+    #         if pr == True:
+    #             self.Ux = self.flow[:, :, 0]
+    #             self.Uy = self.flow[:, :, 1]
+    #             self.UxTot.append(self.flow[:, :, 0])
+    #             self.UyTot.append(self.flow[:, :, 1])
+    #             Field = Render.setField(self.Ux, self.Uy, Type)
+
+    #             if display == 'field':
+    #                 self.opyfDisp.plotField(Field, vis=self.vis, **args)
+    #                 if saveImgPath is not None:
+    #                     self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
+    #                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+    #                 plt.show()
+    #                 plt.pause(0.02)
+
     def stepGoodFeaturesToTrackandOpticalFlow(self, pr, i):
         if pr == False:
             self.prev_gray = None
@@ -224,11 +275,12 @@ class Analyzer():
             gray[np.where(gray > 255)] = 255
             gray = np.array(gray, dtype='uint8')
 
-        current_gray = Render.CLAHEbrightness(
-            gray, 0, tileGridSize=(20, 20), clipLimit=2)
+        # TODO optional CLAHE
+        #  current_gray = Render.CLAHEbrightness(
+        #     gray, 0, tileGridSize=(20, 20), clipLimit=2)
 #        self.vis=Render.CLAHEbrightness(self.vis,0,tileGridSize=(20,20),clipLimit=2)
 
-        self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(current_gray,
+        self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(gray,
                                                                 self.prev_gray,
                                                                 self.feature_params,
                                                                 self.lk_params,
@@ -248,19 +300,19 @@ class Analyzer():
                     self.X, Npoints, climmin=self.filters_params['minNperRadius'])
                 self.V = Filters.opyfDeletePointCriterion(
                     self.V, Npoints, climmin=self.filters_params['minNperRadius'])
-            if self.filters_params['maxDevinRadius'] != np.inf:
+            if self.filters_params['maxDevInRadius'] != np.inf:
                 Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
                     self.X, self.V[:, 1], self.filters_params['RadiusF'])
                 self.X = Filters.opyfDeletePointCriterion(
-                    self.X, Dev, climmax=self.filters_params['maxDevinRadius'])
+                    self.X, Dev, climmax=self.filters_params['maxDevInRadius'])
                 self.V = Filters.opyfDeletePointCriterion(
-                    self.V, Dev, climmax=self.filters_params['maxDevinRadius'])
+                    self.V, Dev, climmax=self.filters_params['maxDevInRadius'])
                 Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
                     self.X, self.V[:, 0], self.filters_params['RadiusF'])
                 self.X = Filters.opyfDeletePointCriterion(
-                    self.X, Dev, climmax=self.filters_params['maxDevinRadius'])
+                    self.X, Dev, climmax=self.filters_params['maxDevInRadius'])
                 self.V = Filters.opyfDeletePointCriterion(
-                    self.V, Dev, climmax=self.filters_params['maxDevinRadius'])
+                    self.V, Dev, climmax=self.filters_params['maxDevInRadius'])
 
             if self.scaled == True:
                 self.X = (self.X-np.array(self.origin))*self.scale
@@ -304,7 +356,8 @@ class Analyzer():
                 if saveImgPath is not None:
                     self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
-                plt.pause(0.01)
+                self.opyfDisp.fig.show()
+                plt.pause(0.02)
 
     def interpolateOnGrid(self, mode='sequence'):
 
@@ -335,7 +388,8 @@ class Analyzer():
                     if saveImgPath is not None:
                         self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
                             i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
-                    plt.pause(0.01)
+                    self.opyfDisp.fig.show()
+                    plt.pause(0.02)
 
     def showXV(self, X, V, vis=None, display='quiver', displayColor=False, **args):
         if display == 'quiver':
@@ -412,8 +466,10 @@ class Analyzer():
                 outFolder+'/'+filename+'.'+fileFormat, self.Time, self.Xdata, self.Vdata)
         elif fileFormat == 'csv':
             if fileSequence == False:
-                Files.csv_WriteUnstructured2DTimeserie(
-                    outFolder+'/'+filename+'.'+fileFormat, self.Time, self.Xdata, self.Vdata)
+                time = np.array(
+                    [self.Time, self.Time+self.paramVecTime['step']]).T
+                Files.csv_WriteUnstructured2DTimeserie2(
+                    outFolder+'/'+filename+'.'+fileFormat, time, self.Xdata, self.Vdata)
             elif fileSequence == True:
                 Files.mkdir2(outFolder+'/'+filename)
                 for x, v, t in zip(self.Xdata, self.Vdata, self.Time):

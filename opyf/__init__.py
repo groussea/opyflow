@@ -2,7 +2,7 @@
 """
 Created on Fri May  4 15:10:06 2018
 
-@author: EPFL-LHE
+@author: Gauthier Rousseau
 """
 
 #__all__== ["Filters", "custom_cmap", "Files","Filters","Interpolate","Render","Track"]

@@ -126,6 +126,18 @@ def csv_WriteUnstructured2DTimeserie(csvTrackfile, Time, X, V):
     f.close()
 
 
+def csv_WriteUnstructured2DTimeserie2(csvTrackfile, Time, X, V):
+    f = open(csvTrackfile, 'w')
+    writer = csv.DictWriter(
+        f, fieldnames=['Time_A', 'Time_B', 'X', 'Y', 'Vx', 'Vy'])
+    writer.writeheader()
+    for x, v, t in zip(X, V, Time):
+        for i in range(len(x)):
+            writer.writerow(
+                {'Time_A': t[0], 'Time_B': t[1], 'X': x[i][0], 'Y': x[i][1], 'Vx': v[i][0], 'Vy': v[i][1]})
+    f.close()
+
+
 def write_csvBeads(csvpath, X, R):
     f = open(csvpath, 'w')
     writer = csv.DictWriter(f, fieldnames=['N', 'X', 'Y', 'Z', 'R'])
