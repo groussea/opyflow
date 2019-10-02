@@ -12,14 +12,21 @@ import numpy as np
 import cv2
 from opyf import MeshesAndTime, Track, Render, Files, Tools, Interpolate, Filters
 import matplotlib.pyplot as plt
+import time
 
 
 class Analyzer():
-    def __init__(self, **args):
-        plt.ioff()
+    def __init__(self, imageROI=None, **args):
+
+        print('Dimensions :\n \t', 'Width :',
+              self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
+
         self.scaled = False
-        self.ROI = args.get(
-            'imageROI', [0, 0, self.frameInit.shape[1], self.frameInit.shape[0]])
+        if imageROI is None:
+            self.ROI = [0, 0, self.frameInit.shape[1], self.frameInit.shape[0]]
+        else:
+            self.ROI = imageROI
+        print('Regio Of Interest :\n \t', self.ROI)
         self.cropFrameInit = self.frameInit[self.ROI[1]:(
             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
         self.Hvis, self.Lvis = self.cropFrameInit.shape
@@ -29,9 +36,10 @@ class Analyzer():
         self.set_opticalFlowParams()
         self.set_filtersParams()
         self.set_interpolationParams()
+        # self.set_tracksParams()
         self.vlimPx = args.get('vlim', [-np.inf, np.inf])
+        self.prevTracks = None
 
-        self.reset()
 
 # TODO extract samples + function        self.samplesMat = []
 #        self.Xsamples = []
@@ -45,9 +53,9 @@ class Analyzer():
                           'extentFrame': args.get('extentFrame', [0, self.Lvis, self.Hvis, 0]),
                           'unit': args.get('unit', ['px', 'deltaT']),
                           'Hfig': args.get('Hfig', 8),
-                          'num': args.get('num', 'opyfPlot'),
                           'grid': args.get('grid', True),
                           'vlim': args.get('vlim', [0, 40])}
+        self.reset()
         self.set_gridToInterpolateOn(0, self.Lvis, 4, 0, self.Hvis, 4)
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
 
@@ -81,7 +89,7 @@ class Analyzer():
         self.filters_params = dict(RadiusF=RadiusF,
                                    minNperRadius=minNperRadius,
                                    maxDevInRadius=maxDevInRadius,
-                                   DGF=wayBackGoodFlag)
+                                   wayBackGoodFlag=wayBackGoodFlag)
 
         print('')
         print('Filters Params:')
@@ -105,7 +113,8 @@ class Analyzer():
                 v/(self.scale*self.fps/self.paramVecTime['step']) for v in vlim]
 
         self.paramPlot['vlim'] = vlim
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot)
+        plt.close('opyfPlot')
+        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
         print('Velocity limits: ', vlim[0])
         print('\t minimum norm velocity: ', vlim[0])
         print('\t maximum norm velocity: ', vlim[1])
@@ -135,7 +144,7 @@ class Analyzer():
         self.XT = Interpolate.npGrid2TargetPoint2D(self.grid_x, self.grid_y)
         self.paramPlot['vecX'] = self.vecX
         self.paramPlot['vecY'] = self.vecY
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot)
+        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
         self.Ux, self.Uy = np.zeros((self.Hgrid, self.Lgrid)), np.zeros(
             (self.Hgrid, self.Lgrid))
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
@@ -152,7 +161,7 @@ class Analyzer():
                              'shift': shift,
                              'Ntot':  Ntot}
 
-        self.vec, self.prev = MeshesAndTime.set_vecTime(framedeb=self.paramVecTime['starting_frame'],
+        self.vec, self.prev = MeshesAndTime.set_vecTime(starting_frame=self.paramVecTime['starting_frame'],
                                                         step=self.paramVecTime['step'],
                                                         shift=self.paramVecTime['shift'],
                                                         Ntot=self.paramVecTime['Ntot'])
@@ -171,7 +180,7 @@ class Analyzer():
                     file_prev = self.listD[i]
                 else:
                     print(
-                        '--> measure diplacements between images [' + file_prev + '] and [' + self.listD[i] + ']')
+                        '--> diplacements measurement between images [' + file_prev + '] and [' + self.listD[i] + ']')
 
         if self.processingMode == 'video':
             for pr, i in zip(self.prev, self.vec):
@@ -181,9 +190,69 @@ class Analyzer():
                     file_prev = str(i)
                 else:
                     print(
-                        '--> measure diplacements between frame [' + file_prev + '] and [' + str(i) + ']')
+                        '--> diplacements measurement between frame [' + file_prev + '] and [' + str(i) + ']')
         self.Time = self.vec[0:-1:2]
         # initilize self.vis with the first frame of the set
+
+        if self.processingMode == 'video':
+            self.dictFrames = {}
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            self.sortedVec = np.sort(np.unique(self.vec))
+            k = 0
+            while k < len(self.sortedVec):
+                indF = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+                ret, vis = self.cap.read()
+                if indF == self.sortedVec[k]:
+                    self.dictFrames[str(self.sortedVec[k])] = vis
+                    k += 1
+        self.readFrame(self.vec[0])
+
+    def set_trackingFeatures(self, starting_frame=0, step=1, Ntot=10, track_length=10, detection_interval=10):
+
+        self.tracks_params = {'track_len': track_length,
+                              'detect_interval': detection_interval}
+
+        self.paramVecTimeTracks = {'starting_frame': starting_frame,
+                                   'step': step,
+                                   'Ntot':  Ntot}
+
+        self.vecTracks, self.prevTracks = MeshesAndTime.set_vecTimeTracks(
+            starting_frame=starting_frame, step=step,  Ntot=Ntot)
+
+        print(
+            '\nTracking processing \nTracking operates only in succesives images sperated with [step] frames')
+        if self.vec[-1] > self.number_of_frames:
+            print('----- Error ----')
+            print('Your tracking plan is not compatible with the frame set')
+            print(
+                'Consider that for tracking [starting_frame+step*(Ntot)]  must be smaller than the number of frames')
+            sys.exit()
+
+        print('Starting frame : [' + str(starting_frame) + ']')
+
+        print('--> Tracking operate from frame [' + str(
+            self.vecTracks[1]) + '] to [' + str(self.vecTracks[-1]) + ']')
+
+        print('On the first frame, only Good Features to Track are detected')
+
+        print('Maximum tracking length are ['+str(track_length)+']')
+        print(
+            'Good features detection are reloaded every ['+str(detection_interval)+'] frames')
+        print(
+            'After[extractTracks] method, tracks are stored in [tracks], \nFor saving them run [writeTracks]')
+
+        self.set_filtersParams(wayBackGoodFlag=1)
+
+        if self.processingMode == 'video':
+            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+            self.sortedVec = np.sort(np.unique(self.vecTracks))
+            k = 0
+            while k < len(self.sortedVec):
+                indF = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+                ret, vis = self.cap.read()
+                if indF == self.sortedVec[k]:
+                    self.dictFrames[str(self.sortedVec[k])] = vis
+                    k += 1
         self.readFrame(self.vec[0])
 
     def initializeAveragedFrameFromFile(self, file, imreadOption=1):
@@ -196,7 +265,7 @@ class Analyzer():
         else:
             self.frameAv = frameav
 
-#TODO and test
+# TODO and test
 #    def initializeAveragedFrameFromSequence(self,vec):
 #        frameav=None
 #        incr=0
@@ -223,8 +292,8 @@ class Analyzer():
             self.vis = cv2.imread(self.folder_src+'/'+l,
                                   self.imreadOption)  # 2 for tiff images
         elif self.processingMode == 'video':
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, i)
-            ret, self.vis = self.cap.read()
+            self.vis = self.dictFrames[str(i)]
+
         self.vis = self.vis[self.ROI[1]:(
             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
 
@@ -259,28 +328,70 @@ class Analyzer():
     #                 plt.show()
     #                 plt.pause(0.02)
 
-    def stepGoodFeaturesToTrackandOpticalFlow(self, pr, i):
+    def stepTracks(self, pr, i):
         if pr == False:
             self.prev_gray = None
 
         self.readFrame(i)
+        self.substractAveragedFrame()
+        self.tracks, self.vtracks, self.prev_gray, self.X, self.V = Track.opyfTrack(self.tracks, self.vtracks, self.gray, self.prev_gray,
+                                                                                    self.incr, self.feature_params,
+                                                                                    self.lk_params, self.tracks_params,
+                                                                                    ROI=self.ROImeasure,
+                                                                                    vmin=self.vlimPx[0],
+                                                                                    vmax=self.vlimPx[1],
+                                                                                    mask=self.mask,
+                                                                                    wayBackGoodFlag=self.filters_params['wayBackGoodFlag'])
 
-        gray = Tools.convertToGrayScale(self.vis)
+        self.scaleAndLogTracks(i)
 
+    def extractTracks(self, display=False, saveImgPath=None, imgFormat='.png', **args):
+        self.reset()
+        self.tracks = []
+        self.vtracks = []
+        if self.prevTracks is None:
+            print(
+                '\n \nWARNING : To run the extractTracks() method, it is mandatory to define the tracking plan through the method [set_trackingFeatures()]\n\n')
+            sys.exit()
+        for pr, i in zip(self.prevTracks, self.vecTracks):
+            self.stepTracks(pr, i)
+            if pr == True:
+                self.Xdata.append(self.X)
+                self.Vdata.append(self.V)
+
+                cv2.polylines(self.vis,
+                              [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
+                self.showXV(self.X, self.V, vis=self.vis,
+                            display=display, **args)
+                if saveImgPath is not None:
+                    self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
+                        i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                if display is not False:
+                    self.opyfDisp.fig.show()
+                    plt.pause(0.02)
+
+    def substractAveragedFrame(self):
+        self.gray = Tools.convertToGrayScale(self.vis)
         if self.rangeOfPixels != [0, 255] or self.frameAv is not None:
-            gray = np.array(gray, dtype='float32')
-            gray = (
-                (gray-self.rangeOfPixels[0])/(self.rangeOfPixels[1]-self.rangeOfPixels[0]))*255-self.frameAv
-            gray[np.where(gray < 0)] = 0
-            gray[np.where(gray > 255)] = 255
-            gray = np.array(gray, dtype='uint8')
+            self.gray = np.array(self.gray, dtype='float32')
+            self.gray = (
+                (self.gray-self.rangeOfPixels[0])/(self.rangeOfPixels[1]-self.rangeOfPixels[0]))*255-self.frameAv
+            self.gray[np.where(self.gray < 0)] = 0
+            self.gray[np.where(self.gray > 255)] = 255
+            self.gray = np.array(self.gray, dtype='uint8')
+
+    def stepGoodFeaturesToTrackandOpticalFlow(self, pr, i):
+        if pr == False:
+            self.prev_gray = None
+        self.readFrame(i)
+        self.substractAveragedFrame()
 
         # TODO optional CLAHE
         #  current_gray = Render.CLAHEbrightness(
         #     gray, 0, tileGridSize=(20, 20), clipLimit=2)
 #        self.vis=Render.CLAHEbrightness(self.vis,0,tileGridSize=(20,20),clipLimit=2)
 
-        self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(gray,
+        self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(self.gray,
                                                                 self.prev_gray,
                                                                 self.feature_params,
                                                                 self.lk_params,
@@ -288,7 +399,7 @@ class Analyzer():
                                                                 vmin=self.vlimPx[0],
                                                                 vmax=self.vlimPx[1],
                                                                 mask=self.mask,
-                                                                DGF=self.filters_params['DGF'])
+                                                                wayBackGoodFlag=self.filters_params['wayBackGoodFlag'])
 
         if pr == True:
 
@@ -313,41 +424,74 @@ class Analyzer():
                     self.X, Dev, climmax=self.filters_params['maxDevInRadius'])
                 self.V = Filters.opyfDeletePointCriterion(
                     self.V, Dev, climmax=self.filters_params['maxDevInRadius'])
+            self.scaleAndLogFlow(i)
 
-            if self.scaled == True:
-                self.X = (self.X-np.array(self.origin))*self.scale
-                self.V = self.V*self.scale*self.fps/self.paramVecTime['step']
-                self.X[:, 1] = -self.X[:, 1]
-                self.V[:, 1] = -self.V[:, 1]
-            print('')
-            self.incr += 1
-            print('-------------- [Step '+str(self.incr)+' / ' +
-                  str(self.paramVecTime['Ntot'])+'] --------------')
-            if self.processingMode == 'image sequence':
-                print('------- From frame [' + self.listD[i-self.paramVecTime['step']
-                                                          ] + '] to frame [' + self.listD[i] + '] -------')
-            if self.processingMode == 'video':
-                print(
-                    '------- From frame [' + str(i-self.paramVecTime['step']) + '] to frame [' + str(i) + '] -------')
-            print('Number of Good Feature To Track = '+str(len(self.X)))
-            print('Displacement max = '+str(np.max(self.V)) +
+    def scaleAndLogTracks(self, i):
+        if self.scaled == True:
+            self.X = (self.X-np.array(self.origin))*self.scale
+            self.V = self.V*self.scale*self.fps/self.paramVecTime['step']
+            self.X[:, 1] = -self.X[:, 1]
+            self.V[:, 1] = -self.V[:, 1]
+        print('')
+        self.incr += 1
+        print('-------------- [Tracking - Step '+str(self.incr)+' / ' +
+              str(self.paramVecTimeTracks['Ntot'])+'] --------------')
+
+        if self.processingMode == 'image sequence':
+            print('------- From frame [' + self.listD[i-self.paramVecTimeTracks['step']
+                                                      ] + '] to frame [' + self.listD[i] + '] -------')
+        if self.processingMode == 'video':
+            print(
+                '------- From frame [' + str(i-self.paramVecTimeTracks['step']) + '] to frame [' + str(i) + '] -------')
+        print('Number of Good Feature To Track = '+str(len(self.X)))
+        if len(self.V) == 0:
+            print(
+                'No displacements measured (consider changing parameters set if displacements expected between these two frames)')
+        else:
+            print('Displacement max = '+str(np.max(np.absolute(self.V))) +
+                  ' '+self.unit[0]+'/'+self.unit[1])
+
+    def scaleAndLogFlow(self, i):
+        if self.scaled == True:
+            self.X = (self.X-np.array(self.origin))*self.scale
+            self.V = self.V*self.scale*self.fps/self.paramVecTime['step']
+            self.X[:, 1] = -self.X[:, 1]
+            self.V[:, 1] = -self.V[:, 1]
+        print('')
+        self.incr += 1
+        print('-------------- [Step '+str(self.incr)+' / ' +
+              str(self.paramVecTime['Ntot'])+'] --------------')
+        if self.processingMode == 'image sequence':
+            print('------- From frame [' + self.listD[i-self.paramVecTime['step']
+                                                      ] + '] to frame [' + self.listD[i] + '] -------')
+        if self.processingMode == 'video':
+            print(
+                '------- From frame [' + str(i-self.paramVecTime['step']) + '] to frame [' + str(i) + '] -------')
+        print('Number of Good Feature To Track = '+str(len(self.X)))
+        if len(self.V) == 0:
+            print(
+                'No displacements measured (consider changing parameters set if displacements expected between these two frames)')
+        else:
+            print('Displacement max = '+str(np.max(np.absolute(self.V))) +
                   ' '+self.unit[0]+'/'+self.unit[1])
 
     def reset(self):
 
         self.Xdata = []
         self.Vdata = []
+        self.tracks = []
         self.incr = 0
         self.UxTot = []
         self.UyTot = []
+        plt.close('opyfPlot')
+        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
 
-    def extractGoodFeaturesPositionsAndDisplacements(self, display=False, saveImgPath=None, imgFormat='.png', **args):
+    def extractGoodFeaturesAndDisplacements(self, display=False, saveImgPath=None, imgFormat='.png', **args):
         self.reset()
 
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
-            if len(self.X) > 0:
-
+            if pr == True:
                 self.Xdata.append(self.X)
                 self.Vdata.append(self.V)
 
@@ -356,13 +500,34 @@ class Analyzer():
                 if saveImgPath is not None:
                     self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
-                self.opyfDisp.fig.show()
-                plt.pause(0.02)
+                if display is not False:
+                    self.opyfDisp.fig.show()
+                    plt.pause(0.02)
 
-    def interpolateOnGrid(self, mode='sequence'):
+    def extractGoodFeaturesDisplacementsAndAccumulate(self, display=False, saveImgPath=None, imgFormat='.png', **args):
+        self.reset()
+        self.Xaccu = np.empty((0, 2))
+        self.Vaccu = np.empty((0, 2))
+        for pr, i in zip(self.prev, self.vec):
+            self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
+            if pr == True:
+                self.Xdata.append(self.X)
+                self.Vdata.append(self.V)
+                self.Xaccu = np.append(self.Xaccu, self.X, axis=0)
+                self.Vaccu = np.append(self.Vaccu, self.V, axis=0)
+                self.showXV(self.Xaccu, self.Vaccu, vis=self.vis,
+                            display=display, **args)
+                if saveImgPath is not None:
+                    self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
+                        i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                if display is not False:
+                    self.opyfDisp.fig.show()
+                    plt.pause(0.02)
+
+    def interpolateOnGrid(self, X, V, mode='sequence'):
 
         self.interpolatedVelocities = Interpolate.npInterpolateVTK2D(
-            self.X, self.V, self.XT, ParametreInterpolatorVTK=self.interp_params)
+            X, V, self.XT, ParametreInterpolatorVTK=self.interp_params)
 
         self.gridMask[np.where(self.gridMask == 0)] = np.nan
         self.Ux = Interpolate.npTargetPoints2Grid2D(
@@ -374,14 +539,21 @@ class Analyzer():
         self.reset()
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
-            if len(self.X) > 0:
+            if pr == True:
                 self.Xdata.append(self.X)
                 self.Vdata.append(self.V)
-                self.interpolateOnGrid()
-                self.UxTot.append(np.reshape(
-                    self.interpolatedVelocities[:, 0], (self.Hgrid, self.Lgrid)))
-                self.UyTot.append(np.reshape(
-                    self.interpolatedVelocities[:, 1], (self.Hgrid, self.Lgrid)))
+                if len(self.X) > 0:
+                    self.interpolateOnGrid(self.X, self.V)
+                    self.UxTot.append(np.reshape(
+                        self.interpolatedVelocities[:, 0], (self.Hgrid, self.Lgrid)))
+                    self.UyTot.append(np.reshape(
+                        self.interpolatedVelocities[:, 1], (self.Hgrid, self.Lgrid)))
+                else:
+                    self.Ux, self.Uy = np.zeros((self.Hgrid, self.Lgrid)), np.zeros(
+                        (self.Hgrid, self.Lgrid))*np.nan
+                    self.UxTot.append(self.Ux)
+                    self.UyTot.append(self.Uy)
+
                 Field = Render.setField(self.Ux, self.Uy, Type)
                 if display == 'field':
                     self.opyfDisp.plotField(Field, vis=self.vis, **args)
@@ -390,6 +562,24 @@ class Analyzer():
                             i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
                     self.opyfDisp.fig.show()
                     plt.pause(0.02)
+
+    def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1=False, display2=False, saveImgPath=None, Type='norme', imgFormat='png', **args):
+        self.extractGoodFeaturesDisplacementsAndAccumulate(
+            display=display1, **args)
+        self.interpolateOnGrid(self.Xaccu, self.Vaccu)
+        self.UxTot.append(np.reshape(
+            self.interpolatedVelocities[:, 0], (self.Hgrid, self.Lgrid)))
+        self.UyTot.append(np.reshape(
+            self.interpolatedVelocities[:, 1], (self.Hgrid, self.Lgrid)))
+        self.Field = Render.setField(self.Ux, self.Uy, Type)
+        if display2 == 'field':
+
+            self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
+            if saveImgPath is not None:
+                self.opyfDisp.fig.savefig(saveImgPath+'/'+display2+'_'+format(
+                    i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+            self.opyfDisp.fig.show()
+            plt.pause(0.02)
 
     def showXV(self, X, V, vis=None, display='quiver', displayColor=False, **args):
         if display == 'quiver':
@@ -446,8 +636,9 @@ class Analyzer():
                                               -(self.paramPlot['extentFrame'][3]-self.origin[1])*self.scale, ],
                               'unit': unit,
                               'vlim': [vlim*self.scale*self.fps/self.paramVecTime['step'] for vlim in self.paramPlot['vlim']]}
-
-            self.opyfDisp = Render.opyfDisplayer(**self.paramPlot)
+            plt.close('opyfPlot')
+            self.opyfDisp = Render.opyfDisplayer(
+                **self.paramPlot, num='opyfPlot')
 
     def invertYaxis(self):
         self.vecY = -self.vecY
@@ -502,6 +693,35 @@ class Analyzer():
 #
 #
 
+    def writeTracks(self, filename=None, fileFormat='csv', outFolder='.'):
+        import csv
+        print('')
+
+        TL = self.tracks_params['track_len']
+        B = 0
+        if TL < self.paramVecTimeTracks['Ntot']:
+            print('Track_length has been set at [' + str(
+                TL) + '] and step at [' + str(self.paramVecTimeTracks['step']) + ']')
+            print('Consequently, and considering the tracking processing plan, no tracks before frame {last_frame - Track_length*step}, i.e. '+str(
+                self.vecTracks[-1]-(TL-1)*self.paramVecTimeTracks['step'])+' will be saved')
+            B = TL
+        if filename is None:
+            filename = 'tracks_from_frame' + str(self.vecTracks[-B]) + 'to' + str(self.vecTracks[-1]) + '_with_step_' + str(
+                self.paramVecTimeTracks['step'])
+        f = open(filename, 'w')
+        writer = csv.DictWriter(
+            f, fieldnames=['track_index', 'frame_index', 'X', 'Y', 'Vx', 'Vy'])
+        writer.writeheader()
+        N = 0
+
+        for (tr, vtr) in zip(self.tracks, self.vtracks):
+            l = len(tr)
+            for i in range(l):
+                writer.writerow(
+                    {'track_index': N, 'frame_index': self.vecTracks[-l+i], 'X': tr[i][0], 'Y': tr[i][1], 'Vx': vtr[i][0], 'Vy': vtr[i][1]})
+            N += 1
+        f.close()
+
     def writeImageProcessingParamsJSON(self, outFolder='.', filename=None):
 
         fulldict = {'lk_params': self.lk_params, 'feature_params': self.feature_params,
@@ -512,36 +732,37 @@ class Analyzer():
 
 
 #            for x,v in zip(Xdata,Vdata):
-    def extractGoodFeaturesPositionsAndExtractFeatures(self, display=False, windowSize=(16, 16)):
 
-        for pr, i in zip(self.prev, self.vec):
+    # def extractGoodFeaturesPositionsAndExtractFeatures(self, display=False, windowSize=(16, 16)):
 
-            #    frame=frame[:,:,1]
-            l = self.listD[i]
+    #     for pr, i in zip(self.prev, self.vec):
 
-            vis = cv2.imread(self.folder_src+'/'+l)  # special for tiff images
+    #         #    frame=frame[:,:,1]
+    #         l = self.listD[i]
 
-            vis = Render.CLAHEbrightness(
-                vis, 0, tileGridSize=(20, 20), clipLimit=2)
-            if len(np.shape(vis)) == 3:
-                current_gray = cv2.cvtColor(vis, cv2.COLOR_BGR2GRAY)
-            else:
-                current_gray = vis
-            current_gray = current_gray[self.ROI[1]:(
-                self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
+    #         vis = cv2.imread(self.folder_src+'/'+l)  # special for tiff images
 
-            p0 = cv2.goodFeaturesToTrack(current_gray, **self.feature_params)
-            X = p0.reshape(-1, 2)
-            samples = []
-            for x in X:
-                featureExtraction = current_gray[int(x[0]-windowSize[0]/2):int(
-                    x[0]+windowSize[0]/2), int(x[1]-windowSize[1]/2):int(x[1]+windowSize[1]/2)]
-                samples.append(featureExtraction)
+    #         vis = Render.CLAHEbrightness(
+    #             vis, 0, tileGridSize=(20, 20), clipLimit=2)
+    #         if len(np.shape(vis)) == 3:
+    #             current_gray = cv2.cvtColor(vis, cv2.COLOR_BGR2GRAY)
+    #         else:
+    #             current_gray = vis
+    #         current_gray = current_gray[self.ROI[1]:(
+    #             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
 
-            self.samplesMat.append(samples)
-            self.Xsamples.append(X)
-            if display == 'points':
-                self.show(self, X, X, vis, display='points')
+    #         p0 = cv2.goodFeaturesToTrack(current_gray, **self.feature_params)
+    #         X = p0.reshape(-1, 2)
+    #         samples = []
+    #         for x in X:
+    #             featureExtraction = current_gray[int(x[0]-windowSize[0]/2):int(
+    #                 x[0]+windowSize[0]/2), int(x[1]-windowSize[1]/2):int(x[1]+windowSize[1]/2)]
+    #             samples.append(featureExtraction)
+
+    #         self.samplesMat.append(samples)
+    #         self.Xsamples.append(X)
+    #         if display == 'points':
+    #             self.show(self, X, X, vis, display='points')
 
 
 class videoAnalyser(Analyzer):

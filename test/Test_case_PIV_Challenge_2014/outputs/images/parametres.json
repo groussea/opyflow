@@ -23,7 +23,7 @@
         "RadiusF": 10.0,
         "minNperRadius": 2.0,
         "maxDevinRadius": 3.0,
-        "DGF": 1.0,
+        "wayBackGoodFlag": 1.0,
         "mask": null
     },
     "interp_params": {

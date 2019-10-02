@@ -95,7 +95,7 @@ lk_params = dict(winSize=(32, 6),
 # This strategy supress isolated point that are usally errors
 # maxDevinRadius determine the maximum of deviation of a point compared to his
 # closest N neighbor within RadiusF.
-# 'DGF' is a condition for the lukas kanade method to considera point if the
+# 'wayBackGoodFlag' is a condition for the lukas kanade method to considera point if the
 # prediction from A to B is the same than from B to A frame.
 # mask is a binary frame that has the same size than the ROI image.
 #
@@ -105,7 +105,7 @@ filters_params = dict(vmin=None,
                       RadiusF=10.,
                       minNperRadius=2.,
                       maxDevinRadius=3.,
-                      DGF=1.,
+                      wayBackGoodFlag=1.,
                       mask=None)
 
 # To interpolate datas we use vtk librarie which provide in its last versions efficient
@@ -258,7 +258,7 @@ for i in tqdm.trange(len(prev)):
     prev_gray, X, V = opyf.Track.opyfFlowGoodFlag(frame, prev_gray, feature_params,
                                                   lk_params, ROI=ROI, vmax=filters_params[
                                                       'vmax'], vmin=filters_params['vmin'],
-                                                  mask=mask, DGF=filters_params['DGF'])
+                                                  mask=mask, wayBackGoodFlag=filters_params['wayBackGoodFlag'])
 
 
 #    if len(X)>0:

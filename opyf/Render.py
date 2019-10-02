@@ -141,7 +141,7 @@ class opyfDisplayer:
 #            print('vecX and vecY have not been specified')
         plt.ioff()
         self.fig, self.ax = opyffigureandaxes(
-            extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num='opyfPlot')
+            extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
 #        self.setExtent(self.paramPlot['extentFrame'])
         plt.ion()
 
@@ -156,6 +156,207 @@ class opyfDisplayer:
         self.ax.set_xlim(extent[0], extent[1])
         self.ax.set_ylim(extent[2], extent[3])
         self.paramPlot['extentFrame'] = extent
+
+    def opyfColorBar(self,label='Magnitude [px/Dt]', **args):
+        self.cbaxes = self.fig.add_axes([0.15, 0.1, 0.70, 0.03])
+        self.cb = self.fig.colorbar(self.im, cax=self.cbaxes, orientation='horizontal', **args)
+        self.cb.set_label(label)
+
+
+    def opyfField(self,grid_val, dConfig=None, extent=None, extentr=None, **args):
+       
+
+        if 'vlim' in args:
+            vlim = args.get('vlim', [grid_val.min(), grid_val.max()])
+            if vlim is None:
+                vlim = [grid_val.min(), grid_val.max()]
+            del args['vlim']
+        else:
+            vlim = [grid_val.min(), grid_val.max()]
+
+        args['vmin'] = vlim[0]
+        args['vmax'] = vlim[1]
+
+        self.im = self.ax.imshow(grid_val, extent=extent,cmap=self.cmap, **args)
+
+        if extentr is not None:
+            self.ax.set_xlim(extentr[0], extentr[1])
+            self.ax.set_ylim(extentr[2], extentr[3])
+
+    def opyfQuiverPointCloudColored(self, X, V, nvec=3000, normalize=False, **args):
+
+        from matplotlib.colors import Normalize
+
+        # one over N
+        # Select randomly N vectors
+        if len(X) < nvec:
+            N = len(X)
+        else:
+            N = nvec
+            print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
+
+        ind = np.random.choice(np.arange(len(X)), N, replace=False)
+        Xc = X[ind, :]
+        Vc = V[ind, :]
+        colors = (Vc[:, 0]**2+Vc[:, 1]**2)**0.5
+        if len(colors) == 0:
+            colors = np.array([0])
+        if 'vlim' in args:
+            vlim = args.get('vlim', [colors.min(), colors.max()])
+            if vlim is None:
+                vlim = [colors.min(), colors.max()]
+            del args['vlim']
+        else:
+            vlim = [colors.min(), colors.max()]
+        norm = Normalize()
+        norm.autoscale(colors)
+        norm.vmin = vlim[0]
+        norm.vmax = vlim[1]
+        self.im = mpl.cm.ScalarMappable(cmap=self.cmap, norm=norm)
+        self.im.set_array([])
+        if self.ax.get_ylim()[0] > self.ax.get_ylim()[1]:
+            Vc[:, 1] = -Vc[:, 1]
+        if normalize == False:
+            self.qv = self.ax.quiver(Xc[:, 0], Xc[:, 1], Vc[:, 0], Vc[:, 1],
+                        color=self.cmap(norm(colors)), **args)
+        else:
+            self.qv = self.ax.quiver(Xc[:, 0], Xc[:, 1], Vc[:, 0]/colors,
+                        Vc[:, 1]/colors, color=self.cmap(norm(colors)), **args)
+
+    def opyfPointCloudColoredScatter(self, X, V, **args):
+       
+        from matplotlib.colors import Normalize
+
+        norme = (V[:, 0]**2+V[:, 1]**2)**0.5
+        norm = Normalize()
+        norm.autoscale(norme)
+        vlim = args.get('vlim', [np.min(norme), np.max(norme)])
+        if vlim is None:
+            vlim = [np.min(norme), np.max(norme)]
+        args['vmin'] = vlim[0]
+        args['vmax'] = vlim[1]
+        if 'vlim' in args:
+            del args['vlim']
+        if 'markersize' in args:
+            del args['markersize']
+
+    #    sc=ax.scatter(X[:,0], X[:,1],c=norme,color=cmapCS(norm(norme)),**args)
+        self.im = self.ax.scatter(X[:, 0], X[:, 1], c=norme, cmap=self.cmap, **args)
+
+    def opyfPointCloudScatter(self,X, V,  **args):
+
+        if 'vlim' in args:
+            del args['vlim']
+        if 'markersize' in args:
+            del args['markersize']
+        self.ax.scatter(X[:, 0], X[:, 1], **args)
+
+    def opyfQuiverField(self, grid_x, grid_y, gridVx, gridVy,  res=32, normalize=False, **args):
+
+        import opyf
+        if 'cmap' in args:
+            del args['cmap']
+        if 'vlim' in args:
+            del args['vlim']
+        # one over N
+        # Select randomly N vectors
+        l, c = grid_x.shape
+        resx = np.absolute(grid_x[0, 1]-grid_x[0, 0])
+        resy = np.absolute(grid_y[1, 0]-grid_y[0, 0])
+        densx = int(res/resx)
+        densy = int(res/resy)
+        lvec = np.arange(densy/2, l-densy/2, densy, dtype=int)+(l % densy)//2
+        cvec = np.arange(densx/2, c-densx/2, densx, dtype=int)+(l % densx)//2
+        new_grid_x = np.zeros(len(lvec))
+        size = (len(lvec), len(cvec))
+        temp_grid_x = grid_x[lvec, :]
+        new_grid_x = temp_grid_x[:, cvec]
+        temp_grid_y = grid_y[lvec, :]
+        new_grid_y = temp_grid_y[:, cvec]
+
+        new_gridVx = np.zeros(size)
+        new_gridVy = np.zeros(size)
+
+        for i in range(size[0]):
+            for j in range(size[1]):
+                new_gridVx[i, j] = np.mean(
+                    gridVx[lvec[i]-densy//2:lvec[i]+densy//2, cvec[j]-densx//2:cvec[j]+densx//2])
+                new_gridVy[i, j] = np.mean(
+                    gridVy[lvec[i]-densy//2:lvec[i]+densy//2, cvec[j]-densx//2:cvec[j]+densx//2])
+
+        TargetPoints = opyf.Interpolate.npGrid2TargetPoint2D(
+            new_grid_x, new_grid_y)
+        Velocities = opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx, new_gridVy)
+    #    colors=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5
+        if normalize == False:
+            self.qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1],
+                        Velocities[:, 0], Velocities[:, 1], **args)
+        else:
+            Norme = (Velocities[:, 0]**2+Velocities[:, 1]**2)**0.5
+            self.qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1],
+                        Velocities[:, 0]/Norme, Velocities[:, 1]/Norme, **args)
+
+    def opyfQuiverFieldColored(self, grid_x, grid_y, gridVx, gridVy,  res=32, normalize=False, **args):
+
+        from matplotlib.colors import Normalize
+        if 'cmap' not in args:
+            args['cmap'] = mpl.cm.coolwarm
+        cmap = args.get('cmap', mpl.cm.coolwarm)
+        del args['cmap']
+
+        # one over N
+        # Select randomly N vectors
+        l, c = grid_x.shape
+        resx = np.absolute(grid_x[0, 1]-grid_x[0, 0])
+        resy = np.absolute(grid_y[1, 0]-grid_y[0, 0])
+        densx = int(np.round(res/resx))
+        densy = int(np.round(res/resy))
+        lvec = np.arange(densy/2, l-densy/2, densy, dtype=int)+(l % densy)//2
+        cvec = np.arange(densx/2, c-densx/2, densx, dtype=int)+(l % densx)//2
+        new_grid_x = np.zeros(len(lvec))
+        size = (len(lvec), len(cvec))
+        temp_grid_x = grid_x[lvec, :]
+        new_grid_x = temp_grid_x[:, cvec]
+        temp_grid_y = grid_y[lvec, :]
+        new_grid_y = temp_grid_y[:, cvec]
+
+        new_gridVx = np.zeros(size)
+        new_gridVy = np.zeros(size)
+
+        for i in range(size[0]):
+            for j in range(size[1]):
+                new_gridVx[i, j] = np.mean(
+                    gridVx[lvec[i]-densy//2:lvec[i]+densy//2+1, cvec[j]-densx//2:cvec[j]+densx//2+1])
+                new_gridVy[i, j] = np.mean(
+                    gridVy[lvec[i]-densy//2:lvec[i]+densy//2+1, cvec[j]-densx//2:cvec[j]+densx//2+1])
+
+        TargetPoints = opyf.Interpolate.npGrid2TargetPoint2D(
+            new_grid_x, new_grid_y)
+        Velocities = opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx, new_gridVy)
+        Norme = (Velocities[:, 0]**2+Velocities[:, 1]**2)**0.5
+        if 'vlim' in args:
+            vlim = args.get('vlim', [Norme.min(), Norme.max()])
+            if vlim is None:
+                vlim = [Norme.min(), Norme.max()]
+            del args['vlim']
+        else:
+            vlim = [Norme.min(), Norme.max()]
+
+        norm = Normalize()
+        norm.autoscale(Norme)
+        norm.vmin = vlim[0]
+        norm.vmax = vlim[1]
+        self.im = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
+        self.im.set_array([])
+        if normalize == False:
+            qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1], Velocities[:,
+                                                                            0], Velocities[:, 1], color=cmap(norm(Norme)), **args)
+        else:
+            qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1], Velocities[:, 0] /
+                        Norme[:], Velocities[:, 1]/Norme[:], color=cmap(norm(Norme)), **args)
+
+
+
 
     def plot(self, Field=None, gridVx=None, gridVy=None, Xdata=None, Vdata=None, vis=None, Ptype='norme', Hfig=8, namefig='Opyf', scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, res=32,
              c='k', s=10, ROIvis=None, **args):
@@ -173,22 +374,24 @@ class opyfDisplayer:
 #            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opfPlot')
 
         if cmap is None:
-            cmap = setcmap(Ptype, alpha=alpha)
+            self.cmap = setcmap(Ptype, alpha=alpha)
+        elif type(cmap) == str:
+            self.cmap = plt.get_cmap(cmap)
+        else:
+            self.cmap=cmap
 
         normalize = args.get('normalize', False)
         extentVis = args.get('extentVis', self.paramPlot['extentFrame'])
         vlim = args.get('vlim', self.paramPlot['vlim'])
-        infoPlotQuiver = {'cmap': cmap,
-                          'width': width,
+        infoPlotQuiver = {'width': width,
                           'alpha': alpha,
                           'vlim': vlim,
                           'scale': scale}
 
-        infoPlotPointCloud = {'cmap': cmap,
-                              'alpha': alpha,
+        infoPlotPointCloud = {'alpha': alpha,
                               'vlim': vlim}
-        infoPlotField = {'cmap': cmap,
-                         'vlim': vlim}
+        infoPlotField = {'vlim': vlim}
+
 
         if self.paramDisp['DisplayVis'] == True and vis is not None:
             if ROIvis is not None:
@@ -208,43 +411,37 @@ class opyfDisplayer:
             extent = [self.grid_x[0, 0]-resx, self.grid_x[0, -1] +
                       resx, self.grid_y[-1, 0]+resy/2, self.grid_y[0, 0]-resy]
     #        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
-            self.fig, self.ax, self.im = opyfField(
-                Field, ax=self.ax, extent=extent, extentr=extentVis, **infoPlotField)
+            self.opyfField(Field, extent=extent, extentr=extentVis, **infoPlotField)
 
-            self.fig, self.cb = opyfColorBar(
-                self.fig, self.im, label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
+            self.opyfColorBar(label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
 
         if self.paramDisp['QuiverOnFieldColored'] == True:
-            self.fig, self.ax, self.qv, self.sm = opyfQuiverFieldColored(
-                self.grid_x, self.grid_y, gridVx, gridVy, ax=self.ax, res=res, normalize=normalize, **infoPlotQuiver)
-            self.fig, self.cb = opyfColorBar(
-                self.fig, self.sm, label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
+            self.opyfQuiverFieldColored(
+                self.grid_x, self.grid_y, gridVx, gridVy, res=res, normalize=normalize, **infoPlotQuiver)
+            self.opyfColorBar(label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
 
         if self.paramDisp['QuiverOnField'] == True:
-            self.fig, self.ax, qv = opyfQuiverField(
-                self.grid_x, self.grid_y, gridVx, gridVy, ax=self.ax, res=res, normalize=normalize, color=c, **infoPlotQuiver)
+            self.opyfQuiverField(
+                self.grid_x, self.grid_y, gridVx, gridVy, res=res, normalize=normalize, color=c, **infoPlotQuiver)
 
         if self.paramDisp['DisplayPointsColored'] == True and Xdata is not None and Vdata is not None:
-            self.fig, self.ax, self.sc = opyfPointCloudColoredScatter(
-                Xdata, Vdata, ax=self.ax, s=10, cmapCS=cmap, **infoPlotPointCloud)
-            self.fig, self.cb = opyfColorBar(
-                self.fig, self.sc, label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
+            self.opyfPointCloudColoredScatter(Xdata, Vdata, s=10,  **infoPlotPointCloud)
+            self.opyfColorBar(label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
             self.cb.set_alpha(0.8)
             self.cb.draw_all()
     #
         if self.paramDisp['DisplayPoints'] == True and Xdata is not None and Vdata is not None:
-            self.fig, self.ax = opyfPointCloudScatter(
-                Xdata, Vdata, ax=self.ax, s=s, color=c, **infoPlotPointCloud)
+            self.opyfPointCloudScatter(Xdata, Vdata, s=s, color=c, **infoPlotPointCloud)
 
         if self.paramDisp['QuiverOnPoints'] == True and Xdata is not None and Vdata is not None:
             self.fig, self.ax, qv = opyfQuiverPointCloud(
                 Xdata, Vdata, ax=self.ax, nvec=nvec, color=c, normalize=normalize, **infoPlotQuiver)
 
         if self.paramDisp['QuiverOnPointsColored'] == True and Xdata is not None and Vdata is not None:
-            self.fig, self.ax, self.qv, sc = opyfQuiverPointCloudColored(
-                Xdata, Vdata, ax=self.ax, nvec=nvec, normalize=normalize, **infoPlotQuiver)
-            self.fig, self.cb = opyfColorBar(
-                self.fig, sc, label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
+            self.opyfQuiverPointCloudColored(
+                Xdata, Vdata, nvec=nvec, normalize=normalize, **infoPlotQuiver)
+            self.opyfColorBar(
+                 label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
             self.cb.set_alpha(0.8)
             self.cb.draw_all()
         self.fig.show()
@@ -275,7 +472,7 @@ class opyfDisplayer:
                 self.paramPlot['vecX'], self.paramPlot['vecY'])
             plt.close('all')
             self.fig, self.ax = opyffigureandaxes(
-                extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num='opyfPlot')
+                extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
             self.ax.set_ylabel(r'Y[no unit]')
 
     def plotField(self, Field, vecX=None, vecY=None, vis=None, **args):
@@ -310,9 +507,9 @@ class opyfDisplayer:
     def plotQuiverUnstructured(self, Xdata, Vdata, displayColor=False, vis=None, **args):
 
         for key, value in self.paramDisp.items():
-            if key == 'QuiverOnPoints' and displayColor == False:
+            if key == 'QuiverOnPoints' and displayColor == False and len(Xdata>1):
                 self.paramDisp[key] = True
-            elif key == 'QuiverOnPointsColored' and displayColor == True:
+            elif key == 'QuiverOnPointsColored' and displayColor == True and len(Xdata>1):
                 self.paramDisp[key] = True
             else:
                 self.paramDisp[key] = False
@@ -430,6 +627,8 @@ def opyfQuiverPointCloudColored(X, V, fig=None, ax=None, nvec=3000, normalize=Fa
     Xc = X[ind, :]
     Vc = V[ind, :]
     colors = (Vc[:, 0]**2+Vc[:, 1]**2)**0.5
+    if len(colors) == 0:
+        colors = np.array([0])
     if 'vlim' in args:
         vlim = args.get('vlim', [colors.min(), colors.max()])
         if vlim is None:
@@ -740,8 +939,8 @@ def setcmap(Type, alpha=1.):
                                                     alpha), (1, 1, 0.3, alpha), (0.8, 0, 0, alpha), (0, 0, 0, alpha)]
         position = [0, 0.01, 0.05, 0.5, 1]
         cmap = make_cmap(colors, position=position)
-        cmap.set_under('g')
-        cmap.set_over('g')
+        cmap.set_under((0, 1, 0, 0.5))
+        cmap.set_over((0, 1, 0, 0.5))
     elif Type == 'horizontal' or paramPlot['Type'] == 'vertical':
         colors = [(11./255, 22./255, 33./255, 1), (33./255, 66./255, 99./255, 1),
                   (103./255, 230./255, 93./255, 0.3), (0.7, 0, 0, 1), (1., 0, 0, 1)]

@@ -106,7 +106,7 @@ lk_params = dict(winSize=(16, 16),
 # This strategy supress isolated point that are usally errors
 # maxDevinRadius determine the maximum of deviation of a point compared to his
 # closest N neighbor within RadiusF.
-# 'DGF' is a condition for the lukas kanade method to considera point if the
+# 'wayBackGoodFlag' is a condition for the lukas kanade method to considera point if the
 # prediction from A to B is the same than from B to A frame.
 # mask is a binary frame that has the same size than the ROI image.
 #
@@ -123,7 +123,7 @@ filters_params = dict(vmin=None,
                       RadiusF=20.,
                       minNperRadius=4.,
                       maxDevinRadius=2.5,
-                      DGF=5.)
+                      wayBackGoodFlag=5.)
 
 # To interpolate datas we use vtk librarie which provide in its last versions efficient
 # Interpolation calculation
@@ -199,7 +199,7 @@ for i in range(np.int(N/2)):
                                                       'vmax'], vmin=filters_params['vmin'],
                                                   csvTrack=folder_outputs+'/' +
                                                   format(incr, '04.0f')+'.csv',
-                                                  mask=mask, DGF=filters_params['DGF'])
+                                                  mask=mask, wayBackGoodFlag=filters_params['wayBackGoodFlag'])
 
 # filtres les vecteurs abérents, plus de uniformité, tu cregardes une zone autour d'un vecteur et tu considères l'écart type autour du vecteur
 # pour identifier les outliers (le bruit), ça peut etre néfaste car des fois il y a des zones ou t'as bcp de bruit mais que tu les filtres quand même

@@ -92,7 +92,7 @@ lk_params = dict(winSize=(30, 15),
 # This strategy supress isolated point that are usally errors
 # maxDevinRadius determine the maximum of deviation of a point compared to his
 # closest N neighbor within RadiusF.
-# 'DGF' is a condition for the lukas kanade method to considera point if the
+# 'wayBackGoodFlag' is a condition for the lukas kanade method to considera point if the
 # prediction from A to B is the same than from B to A frame.
 # mask is a binary frame that has the same size than the ROI image.
 #
@@ -102,7 +102,7 @@ filters_params = dict(vmin=4.,
                       RadiusF=20.,
                       minNperRadius=2.,
                       maxDevinRadius=2.5,
-                      DGF=3.)
+                      wayBackGoodFlag=3.)
 
 # To interpolate datas we use vtk librarie which provide in its last versions efficient
 # Interpolation calculation
@@ -191,7 +191,7 @@ for i in tqdm.trange(len(prev)):
                                                       'vmax'], vmin=filters_params['vmin'],
                                                   csvTrack=folder_outputs+'/' +
                                                   format(incr, '04.0f')+'.csv',
-                                                  mask=mask, DGF=filters_params['DGF'])
+                                                  mask=mask, wayBackGoodFlag=filters_params['wayBackGoodFlag'])
 
     if len(X) > 0:
         # filters

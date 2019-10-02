@@ -114,6 +114,16 @@ def write_csvTrack2D(csvTrackfile, X, V):
             {'N': i+1, 'X': X[i][0], 'Y': X[i][1], 'Vx': V[i][0], 'Vy': V[i][1]})
     f.close()
 
+def write_csvTracks(csvTrackfile, tracks):
+    f = open(csvTrackfile, 'w')
+    writer = csv.DictWriter(f, fieldnames=['Ntracks', 'Frame' , 'X', 'Y', 'Vx', 'Vy'])
+    writer.writeheader()
+    for t in tracks:
+        for (x,v) in zip(t[0],t[1]):
+        writer.writerow(
+            {'N': i+1, 'X': X[i][0], 'Y': X[i][1], 'Vx': V[i][0], 'Vy': V[i][1]})
+    f.close()
+
 
 def csv_WriteUnstructured2DTimeserie(csvTrackfile, Time, X, V):
     f = open(csvTrackfile, 'w')
