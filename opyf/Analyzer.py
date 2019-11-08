@@ -765,7 +765,7 @@ class Analyzer():
     #             self.show(self, X, X, vis, display='points')
 
 
-class videoAnalyser(Analyzer):
+class videoAnalyzer(Analyzer):
     def __init__(self, video_src, **args):
         self.processingMode = 'video'
         self.video_src = video_src
@@ -780,9 +780,9 @@ class videoAnalyser(Analyzer):
 
 
 class frameSequenceAnalyzer(Analyzer):
-    def __init__(self, **args):
+    def __init__(self,folder_src, **args):
         self.processingMode = 'image sequence'
-        self.folder_src = args.get('folder_src', './')
+        self.folder_src = folder_src
         self.listD = np.sort(os.listdir(self.folder_src))
         self.number_of_frames = len(self.listD)
         self.frameInit = cv2.imread(self.folder_src+'/'+self.listD[0])
