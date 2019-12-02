@@ -295,7 +295,7 @@ def tecplot_WriteRectilinearMesh(filename, Xvec, Yvec, variables):
 
     f = open(filename, "wt")
 
-    f.write('Variables="x","y"')
+    f.write('VARIABLES="X","Y","Z"')
 
     for v in variables:
         f.write(',"%s"' % v[0])
@@ -306,55 +306,87 @@ def tecplot_WriteRectilinearMesh(filename, Xvec, Yvec, variables):
 #    f.write(', F=POINT\n')
 
     id = 0
-    for j in xrange(len(Yvec)):
-        for i in xrange(len(Xvec)):
-            f.write(pad(str(Xvec[i]), fw) + pad(str(Yvec[j]), fw))
+    for j in range(len(Yvec)):
+        for i in range(len(Xvec)):
+            f.write(pad(str(float(Xvec[i])), fw) + pad(str(float(Yvec[j])), fw) + pad(str(float(0)), fw))
             f.write(varline(variables, id, fw))
             id = id + 1
 
     f.close()
 
+def csv_WriteRectilinearMesh(filename, Xvec, Yvec, variables):
 
-def tecplot_ReadRectilinearMesh(filename):
-    def pad(s, width):
-        s2 = s
-        while len(s2) < width:
-            s2 = ' ' + s2
-        if s2[0] != ' ':
-            s2 = ' ' + s2
-        if len(s2) > width:
-            s2 = s2[:width]
-        return s2
-
-    def varline(variables, id, fw):
+    def varline(variables, id):
         s = ""
         for v in variables:
-            s = s + pad(str(v[1][id]), fw)
+            s = s +','+ str(v[1][id])
         s = s + '\n'
         return s
 
-    fw = 10  # field width
 
     f = open(filename, "wt")
 
-    f.write('Variables="x","y"')
+    f.write('X'+','+'Y')
 
     for v in variables:
-        f.write(',"%s"' % v[0])
-    f.write('\n\n')
+        f.write(','+'%s' % v[0])
+    f.write('\n')
 
 #    f.write('Zone I=' + pad(str(len(Xvec)),6) + ',J=' + pad(str(len(Yvec)),6))
 
 #    f.write(', F=POINT\n')
 
     id = 0
-    for j in xrange(len(Yvec)):
-        for i in xrange(len(Xvec)):
-            f.write(pad(str(Xvec[i]), fw) + pad(str(Yvec[j]), fw))
-            f.write(varline(variables, id, fw))
+    for j in range(len(Yvec)):
+        for i in range(len(Xvec)):
+            f.write(str(float(Xvec[i])) +','+ str(float(Yvec[j])))
+            f.write(varline(variables, id))
             id = id + 1
 
     f.close()
+    print('[log] Data saved in '+filename)
+
+
+#def tecplot_ReadRectilinearMesh(filename):
+#    def pad(s, width):
+#        s2 = s
+#        while len(s2) < width:
+#            s2 = ' ' + s2
+#        if s2[0] != ' ':
+#            s2 = ' ' + s2
+#        if len(s2) > width:
+#            s2 = s2[:width]
+#        return s2
+#
+#    def varline(variables, id, fw):
+#        s = ""
+#        for v in variables:
+#            s = s + pad(str(v[1][id]), fw)
+#        s = s + '\n'
+#        return s
+#
+#    fw = 10  # field width
+#
+#    f = open(filename, "wt")
+#
+#    f.write('Variables="x","y"')
+#
+#    for v in variables:
+#        f.write(',"%s"' % v[0])
+#    f.write('\n\n')
+#
+##    f.write('Zone I=' + pad(str(len(Xvec)),6) + ',J=' + pad(str(len(Yvec)),6))
+#
+##    f.write(', F=POINT\n')
+#
+#    id = 0
+#    for j in range(len(Yvec)):
+#        for i in range(len(Xvec)):
+#            f.write(pad(str(Xvec[i]), fw) + pad(str(Yvec[j]), fw))
+#            f.write(varline(variables, id, fw))
+#            id = id + 1
+#
+#    f.close()
 
 
 def tecplot_reader(filetec, headerlines=2):

@@ -22,6 +22,7 @@ class Analyzer():
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
 
         self.scaled = False
+        self.scale= 1
         if imageROI is None:
             self.ROI = [0, 0, self.frameInit.shape[1], self.frameInit.shape[0]]
         else:
@@ -61,6 +62,7 @@ class Analyzer():
 
         self.set_vecTime()
         print('number of frames : ' + str(self.number_of_frames))
+        self.fieldResults=None
         # plt.ion()
 
     def set_goodFeaturesToTrackParams(self, maxCorners=40000, qualityLevel=0.005,
@@ -142,7 +144,7 @@ class Analyzer():
         self.vecX = self.grid_x[0, :]
         self.vecY = self.grid_y[:, 0]
         self.XT = Interpolate.npGrid2TargetPoint2D(self.grid_x, self.grid_y)
-        self.XT = Interpolate.npGrid2TargetPoint2D(self.grid_x, self.grid_y)
+
         self.paramPlot['vecX'] = self.vecX
         self.paramPlot['vecY'] = self.vecY
         self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
@@ -557,14 +559,15 @@ class Analyzer():
                     self.UyTot.append(self.Uy)
 
                 Field = Render.setField(self.Ux, self.Uy, Type)
-                if display == 'field':
+                if display == 'fielself.vecd':
                     self.opyfDisp.plotField(Field, vis=self.vis, **args)
                     if saveImgPath is not None:
                         self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
-                            i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                            self.vec[0], '04.0f')+'_to_'+format(iself.vec[-1], '04.0f')+'.'+imgFormat)
                     self.opyfDisp.fig.show()
                     plt.pause(0.02)
-
+        self.fieldResults='time-serie'
+        
     def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1=False, display2=False, saveImgPath=None, Type='norme', imgFormat='png', **args):
         self.extractGoodFeaturesDisplacementsAndAccumulate(
             display=display1, **args)
@@ -583,6 +586,8 @@ class Analyzer():
             self.opyfDisp.fig.show()
             plt.pause(0.02)
 
+        self.fieldResults='accumulation'
+        
     def showXV(self, X, V, vis=None, display='quiver', displayColor=False, **args):
         if display == 'quiver':
             self.opyfDisp.plotQuiverUnstructured(
@@ -651,40 +656,91 @@ class Analyzer():
         self.Vdata = [(V*np.array([1, -1])) for V in self.Vdata]
 
     def writeGoodFeaturesPositionsAndDisplacements(self, fileFormat='hdf5', outFolder='.', filename=None, fileSequence=False):
+        XpROI=np.copy(self.Xdata)
+        if self.scaled==False:
+            XpROI[:,0]=self.Xdata[:,0]+self.ROI[0]
+            XpROI[:,1]=self.Xdata[:,1]+self.ROI[1]
         if filename is None:
             filename = 'good_features_positions_and_opt_flow_from_frame' + str(self.vec[0]) + 'to' + str(
                 self.vec[-1]) + '_with_step_' + str(self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
         if fileFormat == 'hdf5':
             Files.hdf5_WriteUnstructured2DTimeserie(
-                outFolder+'/'+filename+'.'+fileFormat, self.Time, self.Xdata, self.Vdata)
+                outFolder+'/'+filename+'.'+fileFormat, self.Time, XpROI, self.Vdata)
         elif fileFormat == 'csv':
             if fileSequence == False:
-                time = np.array(
+                timeT = np.array(
                     [self.Time, self.Time+self.paramVecTime['step']]).T
                 Files.csv_WriteUnstructured2DTimeserie2(
-                    outFolder+'/'+filename+'.'+fileFormat, time, self.Xdata, self.Vdata)
+                    outFolder+'/'+filename+'.'+fileFormat, timeT, XpROI, self.Vdata)
             elif fileSequence == True:
                 Files.mkdir2(outFolder+'/'+filename)
-                for x, v, t in zip(self.Xdata, self.Vdata, self.Time):
+                for x, v, t in zip(XpROI, self.Vdata, self.Time):
                     Files.write_csvTrack2D(outFolder+'/'+filename+'/'+format(t, '04.0f')+'_to_'+format(
                         t+self.paramVecTime['step'], '04.0f')+'.'+fileFormat, x, v)
 
         self.writeImageProcessingParamsJSON(outFolder=outFolder)
 
     def writeVelocityField(self, fileFormat='hdf5', outFolder='.', filename=None, fileSequence=False, saveParamsImgProc=True):
+        #for export in the image referential only if scaling and origin has not been attributed
+        
+        if len(self.UxTot)==0:
+            sys.exit('[Warning] the following method should be run to produce an interpolated field that can be saved {extractGoodFeaturesPositionsDisplacementsAndInterpolate} or {extractGoodFeaturesDisplacementsAccumulateAndInterpolate}')
+
+        vecXpROI=np.copy(self.vecX)
+        vecYpROI=np.copy(self.vecY)
+        if self.scaled==False:
+            vecXpROI=self.vecX+self.ROI[0]
+            vecYpROI=self.vecY+self.ROI[1]
+            
         self.UxTot = np.array(self.UxTot)
         self.UyTot = np.array(self.UyTot)
-        if filename is None:
-            filename = 'velocity_field_from_frame' + str(self.vec[0]) + 'to' + str(self.vec[-1]) + '_with_step_' + str(
-                self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
-        if fileFormat == 'hdf5':
-            variables = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UxTot],
-                         ['Uy_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UyTot]]
-            Files.hdf5_Write(outFolder+'/'+filename+'.'+fileFormat, [['T_['+self.unit[0]+']', self.Time], [
-                             'X_['+self.unit[0]+']', self.vecX], ['Y_['+self.unit[0]+']', self.vecY]], variables)
+        
+        if self.fieldResults=='time-serie':
+            if filename is None:
+                filename = 'velocity_field_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
+                    self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
+            self.variables = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', self.UxTot],
+                             ['Uy_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', self.UyTot]]
+            if fileFormat == 'hdf5':
+                Files.hdf5_Write(outFolder+'/'+filename+'.'+fileFormat, [['T_['+self.unit[0]+']', self.Time], [
+                             'X_['+self.unit[0]+']', vecXpROI], ['Y_['+self.unit[0]+']', vecYpROI]], self.variables)              
+
+            if fileFormat == 'tecplot' or 'csv' or 'tec':
+                for k in range(len(self.Time)):
+                    VT = Interpolate.npGrid2TargetPoint2D(self.UxTot[k], self.UyTot[k])
+                    variablesTecplot = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', VT[:,0]],
+                            ['Uy_['+self.unit[0]+'.'+self.unit[1]+'-1]', VT[:,1]]]
+                    filename = 'velocity_field_from_frame_' + str(self.vec[2*k]) + '_to_' + str(self.vec[2*k+1])
+                    if fileFormat == 'tecplot'  or 'tec':
+                        Files.tecplot_WriteRectilinearMesh(outFolder+'/'+format(k,'04.0f')+'_'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                    if fileFormat == 'csv':
+                        Files.csv_WriteRectilinearMesh(outFolder+'/'+format(k,'04.0f')+'_'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                        
+        elif  self.fieldResults=='accumulation':
+            VT = Interpolate.npGrid2TargetPoint2D(self.UxTot[0], self.UyTot[0])
+            if filename is None:
+                filename = 'velocity_field_with_accumulation_of_features_velocities_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
+                    self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
+
+            if fileFormat == 'hdf5':
+                Files.hdf5_Write(outFolder+'/'+filename+'.'+fileFormat, [[
+                                 'X_['+self.unit[0]+']', vecXpROI], ['Y_['+self.unit[0]+']', vecYpROI]], self.variables)
+                    
+            if fileFormat == 'tecplot' or 'csv' or 'tec':
+                variablesTecplot = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', VT[:,0]],
+                            ['Uy_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', VT[:,1]]]
+                if fileFormat == 'tecplot'  or 'tec':
+                    Files.tecplot_WriteRectilinearMesh(outFolder+'/'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                if fileFormat == 'csv':
+                    Files.csv_WriteRectilinearMesh(outFolder+'/'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                    
+        
         if saveParamsImgProc == True:
             self.writeImageProcessingParamsJSON(outFolder=outFolder)
- # TODO for csv format
+            
+            
+            
+ # TODO for csv format on file for each time step (or only one file if coordimates)
 #        elif fileFormat=='csv':
 #            if fileSequence==False:
 #                Files.csv_WriteUnstructured2DTimeserie(outFolder+'/'+filename+'.'+fileFormat,self.Time,self.Xdata,self.Vdata)
@@ -719,16 +775,22 @@ class Analyzer():
         for (tr, vtr) in zip(self.tracks, self.vtracks):
             l = len(tr)
             for i in range(l):
-                writer.writerow(
+                if self.scaled==True:
+                    writer.writerow(
                     {'track_index': N, 'frame_index': self.vecTracks[-l+i], 'X': tr[i][0], 'Y': tr[i][1], 'Vx': vtr[i][0], 'Vy': vtr[i][1]})
+                else:
+                    writer.writerow(
+                    {'track_index': N, 'frame_index': self.vecTracks[-l+i], 'X': tr[i][0]+self.ROI[0], 'Y': tr[i][1]+self.ROI[1], 'Vx': vtr[i][0], 'Vy': vtr[i][1]})
+
             N += 1
         f.close()
 
     def writeImageProcessingParamsJSON(self, outFolder='.', filename=None):
 
         fulldict = {'lk_params': self.lk_params, 'feature_params': self.feature_params,
-                    'filters_params': self.filters_params, 'interp_parameter': self.interp_params}
-
+                    'filters_params': self.filters_params, 'interp_parameter': self.interp_params,
+                    'vecTime_params':self.paramVecTime}
+        fulldict['fieldResults']=self.fieldResults
         Files.writeImageProcessingParamsJSON(
             fulldict, outFolder=outFolder, filename=None)
 

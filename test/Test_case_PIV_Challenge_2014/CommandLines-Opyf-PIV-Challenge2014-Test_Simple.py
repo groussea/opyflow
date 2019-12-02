@@ -14,7 +14,7 @@ Created on Wed Nov 22 08:24:12 2017
 # 1 #### Initialisation
 
 import tqdm
-import opyf
+
 import json
 import matplotlib.pyplot as plt
 import numpy as np
@@ -25,7 +25,8 @@ import os
 folder_main = './'
 os.chdir(folder_main)
 # if it is not installed where is the opyf folder?
-# sys.path.append('/media/gauthier/Data_1/TAF/OPyF-Project/github/opyFlow')
+sys.path.append('../../')
+import opyf
 
 plt.close('all')
 
