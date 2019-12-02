@@ -85,11 +85,12 @@ class Analyzer():
         for x in self.lk_params:
             print('\t- ', x, ':', self.lk_params[x])
 
-    def set_filtersParams(self, RadiusF=30, minNperRadius=0, maxDevInRadius=np.inf, wayBackGoodFlag=np.inf):
+    def set_filtersParams(self, RadiusF=30, minNperRadius=0, maxDevInRadius=np.inf, wayBackGoodFlag=np.inf,CLAHE=False):
         self.filters_params = dict(RadiusF=RadiusF,
                                    minNperRadius=minNperRadius,
                                    maxDevInRadius=maxDevInRadius,
-                                   wayBackGoodFlag=wayBackGoodFlag)
+                                   wayBackGoodFlag=wayBackGoodFlag,
+                                   CLAHE=CLAHE)
 
         print('')
         print('Filters Params:')
@@ -191,7 +192,7 @@ class Analyzer():
                 else:
                     print(
                         '--> diplacements measurement between frame [' + file_prev + '] and [' + str(i) + ']')
-        self.Time = self.vec[0:-1:2]
+        self.Time = (self.vec[0:-1:2]+self.vec[1::2])/2
         # initilize self.vis with the first frame of the set
 
         if self.processingMode == 'video':
@@ -386,10 +387,11 @@ class Analyzer():
         self.readFrame(i)
         self.substractAveragedFrame()
 
-        # TODO optional CLAHE
-        #  current_gray = Render.CLAHEbrightness(
-        #     gray, 0, tileGridSize=(20, 20), clipLimit=2)
-#        self.vis=Render.CLAHEbrightness(self.vis,0,tileGridSize=(20,20),clipLimit=2)
+
+        if self.filters_params['CLAHE']==True:
+             self.gray= Render.CLAHEbrightness(
+             self.gray, 0, tileGridSize=(20, 20), clipLimit=2)
+#             self.vis=Render.CLAHEbrightness(self.vis,0,tileGridSize=(20,20),clipLimit=2)
 
         self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(self.gray,
                                                                 self.prev_gray,
@@ -603,7 +605,7 @@ class Analyzer():
             self.fps = framesPerSecond
             self.scale = metersPerPx
             self.unit = unit
-            self.Time = self.Time/self.fps*self.paramVecTime['step']
+            self.Time = self.Time/self.fps
 
             self.Vdata = [V*self.scale*self.fps /
                           self.paramVecTime['step'] for V in self.Vdata]

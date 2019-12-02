@@ -165,7 +165,6 @@ class opyfDisplayer:
 
     def opyfField(self,grid_val, dConfig=None, extent=None, extentr=None, **args):
        
-
         if 'vlim' in args:
             vlim = args.get('vlim', [grid_val.min(), grid_val.max()])
             if vlim is None:
@@ -408,9 +407,9 @@ class opyfDisplayer:
         if self.paramDisp['DisplayField'] == True and Field is not None:
             resx = np.absolute(self.grid_x[0, 1]-self.grid_x[0, 0])
             resy = np.absolute(self.grid_y[1, 0]-self.grid_y[0, 0])
-            extent = [self.grid_x[0, 0]-resx, self.grid_x[0, -1] +
-                      resx, self.grid_y[-1, 0]+resy/2, self.grid_y[0, 0]-resy]
-    #        figp,ax,im=opyfField2(grid_x,grid_y,Field,ax=ax,**infoPlotField)
+            extent = [self.grid_x[0, 0]-resx/2, self.grid_x[0, -1] +
+                      resx/2, self.grid_y[-1, 0]-resy/2, self.grid_y[0, 0]+resy/2]
+
             self.opyfField(Field, extent=extent, extentr=extentVis, **infoPlotField)
 
             self.opyfColorBar(label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
