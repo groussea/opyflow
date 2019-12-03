@@ -348,7 +348,7 @@ class Analyzer():
 
         self.scaleAndLogTracks(i)
 
-    def extractTracks(self, display=False, saveImgPath=None, imgFormat='.png', **args):
+    def extractTracks(self, display=False, saveImgPath=None, numberingOutput=False,imgFormat='png', **args):
         self.reset()
         self.tracks = []
         self.vtracks = []
@@ -356,6 +356,7 @@ class Analyzer():
             print(
                 '\n \nWARNING : To run the extractTracks() method, it is mandatory to define the tracking plan through the method [set_trackingFeatures()]\n\n')
             sys.exit()
+        k=0
         for pr, i in zip(self.prevTracks, self.vecTracks):
             self.stepTracks(pr, i)
             if pr == True:
@@ -367,8 +368,13 @@ class Analyzer():
                 self.showXV(self.X, self.V, vis=self.vis,
                             display=display, **args)
                 if saveImgPath is not None:
-                    self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
+                    if numberingOutput==True:
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
+                        k+=1
+                    else: 
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                        
                 if display is not False:
                     self.opyfDisp.fig.show()
                     plt.pause(0.02)
@@ -490,9 +496,9 @@ class Analyzer():
         plt.close('opyfPlot')
         self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
 
-    def extractGoodFeaturesAndDisplacements(self, display=False, saveImgPath=None, imgFormat='.png', **args):
+    def extractGoodFeaturesAndDisplacements(self, display=False, saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
         self.reset()
-
+        k=0
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
             if pr == True:
@@ -502,16 +508,22 @@ class Analyzer():
                 self.showXV(self.X, self.V, vis=self.vis,
                             display=display, **args)
                 if saveImgPath is not None:
-                    self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
+                    if numberingOutput==True:
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
+                        k+=1
+                    else: 
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                    
                 if display is not False:
                     self.opyfDisp.fig.show()
                     plt.pause(0.02)
 
-    def extractGoodFeaturesDisplacementsAndAccumulate(self, display=False, saveImgPath=None, imgFormat='.png', **args):
+    def extractGoodFeaturesDisplacementsAndAccumulate(self, display=False, saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
         self.reset()
         self.Xaccu = np.empty((0, 2))
         self.Vaccu = np.empty((0, 2))
+        k=0
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
             if pr == True:
@@ -522,8 +534,13 @@ class Analyzer():
                 self.showXV(self.Xaccu, self.Vaccu, vis=self.vis,
                             display=display, **args)
                 if saveImgPath is not None:
-                    self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
+                    if numberingOutput==True:
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
+                        k+=1
+                    else: 
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                    
                 if display is not False:
                     self.opyfDisp.fig.show()
                     plt.pause(0.02)
@@ -539,8 +556,9 @@ class Analyzer():
         self.Uy = Interpolate.npTargetPoints2Grid2D(
             self.interpolatedVelocities[:, 1], self.Lgrid, self.Hgrid)*self.gridMask
 
-    def extractGoodFeaturesPositionsDisplacementsAndInterpolate(self, display=False, saveImgPath=None, Type='norme', imgFormat='png', **args):
+    def extractGoodFeaturesPositionsDisplacementsAndInterpolate(self, display=False, saveImgPath=None, numberingOutput=False, Type='norme', imgFormat='png', **args):
         self.reset()
+        k=0
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
             if pr == True:
@@ -559,14 +577,20 @@ class Analyzer():
                     self.UyTot.append(self.Uy)
 
                 Field = Render.setField(self.Ux, self.Uy, Type)
-                if display == 'fielself.vecd':
+                if display == 'field':
                     self.opyfDisp.plotField(Field, vis=self.vis, **args)
-                    if saveImgPath is not None:
-                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
-                            self.vec[0], '04.0f')+'_to_'+format(iself.vec[-1], '04.0f')+'.'+imgFormat)
+                    if saveImgPath is not None:                  
+                        if numberingOutput==True:
+                            self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
+                            k+=1
+                        else: 
+                            self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
+                            i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                        
                     self.opyfDisp.fig.show()
                     plt.pause(0.02)
         self.fieldResults='time-serie'
+        
         
     def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1=False, display2=False, saveImgPath=None, Type='norme', imgFormat='png', **args):
         self.extractGoodFeaturesDisplacementsAndAccumulate(
