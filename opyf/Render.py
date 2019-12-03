@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import cv2
-
+import sys
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['axes.edgecolor'] = '0'
@@ -29,7 +29,7 @@ def ir(A):
     return int(np.round(A))
 
 
-def opyfPlot(grid_x, grid_y, gridVx, gridVy, Xdata, Vdata, setPlot, vis=None, Ptype='norme', namefig='Opyf', vlim=None, scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, respx=32, ROIvis=None, **args):
+def opyfPlot(grid_x, grid_y, gridVx, gridVy, Xdata, Vdata, setPlot, vis=None, Ptype='norm', namefig='Opyf', vlim=None, scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, respx=32, ROIvis=None, **args):
 
     if cmap is None:
         cmap = setcmap(Ptype, alpha=alpha)
@@ -129,7 +129,7 @@ class opyfDisplayer:
                           'vecY': args.get('vecY', []),
                           'extentFrame': args.get('extentFrame', [0, 1, 0, 1]),
                           'unit': args.get('unit', ['', 'deltaT']),
-                          'Hfig': args.get('Hfig', 9),
+                          'Hfig': args.get('Hfig', 8),
                           'num': args.get('num', 'opyfPlot'),
                           'grid': args.get('grid', True),
                           'vlim': args.get('vlim', None)}
@@ -144,6 +144,8 @@ class opyfDisplayer:
             extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
 #        self.setExtent(self.paramPlot['extentFrame'])
         plt.ion()
+        
+        self.backend=mpl.get_backend()
 
     def setGridXandGridY(self, vecX, vecY):
         self.grid_x = np.ones((len(vecY), 1)) * vecX
@@ -357,7 +359,7 @@ class opyfDisplayer:
 
 
 
-    def plot(self, Field=None, gridVx=None, gridVy=None, Xdata=None, Vdata=None, vis=None, Ptype='norme', Hfig=8, namefig='Opyf', scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, res=32,
+    def plot(self, Field=None, gridVx=None, gridVy=None, Xdata=None, Vdata=None, vis=None, Ptype='norm', Hfig=8, namefig='Opyf', scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, res=32,
              c='k', s=10, ROIvis=None, **args):
 
         if len(self.ax.collections) > 0:
@@ -368,6 +370,10 @@ class opyfDisplayer:
             del self.ax.images[:]
         if len(self.fig.axes) > 1:
             self.fig.axes[1].remove()
+        if self.backend[-14:]== 'backend_inline':  
+            plt.close('all')                  
+            self.fig, self.ax = opyffigureandaxes(
+            extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
 
 
 #            self.fig,self.ax= opyffigureandaxes(extent=self.paramPlot['extentFrame'],Hfig=self.paramPlot['Hfig'],unit=self.paramPlot['unit'][0],num='opfPlot')
@@ -444,6 +450,9 @@ class opyfDisplayer:
             self.cb.set_alpha(0.8)
             self.cb.draw_all()
         self.fig.show()
+        self.fig.canvas.draw()
+        self.fig.canvas.flush_events()
+        
 
     def FieldInitializer(self, vecX, vecY, Field):
         if (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None) or (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None):
@@ -506,9 +515,9 @@ class opyfDisplayer:
     def plotQuiverUnstructured(self, Xdata, Vdata, displayColor=False, vis=None, **args):
 
         for key, value in self.paramDisp.items():
-            if key == 'QuiverOnPoints' and displayColor == False and len(Xdata>1):
+            if key == 'QuiverOnPoints' and displayColor == False and len(Xdata)>1:
                 self.paramDisp[key] = True
-            elif key == 'QuiverOnPointsColored' and displayColor == True and len(Xdata>1):
+            elif key == 'QuiverOnPointsColored' and displayColor == True and len(Xdata)>1:
                 self.paramDisp[key] = True
             else:
                 self.paramDisp[key] = False
@@ -901,7 +910,7 @@ def opyfColorBar(fig, im, label='Magnitude [px/Dt]', **args):
     return fig, cb
 
 
-def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=9, sizemax=17, **args):
+def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=17, **args):
     Hframe = np.absolute(extent[3]-extent[2])
     Lframe = np.absolute(extent[1]-extent[0])
     Lfig = Lframe*Hfig/Hframe
@@ -933,7 +942,7 @@ def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=9, sizemax=17, **args
 
 def setcmap(Type, alpha=1.):
     from opyf.custom_cmap import make_cmap
-    if Type == 'norme':
+    if Type == 'norm':
         colors = [(33./255, 66./255, 99./255, 0.), (33./255, 66./255, 99./255,
                                                     alpha), (1, 1, 0.3, alpha), (0.8, 0, 0, alpha), (0, 0, 0, alpha)]
         position = [0, 0.01, 0.05, 0.5, 1]
@@ -955,12 +964,16 @@ def setcmap(Type, alpha=1.):
 
 def setField(gridVec_x, gridVec_y, Type):
 
-    if Type == 'norme':
+    if Type == 'norm':
         Field = (gridVec_x**2+gridVec_y**2)**(0.5)
     elif Type == 'horizontal':
         Field = gridVec_x
     elif Type == 'vertical':
         Field = gridVec_y
+    else:
+        print('setField(gridVec_x, gridVec_y, Type) requires the Type : norm or horizontal or vertical ')
+        sys.exit()
+        
     return Field
 
 
@@ -1080,7 +1093,7 @@ def CLAHEbrightness(frame, value, tileGridSize=(2, 2), clipLimit=2):
     return vis
 
 
-def opyfPlotRectilinear(vecX, vecY, gridVx, gridVy, setPlot, Xdata=None, Vdata=None, vis=None, Hfig=9, Ptype='norme', namefig='Opyf', vlim=None, scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, res=32, ROIvis=None, **args):
+def opyfPlotRectilinear(vecX, vecY, gridVx, gridVy, setPlot, Xdata=None, Vdata=None, vis=None, Hfig=9, Ptype='norm', namefig='Opyf', vlim=None, scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, res=32, ROIvis=None, **args):
 
     grid_x = np.ones((len(vecY), 1)) * vecX
     grid_y = (np.ones((len(vecX), 1)) * vecY).T

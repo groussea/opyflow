@@ -280,7 +280,7 @@ for i in tqdm.trange(len(prev)):
         # the lgortihm can plot 'horizontal', 'vertical' or norme field values
         #
         # for the vectos
-        render_params = dict(Ptype='norme',
+        render_params = dict(Ptype='norm',
                              vlim=[0, 70.],
                              scale=1000)
 

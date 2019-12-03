@@ -312,7 +312,7 @@ class Analyzer():
         #                           self.matches, '-sintel')
         # self.prev_col = np.copy(self.vis)
 
-    # def extractDeepFlow(self, display=False, saveImgPath=None, Type='norme', imgFormat='png', **args):
+    # def extractDeepFlow(self, display=False, saveImgPath=None, Type='norm', imgFormat='png', **args):
     #     self.reset()
     #     for pr, i in zip(self.prev, self.vec):
     #         self.stepDeepFlow(pr, i)
@@ -437,7 +437,7 @@ class Analyzer():
             self.scaleAndLogFlow(i)
 
     def scaleAndLogTracks(self, i):
-        if self.scaled == True:
+        if self.scaled == True and len(self.X) > 0:
             self.X = (self.X-np.array(self.origin))*self.scale
             self.V = self.V*self.scale*self.fps/self.paramVecTime['step']
             self.X[:, 1] = -self.X[:, 1]
@@ -556,7 +556,7 @@ class Analyzer():
         self.Uy = Interpolate.npTargetPoints2Grid2D(
             self.interpolatedVelocities[:, 1], self.Lgrid, self.Hgrid)*self.gridMask
 
-    def extractGoodFeaturesPositionsDisplacementsAndInterpolate(self, display=False, saveImgPath=None, numberingOutput=False, Type='norme', imgFormat='png', **args):
+    def extractGoodFeaturesPositionsDisplacementsAndInterpolate(self, display=False, saveImgPath=None, numberingOutput=False, Type='norm', imgFormat='png', **args):
         self.reset()
         k=0
         for pr, i in zip(self.prev, self.vec):
@@ -592,7 +592,7 @@ class Analyzer():
         self.fieldResults='time-serie'
         
         
-    def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1=False, display2=False, saveImgPath=None, Type='norme', imgFormat='png', **args):
+    def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1=False, display2=False, saveImgPath=None, Type='norm', imgFormat='png', **args):
         self.extractGoodFeaturesDisplacementsAndAccumulate(
             display=display1, **args)
         self.interpolateOnGrid(self.Xaccu, self.Vaccu)
@@ -606,7 +606,7 @@ class Analyzer():
             self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
             if saveImgPath is not None:
                 self.opyfDisp.fig.savefig(saveImgPath+'/'+display2+'_'+format(
-                    i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
+                    self.vec[0], '04.0f')+'_to_'+format(self.vec[-1], '04.0f')+'.'+imgFormat)
             self.opyfDisp.fig.show()
             plt.pause(0.02)
 
@@ -622,6 +622,9 @@ class Analyzer():
                 Xdata=X, Vdata=V, vis=vis, displayColor=displayColor, **args)
 
     def scaleData(self, framesPerSecond=1, metersPerPx=1, unit=['m', 's'], origin=None):
+        
+
+        
         if self.scaled == True:
             print('datas already scaled')
         else:
@@ -635,25 +638,30 @@ class Analyzer():
             self.scale = metersPerPx
             self.unit = unit
             self.Time = self.Time/self.fps
-
-            self.Vdata = [V*self.scale*self.fps /
-                          self.paramVecTime['step'] for V in self.Vdata]
-            self.Xdata = [(X-np.array(self.origin)) *
-                          self.scale for X in self.Xdata]
-            self.Ux, self.Uy = self.Ux*self.scale*self.fps / \
-                self.paramVecTime['step'], self.Uy * \
+            if hasattr(self,'X')==True:
+                self.X = (self.X-np.array(self.origin))*self.scale
+                self.V = self.V*self.scale*self.fps /self.paramVecTime['step']       
+                self.Vdata = [V*self.scale*self.fps /
+                              self.paramVecTime['step'] for V in self.Vdata]
+    
+                self.Xdata = [(X-np.array(self.origin)) *
+                              self.scale for X in self.Xdata]
+            if hasattr(self,'Ux')==True:
+                self.Ux, self.Uy = self.Ux*self.scale*self.fps / \
+                    self.paramVecTime['step'], self.Uy * \
+                    self.scale*self.fps/self.paramVecTime['step']
+                self.vecX = (self.vecX-self.origin[0])*self.scale
+                self.vecY = (self.vecY-self.origin[1])*self.scale
+                self.gridVx, self.gridVy = self.gridVx*self.scale*self.fps / \
+                self.paramVecTime['step'], self.gridVy * \
                 self.scale*self.fps/self.paramVecTime['step']
-            self.vecX = (self.vecX-self.origin[0])*self.scale
-            self.vecY = (self.vecY-self.origin[1])*self.scale
-
+                
             self.grid_y, self.grid_x = (
                 self.grid_y-self.origin[1])*self.scale, (self.grid_x-self.origin[0])*self.scale
             self.invertYaxis()
             self.XT = Interpolate.npGrid2TargetPoint2D(
                 self.grid_x, self.grid_y)
-            self.gridVx, self.gridVy = self.gridVx*self.scale*self.fps / \
-                self.paramVecTime['step'], self.gridVy * \
-                self.scale*self.fps/self.paramVecTime['step']
+            
 
             self.interp_params = dict(Radius=self.interp_params['Radius']*self.scale,  # it is not necessary to perform interpolation on a high radius since we have a high number of values
                                       Sharpness=self.interp_params['Sharpness'],
@@ -674,12 +682,17 @@ class Analyzer():
     def invertYaxis(self):
         self.vecY = -self.vecY
         self.grid_y = -self.grid_y
-        self.gridVx = -self.gridVx
-        self.Uy = -self.Uy
-        self.Xdata = [(X*np.array([1, -1])) for X in self.Xdata]
-        self.Vdata = [(V*np.array([1, -1])) for V in self.Vdata]
+        if hasattr(self,'Ux')==True:
+            self.gridVx = -self.gridVx
+            self.Uy = -self.Uy
+        if hasattr(self,'X')==True:
+            self.X=self.X*np.array([1, -1])
+            self.V=self.V*np.array([1, -1])
+            self.Xdata = [(X*np.array([1, -1])) for X in self.Xdata]
+            self.Vdata = [(V*np.array([1, -1])) for V in self.Vdata]
 
     def writeGoodFeaturesPositionsAndDisplacements(self, fileFormat='hdf5', outFolder='.', filename=None, fileSequence=False):
+        self.filename=filename
         XpROI=np.copy(self.Xdata)
         if self.scaled==False:
             XpROI[:,0]=self.Xdata[:,0]+self.ROI[0]
@@ -706,7 +719,7 @@ class Analyzer():
 
     def writeVelocityField(self, fileFormat='hdf5', outFolder='.', filename=None, fileSequence=False, saveParamsImgProc=True):
         #for export in the image referential only if scaling and origin has not been attributed
-        
+        self.filename=filename
         if len(self.UxTot)==0:
             sys.exit('[Warning] the following method should be run to produce an interpolated field that can be saved {extractGoodFeaturesPositionsDisplacementsAndInterpolate} or {extractGoodFeaturesDisplacementsAccumulateAndInterpolate}')
 
@@ -721,42 +734,45 @@ class Analyzer():
         
         if self.fieldResults=='time-serie':
             if filename is None:
-                filename = 'velocity_field_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
+                self.filename = 'velocity_field_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
                     self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
-            self.variables = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', self.UxTot],
-                             ['Uy_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', self.UyTot]]
+            self.variables = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UxTot],
+                             ['Uy_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UyTot]]
             if fileFormat == 'hdf5':
-                Files.hdf5_Write(outFolder+'/'+filename+'.'+fileFormat, [['T_['+self.unit[0]+']', self.Time], [
+                Files.hdf5_Write(outFolder+'/'+self.filename+'.'+fileFormat, [['T_['+self.unit[0]+']', self.Time], [
                              'X_['+self.unit[0]+']', vecXpROI], ['Y_['+self.unit[0]+']', vecYpROI]], self.variables)              
 
-            if fileFormat == 'tecplot' or 'csv' or 'tec':
+            if fileFormat == 'tecplot' or fileFormat == 'csv' or fileFormat == 'tec':
                 for k in range(len(self.Time)):
                     VT = Interpolate.npGrid2TargetPoint2D(self.UxTot[k], self.UyTot[k])
                     variablesTecplot = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', VT[:,0]],
                             ['Uy_['+self.unit[0]+'.'+self.unit[1]+'-1]', VT[:,1]]]
-                    filename = 'velocity_field_from_frame_' + str(self.vec[2*k]) + '_to_' + str(self.vec[2*k+1])
-                    if fileFormat == 'tecplot'  or 'tec':
-                        Files.tecplot_WriteRectilinearMesh(outFolder+'/'+format(k,'04.0f')+'_'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                    self.filename = 'velocity_field_from_frame_' + str(self.vec[2*k]) + '_to_' + str(self.vec[2*k+1])
+                    if fileFormat == 'tecplot'  or fileFormat == 'tec':
+                        Files.tecplot_WriteRectilinearMesh(outFolder+'/'+format(k,'04.0f')+'_'+self.filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
                     if fileFormat == 'csv':
-                        Files.csv_WriteRectilinearMesh(outFolder+'/'+format(k,'04.0f')+'_'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                        Files.csv_WriteRectilinearMesh(outFolder+'/'+format(k,'04.0f')+'_'+self.filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
                         
         elif  self.fieldResults=='accumulation':
             VT = Interpolate.npGrid2TargetPoint2D(self.UxTot[0], self.UyTot[0])
             if filename is None:
-                filename = 'velocity_field_with_accumulation_of_features_velocities_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
+#                filename = 'velocity_field_with_accumulation_of_features_velocities_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
+#                    self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
+                self.filename = '_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
                     self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
-
+            self.variables = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UxTot],
+                 ['Uy_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UyTot]]
             if fileFormat == 'hdf5':
-                Files.hdf5_Write(outFolder+'/'+filename+'.'+fileFormat, [[
-                                 'X_['+self.unit[0]+']', vecXpROI], ['Y_['+self.unit[0]+']', vecYpROI]], self.variables)
+                Files.hdf5_Write(outFolder+'/'+self.filename+'.'+fileFormat, [['T_['+self.unit[0]+']', self.Time], [
+                             'X_['+self.unit[0]+']', vecXpROI], ['Y_['+self.unit[0]+']', vecYpROI]], self.variables)
                     
-            if fileFormat == 'tecplot' or 'csv' or 'tec':
+            if fileFormat == 'tecplot' or fileFormat == 'csv' or fileFormat == 'tec':
                 variablesTecplot = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', VT[:,0]],
                             ['Uy_['+self.unit[0]+'.'+self.unit[1]+'^{-1}]', VT[:,1]]]
-                if fileFormat == 'tecplot'  or 'tec':
-                    Files.tecplot_WriteRectilinearMesh(outFolder+'/'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                if fileFormat == 'tecplot'  or fileFormat == 'tec':
+                    Files.tecplot_WriteRectilinearMesh(outFolder+'/'+self.filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
                 if fileFormat == 'csv':
-                    Files.csv_WriteRectilinearMesh(outFolder+'/'+filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
+                    Files.csv_WriteRectilinearMesh(outFolder+'/'+self.filename+'.'+fileFormat, vecXpROI, vecYpROI, variablesTecplot)
                     
         
         if saveParamsImgProc == True:
@@ -774,9 +790,10 @@ class Analyzer():
 #                    Files.write_csvTrack2D(outFolder+'/'+filename+'/'+format(t,'04.0f')+'_to_'+format(t+self.paramVecTime['step'],'04.0f')+'.'+fileFormat,x,v)
 #
 #
-
-    def writeTracks(self, filename=None, fileFormat='csv', outFolder='.'):
+#TODO export this method in Files
+    def writeTracks(self, filename=None, fileFormat='csv', outFolder='.', saveParamsImgProc=True):
         import csv
+        self.filename=filename
         print('')
 
         TL = self.tracks_params['track_len']
@@ -795,19 +812,25 @@ class Analyzer():
             f, fieldnames=['track_index', 'frame_index', 'X', 'Y', 'Vx', 'Vy'])
         writer.writeheader()
         N = 0
-
+        
         for (tr, vtr) in zip(self.tracks, self.vtracks):
             l = len(tr)
             for i in range(l):
                 if self.scaled==True:
+                    corr=self.scale*self.fps /self.paramVecTime['step'] 
                     writer.writerow(
-                    {'track_index': N, 'frame_index': self.vecTracks[-l+i], 'X': tr[i][0], 'Y': tr[i][1], 'Vx': vtr[i][0], 'Vy': vtr[i][1]})
+                    {'track_index': N, 'frame_index': self.vecTracks[-l+i], 'X': tr[i][0]*self.scale, 'Y': tr[i][1]*self.scale, 'Vx': vtr[i][0]*corr, 'Vy': vtr[i][1]*corr})
                 else:
                     writer.writerow(
                     {'track_index': N, 'frame_index': self.vecTracks[-l+i], 'X': tr[i][0]+self.ROI[0], 'Y': tr[i][1]+self.ROI[1], 'Vx': vtr[i][0], 'Vy': vtr[i][1]})
 
             N += 1
         f.close()
+        print('[log] Tracks Data saved in '+outFolder+'/'+filename+'.'+fileFormat)
+        
+        if saveParamsImgProc == True:
+            self.writeImageProcessingParamsJSON(outFolder=outFolder)       
+        
 
     def writeImageProcessingParamsJSON(self, outFolder='.', filename=None):
 
@@ -878,7 +901,7 @@ class frameSequenceAnalyzer(Analyzer):
 
         Analyzer.__init__(self, **args)
 
-#    def writeGoodFeaturesPositionsAndExtraction(self,fileFormat='hdf5',imgFormat='png',outFolder='',filename=None,fileSequence=False):
+#TODO    def writeGoodFeaturesPositionsAndExtraction(self,fileFormat='hdf5',imgFormat='png',outFolder='',filename=None,fileSequence=False):
 #        if filename is None:
 #            filename='Goof_features_positions_from_frame'+ str(self.vec[0]) + 'to' + str(self.vec[-2]) + '_with_shift_'+str(self.paramVecTime['shift'])
 #
