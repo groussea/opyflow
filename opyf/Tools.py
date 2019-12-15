@@ -16,3 +16,7 @@ def convertToGrayScale(vis):
     else:
         gray = vis
     return gray
+
+def computeHomography(R1, tvec1, R2,tvec2,d_inv, normal):
+    homography = R2 @ R1.transpose() + d_inv * (-R2 @ R1.transpose() @ tvec1 + tvec2) @ normal.transpose()
+    return homography

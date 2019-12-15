@@ -12,8 +12,8 @@ import numpy as np
 import cv2
 from opyf import MeshesAndTime, Track, Render, Files, Tools, Interpolate, Filters
 import matplotlib.pyplot as plt
-import time
 
+import opyf
 
 class Analyzer():
     def __init__(self, imageROI=None, **args):
@@ -56,8 +56,10 @@ class Analyzer():
                           'Hfig': args.get('Hfig', 8),
                           'grid': args.get('grid', True),
                           'vlim': args.get('vlim', [0, 40])}
+        self.birdEyeMod=False
+        self.stabilizeOn=False
         self.reset()
-        self.set_gridToInterpolateOn(0, self.Lvis, 4, 0, self.Hvis, 4)
+        self.set_gridToInterpolateOn()
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
 
         self.set_vecTime()
@@ -65,6 +67,8 @@ class Analyzer():
         self.fieldResults=None
         # plt.ion()
 
+        self.opyfDisp.ax.imshow(self.vis)
+        plt.pause(0.1)
     def set_goodFeaturesToTrackParams(self, maxCorners=40000, qualityLevel=0.005,
                                       minDistance=5, blockSize=16):
 
@@ -137,10 +141,15 @@ class Analyzer():
             self.ROImeasure = [pixLeft, pixUp, pixRight-pixLeft, pixDown-pixUp]
         self.grid_y, self.grid_x, self.gridVx, self.gridVy,  self.Hgrid, self.Lgrid = MeshesAndTime.set_gridToInterpolateOn(
             pixLeft, pixRight, stepHor, pixUp, pixDown, stepVert)
+        self.grid_x=self.grid_x
+        self.grid_y=self.grid_y
+ 
+   
         if self.scaled == True:
             self.grid_y, self.grid_x = - \
                 (self.grid_y-self.origin[1]) * \
                 self.scale, (self.grid_x-self.origin[0])*self.scale
+     
         self.vecX = self.grid_x[0, :]
         self.vecY = self.grid_y[:, 0]
         self.XT = Interpolate.npGrid2TargetPoint2D(self.grid_x, self.grid_y)
@@ -299,6 +308,13 @@ class Analyzer():
 
         self.vis = self.vis[self.ROI[1]:(
             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
+    
+        if self.stabilizeOn==True:
+            self.stabilize(i)
+        if self.birdEyeMod==True:
+            self.transformBirdEye()
+            
+
 
     # TODO  def stepDeepFlow(self, pr, i):
         # self.readFrame(i)
@@ -655,7 +671,11 @@ class Analyzer():
                 self.gridVx, self.gridVy = self.gridVx*self.scale*self.fps / \
                 self.paramVecTime['step'], self.gridVy * \
                 self.scale*self.fps/self.paramVecTime['step']
-                
+            if hasattr(self,'UyTot'):
+                for i in range(len(self.UyTot)):
+                    self.UyTot[i]=self.UyTot[i]*self.scale*self.fps /self.paramVecTime['step']
+                    self.UxTot[i]=self.UxTot[i]*self.scale*self.fps /self.paramVecTime['step']
+                    
             self.grid_y, self.grid_x = (
                 self.grid_y-self.origin[1])*self.scale, (self.grid_x-self.origin[0])*self.scale
             self.invertYaxis()
@@ -690,6 +710,9 @@ class Analyzer():
             self.V=self.V*np.array([1, -1])
             self.Xdata = [(X*np.array([1, -1])) for X in self.Xdata]
             self.Vdata = [(V*np.array([1, -1])) for V in self.Vdata]
+        if hasattr(self,'UyTot'):
+            for i in range(len(self.UyTot)):
+                self.UyTot[i]=-self.UyTot[i]
 
     def writeGoodFeaturesPositionsAndDisplacements(self, fileFormat='hdf5', outFolder='.', filename=None, fileSequence=False):
         self.filename=filename
@@ -716,6 +739,8 @@ class Analyzer():
                         t+self.paramVecTime['step'], '04.0f')+'.'+fileFormat, x, v)
 
         self.writeImageProcessingParamsJSON(outFolder=outFolder)
+
+
 
     def writeVelocityField(self, fileFormat='hdf5', outFolder='.', filename=None, fileSequence=False, saveParamsImgProc=True):
         #for export in the image referential only if scaling and origin has not been attributed
@@ -842,6 +867,84 @@ class Analyzer():
             fulldict, outFolder=outFolder, filename=None)
 
 
+    def set_stabilization(self,mask=None,vlim=[0,40]):
+        if mask is None:
+            mask=np.ones((self.Hvis,self.Lvis))
+        self.videoStab=opyf.videoAnalyzer(self.video_src)
+        self.videoStab.mask=mask
+
+        self.videoStab.set_vlim(vlim)
+        self.videoStab.set_goodFeaturesToTrackParams(qualityLevel=0.05)
+        self.stabilizeOn=True
+        
+    def stabilize(self,s):
+        self.videoStab.set_vecTime(Ntot=1,starting_frame=1,step=s)
+        self.videoStab.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(displayColor=True)
+        transformation_rigid_matrix, rigid_mask =cv2.estimateAffine2D(self.videoStab.X+self.videoStab.V,self.videoStab.X)
+        dst = cv2.warpAffine(self.videoStab.vis,transformation_rigid_matrix,(self.videoStab.Lvis,self.videoStab.Hvis))
+        self.vis=dst
+    
+
+
+
+    def set_birdEyeViewProcessing(self,image_points,model_points,pos_bird_cam,scale=True,framesPerSecond=30):
+        focal_length = self.Lvis
+        center = (self.Lvis/2, self.Hvis/2)
+        camera_matrix = np.array(
+                            [[focal_length, 0, center[0]],
+                            [0, focal_length, center[1]],
+                            [0, 0, 1]], dtype = "double"
+                            )
+        _,camera_matrix_inv=cv2.invert(camera_matrix)
+        dist_coeffs = np.zeros((4,1))
+        ret,self.rvec1,self.tvec1=cv2.solvePnP(model_points,image_points,camera_matrix ,dist_coeffs )
+        self.R1,_=cv2.Rodrigues(self.rvec1)
+        self.RZ=np.array([[0,-1,0.],
+                  [1,0,0.],
+                  [0.,0.,1.]])
+        self.rvec_z,_=cv2.Rodrigues(self.RZ)
+        self.tvec_z=np.array(pos_bird_cam,ndmin=2).transpose()
+        normal = np.array([0,0,1], ndmin=2)
+        self.normal1 = np.dot(self.R1,normal.transpose())
+        origin=np.array([0,0,0], ndmin=2)
+        origin1 = np.dot(self.R1,origin.transpose()) + self.tvec1
+        self.d_inv1 = 1.0 /np.dot(self.normal1.transpose(),origin1)
+        
+        homography_euclidean = Tools.computeHomography(self.R1, self.tvec1, self.RZ,self.tvec_z,self.d_inv1, self.normal1)
+        homography = camera_matrix @ homography_euclidean @ camera_matrix_inv
+        self.homography =homography /homography[2,2]
+        homography_euclidean =homography_euclidean /homography_euclidean[2,2]
+        img_copy=np.copy(self.vis)
+        img_wraped=cv2.warpPerspective(img_copy, self.homography, (self.Lvis,self.Hvis))
+        axisPoints, _ = cv2.projectPoints(model_points, self.rvec_z, self.tvec_z, camera_matrix, (0, 0, 0, 0))
+        # self.opyfDisp.plotPointsUnstructured(axisPoints,axisPoints,vis=img_wraped)
+        self.opyfDisp.ax.imshow(img_wraped)
+        self.opyfDisp.ax.scatter(axisPoints[:,0,0],axisPoints[:,0,1],s=300,linewidths=0.5,marker='P',color=(1,1,1,0.7),zorder=2)
+        self.color=[]
+        for i in range(len(axisPoints)):
+            self.color.append([np.random.uniform(),np.random.uniform(),np.random.uniform()])
+            self.opyfDisp.ax.scatter(axisPoints[i,0,0],axisPoints[i,0,1],s=200,linewidths=0.5,marker='+',color=self.color[i],zorder=3)
+        self.birdEyeMod=True
+        
+        plt.pause(0.1)
+       
+        if scale==True:
+            points = np.array([(0,0,0),(1.,0,0)])
+            axisPoints, _=cv2.projectPoints(points,self.rvec_z, self.tvec_z, camera_matrix, (0, 0, 0, 0))
+            pxPerM=((axisPoints[0,0,0]-axisPoints[1,0,0])**2+(axisPoints[0,0,1]-axisPoints[1,0,1])**2)**0.5
+    
+        self.scaleData(metersPerPx=1/pxPerM,framesPerSecond=framesPerSecond)
+            
+    def transformBirdEye(self):
+        self.vis=cv2.warpPerspective(self.vis, self.homography, (self.Lvis,self.Hvis))
+
+    
+
+# #    plt.subplot(121),plt.imshow(img),plt.title('Input')
+# #    plt.subplot(122),plt.imshow(dst),plt.title('Output')
+# #    plt.show()
+#     return img_wraped        
+        
 #            for x,v in zip(Xdata,Vdata):
 
     # def extractGoodFeaturesPositionsAndExtractFeatures(self, display=False, windowSize=(16, 16)):
@@ -858,7 +961,7 @@ class Analyzer():
     #         if len(np.shape(vis)) == 3:
     #             current_gray = cv2.cvtColor(vis, cv2.COLOR_BGR2GRAY)
     #         else:
-    #             current_gray = vis
+    #             current_gray = vis/media/gauthier/Data-Gauthier/Gauthier/Download/MNT_1m_Brague@Biot.tif
     #         current_gray = current_gray[self.ROI[1]:(
     #             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
 

@@ -11,10 +11,12 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import cv2
 import sys
+from opyf import MeshesAndTime, Track, Render, Files, Tools, Interpolate, Filters
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['axes.edgecolor'] = '0'
 plt.rcParams['axes.linewidth'] = 1.5
+plt.rcParams['lines.linewidth']=2
 # plt.rc('text', usetex=True) may be activated if you prefer a Latex rendering font
 #plt.rc('font', family='arial')
 plt.rcParams['axes.facecolor'] = 'white'
@@ -133,13 +135,14 @@ class opyfDisplayer:
                           'num': args.get('num', 'opyfPlot'),
                           'grid': args.get('grid', True),
                           'vlim': args.get('vlim', None)}
-
+        self.cmap= plt.get_cmap('hot')
         if (len(self.paramPlot['vecX']) > 0 and len(self.paramPlot['vecY']) > 0):
             self.setGridXandGridY(
                 self.paramPlot['vecX'], self.paramPlot['vecY'])
 
 #            print('vecX and vecY have not been specified')
         plt.ioff()
+
         self.fig, self.ax = opyffigureandaxes(
             extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
 #        self.setExtent(self.paramPlot['extentFrame'])
@@ -213,6 +216,7 @@ class opyfDisplayer:
         norm.autoscale(colors)
         norm.vmin = vlim[0]
         norm.vmax = vlim[1]
+    
         self.im = mpl.cm.ScalarMappable(cmap=self.cmap, norm=norm)
         self.im.set_array([])
         if self.ax.get_ylim()[0] > self.ax.get_ylim()[1]:
@@ -289,6 +293,8 @@ class opyfDisplayer:
             new_grid_x, new_grid_y)
         Velocities = opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx, new_gridVy)
     #    colors=(Velocities[:,0]**2+Velocities[:,1]**2)**0.5
+        if self.ax.get_ylim()[0] > self.ax.get_ylim()[1]:
+            Velocities[:, 1] = -Velocities[:, 1]
         if normalize == False:
             self.qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1],
                         Velocities[:, 0], Velocities[:, 1], **args)
@@ -300,10 +306,9 @@ class opyfDisplayer:
     def opyfQuiverFieldColored(self, grid_x, grid_y, gridVx, gridVy,  res=32, normalize=False, **args):
 
         from matplotlib.colors import Normalize
-        if 'cmap' not in args:
-            args['cmap'] = mpl.cm.coolwarm
-        cmap = args.get('cmap', mpl.cm.coolwarm)
-        del args['cmap']
+
+        cmap = self.cmap
+
 
         # one over N
         # Select randomly N vectors
@@ -331,9 +336,9 @@ class opyfDisplayer:
                 new_gridVy[i, j] = np.mean(
                     gridVy[lvec[i]-densy//2:lvec[i]+densy//2+1, cvec[j]-densx//2:cvec[j]+densx//2+1])
 
-        TargetPoints = opyf.Interpolate.npGrid2TargetPoint2D(
+        TargetPoints = Interpolate.npGrid2TargetPoint2D(
             new_grid_x, new_grid_y)
-        Velocities = opyf.Interpolate.npGrid2TargetPoint2D(new_gridVx, new_gridVy)
+        Velocities = Interpolate.npGrid2TargetPoint2D(new_gridVx, new_gridVy)
         Norme = (Velocities[:, 0]**2+Velocities[:, 1]**2)**0.5
         if 'vlim' in args:
             vlim = args.get('vlim', [Norme.min(), Norme.max()])
@@ -349,6 +354,8 @@ class opyfDisplayer:
         norm.vmax = vlim[1]
         self.im = mpl.cm.ScalarMappable(cmap=cmap, norm=norm)
         self.im.set_array([])
+        if self.ax.get_ylim()[0] > self.ax.get_ylim()[1]:
+            Velocities[:, 1] = -Velocities[:, 1]
         if normalize == False:
             qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1], Velocities[:,
                                                                             0], Velocities[:, 1], color=cmap(norm(Norme)), **args)
@@ -949,7 +956,7 @@ def setcmap(Type, alpha=1.):
         cmap = make_cmap(colors, position=position)
         cmap.set_under((0, 1, 0, 0.5))
         cmap.set_over((0, 1, 0, 0.5))
-    elif Type == 'horizontal' or paramPlot['Type'] == 'vertical':
+    elif Type == 'horizontal':
         colors = [(11./255, 22./255, 33./255, 1), (33./255, 66./255, 99./255, 1),
                   (103./255, 230./255, 93./255, 0.3), (0.7, 0, 0, 1), (1., 0, 0, 1)]
         position = [0., 0.4, 0.5, 0.6, 1.]

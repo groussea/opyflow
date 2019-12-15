@@ -12,11 +12,11 @@ from vtk.util.numpy_support import vtk_to_numpy, numpy_to_vtk
 # A function that allow to use interpolation algorithm of vtk
 # Source Numpy array of points [X] and values [V]
 # The Points are 2D numpy arrays and values need to be at same size
-
+# TODO an home made interpolator from pointlocator vtk class  
 
 def npInterpolateVTK2D(npPoints, npValues, npTargetPoints, ParametreInterpolatorVTK=None):
     # Set SParameters if not define
-
+    
     if ParametreInterpolatorVTK == None:
         ParametreInterpolatorVTK = {'kernel': 'Gaussian',
                                     'Radius': 20.,

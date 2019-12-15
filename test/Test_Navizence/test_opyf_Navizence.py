@@ -13,8 +13,8 @@ import numpy as np
 import cv2,vtk,h5py
 #not required
 import matplotlib.pyplot as plt
-#WARNING : you need to set matplotlib as Qt5 or Qt4 Grphics Backend. 
-#On ipython try the magic command %matplotlib qt5
+
+#On ipython try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline"
 
 plt.close('all')
 
@@ -70,8 +70,10 @@ video.set_vlim([0,15])
 '''
 #set_vlim defines video.vlim and indicates the range of displacement expected with the processing plan (close link with step parameter in set_vecTime) 
 #you can run again the processing and see the difference with above
-#video.extractGoodFeaturesAndDisplacements(display='quiver',displayColor=True,width=0.002)
+
 '''
+
+video.extractGoodFeaturesAndDisplacements(display='quiver',displayColor=True,width=0.002)
 #%%
 video.set_filtersParams(wayBackGoodFlag=4,RadiusF=20,maxDevInRadius=1,CLAHE=True)
 '''

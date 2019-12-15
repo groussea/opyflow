@@ -44,13 +44,13 @@ def opyfTrack(tracks, vtracks, gray, prev_gray, incr, feature_params, lk_params,
                 continue
             if int(y) >= gray.shape[0] or int(x) >= gray.shape[1] or int(y) < 0 or int(x) < 0:
                 continue
-            norme = (vx**2+vy**2)**0.5
-            if norme < vmin or norme > vmax:
+            norm = (vx**2+vy**2)**0.5
+            if norm < vmin or norm > vmax:
                 continue
             if maskFrame is not None:
                 if maskFrame[int(y), int(x)] == 0:
                     continue
-            tr.append((x, y))
+            tr.append((x+vx/2, y+vy/2))
             vtr.append((vx, vy))
             if len(tr) > tracks_params['track_len']:
                 del tr[0]
@@ -124,13 +124,13 @@ def opyfFlowGoodFlag(frame, prev_gray, feature_params, lk_params, **args):
         for [vx, vy], [x, y], good_flag in zip(Vtemp, Xtemp, good):
             if not good_flag:
                 continue
-            norme = (vx**2+vy**2)**0.5
-            if norme < vmin or norme > vmax:
+            norm = (vx**2+vy**2)**0.5
+            if norm < vmin or norm > vmax:
                 continue
             if mask is not None:
                 if mask[int(y), int(x)] == 0:
                     continue
-            X.append([x, y])
+            X.append([x+vx/2, y+vy/2]) # position of the measured velocity at half of the displacement
             V.append([vx, vy])
 
 #        csvTrack=folder_outputs+'/'+format(incr,'04.0f')+'.csv'
@@ -143,4 +143,5 @@ def opyfFlowGoodFlag(frame, prev_gray, feature_params, lk_params, **args):
         X[:, 0] = X[:, 0]+ROI[0]
         X[:, 1] = X[:, 1]+ROI[1]
 
+    #return the intermediate position if velocities processed
     return frame_gray, X, V
