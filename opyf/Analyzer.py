@@ -870,20 +870,24 @@ class Analyzer():
     def set_stabilization(self,mask=None,vlim=[0,40]):
         if mask is None:
             mask=np.ones((self.Hvis,self.Lvis))
-        self.videoStab=opyf.videoAnalyzer(self.video_src)
-        self.videoStab.mask=mask
-
-        self.videoStab.set_vlim(vlim)
-        self.videoStab.set_goodFeaturesToTrackParams(qualityLevel=0.05)
+        if self.processingMode=='video':
+            self.stab=opyf.videoAnalyzer(self.video_src)
+        else:
+            self.stab=opyf.frameSequenceAnalyzer(self.folder_src)
+        self.stab.mask=mask
+        self.stab.set_vlim(vlim)
+        self.stab.set_goodFeaturesToTrackParams(qualityLevel=0.05)
         self.stabilizeOn=True
         
+        
     def stabilize(self,s):
-        self.videoStab.set_vecTime(Ntot=1,starting_frame=1,step=s)
-        self.videoStab.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(displayColor=True)
-        transformation_rigid_matrix, rigid_mask =cv2.estimateAffine2D(self.videoStab.X+self.videoStab.V,self.videoStab.X)
-        dst = cv2.warpAffine(self.videoStab.vis,transformation_rigid_matrix,(self.videoStab.Lvis,self.videoStab.Hvis))
+        print('-------------Stabilization Start -------------')
+        self.stab.set_vecTime(Ntot=1,starting_frame=1,step=s)
+        self.stab.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(displayColor=True)
+        transformation_rigid_matrix, rigid_mask =cv2.estimateAffine2D(self.stab.X+self.stab.V,self.stab.X)
+        dst = cv2.warpAffine(self.stab.vis,transformation_rigid_matrix,(self.stab.Lvis,self.stab.Hvis))
         self.vis=dst
-    
+        print('-------------Stabilization End -------------')
 
 
 
@@ -914,27 +918,51 @@ class Analyzer():
         homography = camera_matrix @ homography_euclidean @ camera_matrix_inv
         self.homography =homography /homography[2,2]
         homography_euclidean =homography_euclidean /homography_euclidean[2,2]
-        img_copy=np.copy(self.vis)
-        img_wraped=cv2.warpPerspective(img_copy, self.homography, (self.Lvis,self.Hvis))
-        axisPoints, _ = cv2.projectPoints(model_points, self.rvec_z, self.tvec_z, camera_matrix, (0, 0, 0, 0))
-        # self.opyfDisp.plotPointsUnstructured(axisPoints,axisPoints,vis=img_wraped)
-        self.opyfDisp.ax.imshow(img_wraped)
-        self.opyfDisp.ax.scatter(axisPoints[:,0,0],axisPoints[:,0,1],s=300,linewidths=0.5,marker='P',color=(1,1,1,0.7),zorder=2)
+        img_wraped=np.copy(self.vis)
+        img_vis=np.copy(self.vis)
+        img_vis=cv2.drawFrameAxes(img_vis,camera_matrix,dist_coeffs,self.rvec1,self.tvec1,10)
+        img_wraped=cv2.warpPerspective(img_wraped, self.homography, (self.Lvis,self.Hvis))
+       # self.opyfDisp.plotPointsUnstructured(axisPoints,axisPoints,vis=img_wraped)
+        fig, [ax1,ax2]=plt.subplots(2,1,num='Bird Eye Transformation')
+        fig.suptitle('Bird Eye Transformation')
+        fig.set_size_inches(10,20)
+        ax1.imshow(img_vis)
+        axisPoints, _ = cv2.projectPoints(model_points, self.rvec1, self.tvec1, camera_matrix, (0, 0, 0, 0))
+
+        ax1.scatter(axisPoints[:,0,0],axisPoints[:,0,1],s=300,linewidths=0.5,marker='P',color=(1,1,1,0.7),zorder=2)
         self.color=[]
+        props = dict(facecolor=(1,1,1), alpha=0.5,pad= 2)
         for i in range(len(axisPoints)):
             self.color.append([np.random.uniform(),np.random.uniform(),np.random.uniform()])
-            self.opyfDisp.ax.scatter(axisPoints[i,0,0],axisPoints[i,0,1],s=200,linewidths=0.5,marker='+',color=self.color[i],zorder=3)
-        self.birdEyeMod=True
-        
+            ax1.scatter(axisPoints[i,0,0],axisPoints[i,0,1],s=200,linewidths=0.5,marker='+',color=self.color[i],zorder=3)
+            ax1.text(axisPoints[i][0,0],
+              axisPoints[i][0,1],'        X: '+format(model_points[i][0],'2.2f')+' m Y: '+format(model_points[i][1],'2.2f')+' m Z: '+format(model_points[i][2],'2.2f')+' m   ',
+              fontsize=6, bbox=props,zorder=1)
+        ax1.set_xlim([0,self.Lvis])
+        ax1.set_ylim([self.Hvis,0])
+        # self.opyfDisp.ax.scatter(axisPoints[:,0,0],axisPoints[:,0,1],s=300,linewidths=0.5,marker='P',color=(1,1,1,0.7),zorder=2)
+
+        axisPoints, _ = cv2.projectPoints(model_points, self.rvec_z, self.tvec_z, camera_matrix, (0, 0, 0, 0))
+        ax2.scatter(axisPoints[:,0,0],axisPoints[:,0,1],s=300,linewidths=0.5,marker='P',color=(1,1,1,0.7),zorder=2) 
+       
+        for i in range(len(axisPoints)):
+            ax2.scatter(axisPoints[i,0,0],axisPoints[i,0,1],s=200,linewidths=0.5,marker='+',color=self.color[i],zorder=3)
+            # ax2.text(axisPoints[i][0,0],
+            #   axisPoints[i][0,1],'        X: '+format(model_points[i][0],'2.2f')+' m Y: '+format(model_points[i][1],'2.2f')+' m Z: '+format(model_points[i][2],'2.2f')+' m   ',
+            #   fontsize=6, bbox=props,zorder=1)
+
+        img_wraped=cv2.drawFrameAxes(img_wraped,camera_matrix,dist_coeffs,self.rvec_z,self.tvec_z,10)
+        ax2.imshow(img_wraped) 
+        ax2.set_xlim([0,self.Lvis])
+        ax2.set_ylim([self.Hvis,0])
         plt.pause(0.1)
        
         if scale==True:
             points = np.array([(0,0,0),(1.,0,0)])
             axisPoints, _=cv2.projectPoints(points,self.rvec_z, self.tvec_z, camera_matrix, (0, 0, 0, 0))
-            pxPerM=((axisPoints[0,0,0]-axisPoints[1,0,0])**2+(axisPoints[0,0,1]-axisPoints[1,0,1])**2)**0.5
-    
-        self.scaleData(metersPerPx=1/pxPerM,framesPerSecond=framesPerSecond)
-            
+            pxPerM=((axisPoints[0,0,0]-axisPoints[1,0,0])**2+(axisPoints[0,0,1]-axisPoints[1,0,1])**2)**0.5    
+            self.scaleData(metersPerPx=1/pxPerM,framesPerSecond=framesPerSecond)
+        self.birdEyeMod=True         
     def transformBirdEye(self):
         self.vis=cv2.warpPerspective(self.vis, self.homography, (self.Lvis,self.Hvis))
 
