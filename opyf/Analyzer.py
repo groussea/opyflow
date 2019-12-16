@@ -16,11 +16,11 @@ import matplotlib.pyplot as plt
 import opyf
 
 class Analyzer():
-    def __init__(self, imageROI=None, **args):
+    def __init__(self, imageROI=None,num='opyfPlot',mute=False,**args):
 
         print('Dimensions :\n \t', 'Width :',
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
-
+        self.num=num
         self.scaled = False
         self.scale= 1
         if imageROI is None:
@@ -66,9 +66,9 @@ class Analyzer():
         print('number of frames : ' + str(self.number_of_frames))
         self.fieldResults=None
         # plt.ion()
-
-        self.opyfDisp.ax.imshow(self.vis)
-        plt.pause(0.1)
+        if mute==False:
+            self.opyfDisp.ax.imshow(self.vis)
+            plt.pause(0.1)
     def set_goodFeaturesToTrackParams(self, maxCorners=40000, qualityLevel=0.005,
                                       minDistance=5, blockSize=16):
 
@@ -120,8 +120,8 @@ class Analyzer():
                 v/(self.scale*self.fps/self.paramVecTime['step']) for v in vlim]
 
         self.paramPlot['vlim'] = vlim
-        plt.close('opyfPlot')
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
+        plt.close(self.num)
+        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
         print('Velocity limits: ', vlim[0])
         print('\t minimum norm velocity: ', vlim[0])
         print('\t maximum norm velocity: ', vlim[1])
@@ -156,7 +156,7 @@ class Analyzer():
 
         self.paramPlot['vecX'] = self.vecX
         self.paramPlot['vecY'] = self.vecY
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
+        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
         self.Ux, self.Uy = np.zeros((self.Hgrid, self.Lgrid)), np.zeros(
             (self.Hgrid, self.Lgrid))
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
@@ -509,8 +509,9 @@ class Analyzer():
         self.incr = 0
         self.UxTot = []
         self.UyTot = []
-        plt.close('opyfPlot')
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num='opyfPlot')
+        plt.close(self.num)
+        plt.close('Bird Eye Transformation')
+        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
 
     def extractGoodFeaturesAndDisplacements(self, display=False, saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
         self.reset()
@@ -695,9 +696,9 @@ class Analyzer():
                                               -(self.paramPlot['extentFrame'][3]-self.origin[1])*self.scale, ],
                               'unit': unit,
                               'vlim': [vlim*self.scale*self.fps/self.paramVecTime['step'] for vlim in self.paramPlot['vlim']]}
-            plt.close('opyfPlot')
+            plt.close(self.num)
             self.opyfDisp = Render.opyfDisplayer(
-                **self.paramPlot, num='opyfPlot')
+                **self.paramPlot, num=self.num)
 
     def invertYaxis(self):
         self.vecY = -self.vecY
@@ -783,7 +784,7 @@ class Analyzer():
             if filename is None:
 #                filename = 'velocity_field_with_accumulation_of_features_velocities_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
 #                    self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
-                self.filename = '_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
+                self.filename = 'frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
                     self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
             self.variables = [['Ux_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UxTot],
                  ['Uy_['+self.unit[0]+'.'+self.unit[1]+'-1]', self.UyTot]]
@@ -871,9 +872,9 @@ class Analyzer():
         if mask is None:
             mask=np.ones((self.Hvis,self.Lvis))
         if self.processingMode=='video':
-            self.stab=opyf.videoAnalyzer(self.video_src)
+            self.stab=opyf.videoAnalyzer(self.video_src,mute=True,num='stab')
         else:
-            self.stab=opyf.frameSequenceAnalyzer(self.folder_src)
+            self.stab=opyf.frameSequenceAnalyzer(self.folder_src,mute=True,num='stab')
         self.stab.mask=mask
         self.stab.set_vlim(vlim)
         self.stab.set_goodFeaturesToTrackParams(qualityLevel=0.05)
@@ -882,16 +883,17 @@ class Analyzer():
         
     def stabilize(self,s):
         print('-------------Stabilization Start -------------')
-        self.stab.set_vecTime(Ntot=1,starting_frame=1,step=s)
-        self.stab.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(displayColor=True)
-        transformation_rigid_matrix, rigid_mask =cv2.estimateAffine2D(self.stab.X+self.stab.V,self.stab.X)
-        dst = cv2.warpAffine(self.stab.vis,transformation_rigid_matrix,(self.stab.Lvis,self.stab.Hvis))
-        self.vis=dst
+        if s-self.vec[0]>0:
+            self.stab.set_vecTime(Ntot=1,starting_frame=self.vec[0],step=s-self.vec[0])
+            self.stab.extractGoodFeaturesDisplacementsAccumulateAndInterpolate()
+            transformation_rigid_matrix, rigid_mask =cv2.estimateAffine2D(self.stab.X+self.stab.V,self.stab.X)
+            dst = cv2.warpAffine(self.stab.vis,transformation_rigid_matrix,(self.stab.Lvis,self.stab.Hvis))
+            self.vis=dst
         print('-------------Stabilization End -------------')
 
 
 
-    def set_birdEyeViewProcessing(self,image_points,model_points,pos_bird_cam,scale=True,framesPerSecond=30):
+    def set_birdEyeViewProcessing(self,image_points,model_points,pos_bird_cam,scale=True,framesPerSecond=30,saveOutPut=None):
         focal_length = self.Lvis
         center = (self.Lvis/2, self.Hvis/2)
         camera_matrix = np.array(
@@ -961,9 +963,14 @@ class Analyzer():
             points = np.array([(0,0,0),(1.,0,0)])
             axisPoints, _=cv2.projectPoints(points,self.rvec_z, self.tvec_z, camera_matrix, (0, 0, 0, 0))
             pxPerM=((axisPoints[0,0,0]-axisPoints[1,0,0])**2+(axisPoints[0,0,1]-axisPoints[1,0,1])**2)**0.5    
-            self.scaleData(metersPerPx=1/pxPerM,framesPerSecond=framesPerSecond)
-        self.birdEyeMod=True         
+
+            self.scaleData(metersPerPx=1/pxPerM,framesPerSecond=framesPerSecond,origin=[axisPoints[0,0,0],axisPoints[0,0,1]])
+        self.birdEyeMod=True   
+        
+        if saveOutPut is not None:
+            fig.savefig(saveOutPut)
     def transformBirdEye(self):
+        
         self.vis=cv2.warpPerspective(self.vis, self.homography, (self.Lvis,self.Hvis))
 
     
