@@ -12,12 +12,11 @@ import numpy as np
 import cv2
 from opyf import MeshesAndTime, Track, Render, Files, Tools, Interpolate, Filters
 import matplotlib.pyplot as plt
-
+import time
 import opyf
-
+import matplotlib as mpl
 class Analyzer():
     def __init__(self, imageROI=None,num='opyfPlot',mute=False,**args):
-
         print('Dimensions :\n \t', 'Width :',
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
         self.num=num
@@ -57,8 +56,9 @@ class Analyzer():
                           'grid': args.get('grid', True),
                           'vlim': args.get('vlim', [0, 40])}
         self.birdEyeMod=False
-        self.stabilizeOn=False
-        self.reset()
+        self.stabilizeOn=False 
+        self.mute=mute
+        self.reset(mute=mute)
         self.set_gridToInterpolateOn()
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
 
@@ -66,9 +66,14 @@ class Analyzer():
         print('number of frames : ' + str(self.number_of_frames))
         self.fieldResults=None
         # plt.ion()
+        self.visInit=np.copy(self.vis)
+
         if mute==False:
-            self.opyfDisp.ax.imshow(self.vis)
-            plt.pause(0.1)
+            self.opyfDisp.ax.imshow(cv2.cvtColor(self.vis, cv2.COLOR_BGR2RGB))
+            if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
+                self.opyfDisp.fig.show()
+            time.sleep(0.1)
+            
     def set_goodFeaturesToTrackParams(self, maxCorners=40000, qualityLevel=0.005,
                                       minDistance=5, blockSize=16):
 
@@ -345,7 +350,7 @@ class Analyzer():
     #                     self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
     #                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
     #                 plt.show()
-    #                 plt.pause(0.02)
+    #                 time.sleep(0.1)
 
     def stepTracks(self, pr, i):
         if pr == False:
@@ -365,7 +370,7 @@ class Analyzer():
         self.scaleAndLogTracks(i)
 
     def extractTracks(self, display=False, saveImgPath=None, numberingOutput=False,imgFormat='png', **args):
-        self.reset()
+        self.reset(mute=self.mute)
         self.tracks = []
         self.vtracks = []
         if self.prevTracks is None:
@@ -392,8 +397,8 @@ class Analyzer():
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
                         
                 if display is not False:
-                    self.opyfDisp.fig.show()
-                    plt.pause(0.02)
+                    # self.opyfDisp.fig.show()
+                    time.sleep(0.1)
 
     def substractAveragedFrame(self):
         self.gray = Tools.convertToGrayScale(self.vis)
@@ -501,7 +506,7 @@ class Analyzer():
             print('Displacement max = '+str(np.max(np.absolute(self.V))) +
                   ' '+self.unit[0]+'/'+self.unit[1])
 
-    def reset(self):
+    def reset(self,mute=False):
 
         self.Xdata = []
         self.Vdata = []
@@ -509,12 +514,14 @@ class Analyzer():
         self.incr = 0
         self.UxTot = []
         self.UyTot = []
-        plt.close(self.num)
-        plt.close('Bird Eye Transformation')
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
+        if mute==False:
+            plt.close(self.num)
+            self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
+            if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
+                self.opyfDisp.fig.show()
 
     def extractGoodFeaturesAndDisplacements(self, display=False, saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
-        self.reset()
+        self.reset(mute=self.mute)
         k=0
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
@@ -533,11 +540,11 @@ class Analyzer():
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
                     
                 if display is not False:
-                    self.opyfDisp.fig.show()
-                    plt.pause(0.02)
+                    # self.opyfDisp.fig.show()
+                    time.sleep(0.1)
 
-    def extractGoodFeaturesDisplacementsAndAccumulate(self, display=False, saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
-        self.reset()
+    def extractGoodFeaturesDisplacementsAndAccumulate(self, display='field', saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
+        self.reset(mute=self.mute)
         self.Xaccu = np.empty((0, 2))
         self.Vaccu = np.empty((0, 2))
         k=0
@@ -559,10 +566,10 @@ class Analyzer():
                         i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
                     
                 if display is not False:
-                    self.opyfDisp.fig.show()
-                    plt.pause(0.02)
+                    # self.opyfDisp.fig.show()
+                    time.sleep(0.1)
 
-    def interpolateOnGrid(self, X, V, mode='sequence'):
+    def interpolateOnGrid(self, X, V):
 
         self.interpolatedVelocities = Interpolate.npInterpolateVTK2D(
             X, V, self.XT, ParametreInterpolatorVTK=self.interp_params)
@@ -573,8 +580,8 @@ class Analyzer():
         self.Uy = Interpolate.npTargetPoints2Grid2D(
             self.interpolatedVelocities[:, 1], self.Lgrid, self.Hgrid)*self.gridMask
 
-    def extractGoodFeaturesPositionsDisplacementsAndInterpolate(self, display=False, saveImgPath=None, numberingOutput=False, Type='norm', imgFormat='png', **args):
-        self.reset()
+    def extractGoodFeaturesPositionsDisplacementsAndInterpolate(self, display='field', saveImgPath=None, numberingOutput=False, Type='norm', imgFormat='png', **args):
+        self.reset(mute=self.mute)
         k=0
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
@@ -604,12 +611,12 @@ class Analyzer():
                             self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
                             i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
                         
-                    self.opyfDisp.fig.show()
-                    plt.pause(0.02)
+                    # self.opyfDisp.fig.show()
+                    time.sleep(0.1)
         self.fieldResults='time-serie'
         
         
-    def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1=False, display2=False, saveImgPath=None, Type='norm', imgFormat='png', **args):
+    def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1='quiver', display2='field', saveImgPath=None, Type='norm', imgFormat='png', **args):
         self.extractGoodFeaturesDisplacementsAndAccumulate(
             display=display1, **args)
         self.interpolateOnGrid(self.Xaccu, self.Vaccu)
@@ -624,8 +631,8 @@ class Analyzer():
             if saveImgPath is not None:
                 self.opyfDisp.fig.savefig(saveImgPath+'/'+display2+'_'+format(
                     self.vec[0], '04.0f')+'_to_'+format(self.vec[-1], '04.0f')+'.'+imgFormat)
-            self.opyfDisp.fig.show()
-            plt.pause(0.02)
+            # self.opyfDisp.fig.show()
+            time.sleep(0.1)
 
         self.fieldResults='accumulation'
         
@@ -894,6 +901,8 @@ class Analyzer():
 
 
     def set_birdEyeViewProcessing(self,image_points,model_points,pos_bird_cam,scale=True,framesPerSecond=30,saveOutPut=None):
+
+
         focal_length = self.Lvis
         center = (self.Lvis/2, self.Hvis/2)
         camera_matrix = np.array(
@@ -920,8 +929,8 @@ class Analyzer():
         homography = camera_matrix @ homography_euclidean @ camera_matrix_inv
         self.homography =homography /homography[2,2]
         homography_euclidean =homography_euclidean /homography_euclidean[2,2]
-        img_wraped=np.copy(self.vis)
-        img_vis=np.copy(self.vis)
+        img_wraped=np.copy(self.visInit)
+        img_vis=np.copy(self.visInit)
         img_vis=cv2.drawFrameAxes(img_vis,camera_matrix,dist_coeffs,self.rvec1,self.tvec1,10)
         img_wraped=cv2.warpPerspective(img_wraped, self.homography, (self.Lvis,self.Hvis))
        # self.opyfDisp.plotPointsUnstructured(axisPoints,axisPoints,vis=img_wraped)
@@ -957,7 +966,8 @@ class Analyzer():
         ax2.imshow(img_wraped) 
         ax2.set_xlim([0,self.Lvis])
         ax2.set_ylim([self.Hvis,0])
-        plt.pause(0.1)
+        fig.show()
+        time.sleep(0.1)
        
         if scale==True:
             points = np.array([(0,0,0),(1.,0,0)])

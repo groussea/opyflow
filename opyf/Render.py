@@ -141,12 +141,12 @@ class opyfDisplayer:
                 self.paramPlot['vecX'], self.paramPlot['vecY'])
 
 #            print('vecX and vecY have not been specified')
-        plt.ioff()
+        # plt.ioff()
 
         self.fig, self.ax = opyffigureandaxes(
             extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
 #        self.setExtent(self.paramPlot['extentFrame'])
-        plt.ion()
+        # plt.ion()
         
         self.backend=mpl.get_backend()
 
@@ -377,8 +377,7 @@ class opyfDisplayer:
             del self.ax.images[:]
         if len(self.fig.axes) > 1:
             self.fig.axes[1].remove()
-        if self.backend[-14:]== 'backend_inline':  
-            plt.close('all')                  
+        if self.backend[-14:]== 'backend_inline' or self.backend[-14:]== 'nbAgg' :  
             self.fig, self.ax = opyffigureandaxes(
             extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
 
@@ -456,10 +455,13 @@ class opyfDisplayer:
                  label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
             self.cb.set_alpha(0.8)
             self.cb.draw_all()
-        self.fig.show()
-        self.fig.canvas.draw()
-        self.fig.canvas.flush_events()
         
+        # self.fig.show()
+        self.fig.canvas.draw()
+        self.fig.canvas.start_event_loop(0.01)
+        self.fig.canvas.flush_events()
+        if self.backend[-14:]== 'backend_inline' or self.backend[-14:]== 'nbAgg' :  
+            plt.pause(0.05)
 
     def FieldInitializer(self, vecX, vecY, Field):
         if (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None) or (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None):
