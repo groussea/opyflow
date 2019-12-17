@@ -136,6 +136,12 @@ class opyfDisplayer:
                           'grid': args.get('grid', True),
                           'vlim': args.get('vlim', None)}
         self.cmap= plt.get_cmap('hot')
+        self.reset()
+        self.fig, self.ax = opyffigureandaxes(
+            extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
+        self.backend=mpl.get_backend()
+        
+    def reset(self):
         if (len(self.paramPlot['vecX']) > 0 and len(self.paramPlot['vecY']) > 0):
             self.setGridXandGridY(
                 self.paramPlot['vecX'], self.paramPlot['vecY'])
@@ -143,12 +149,10 @@ class opyfDisplayer:
 #            print('vecX and vecY have not been specified')
         # plt.ioff()
 
-        self.fig, self.ax = opyffigureandaxes(
-            extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
 #        self.setExtent(self.paramPlot['extentFrame'])
         # plt.ion()
         
-        self.backend=mpl.get_backend()
+
 
     def setGridXandGridY(self, vecX, vecY):
         self.grid_x = np.ones((len(vecY), 1)) * vecX

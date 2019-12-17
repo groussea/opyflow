@@ -16,7 +16,7 @@ import time
 import opyf
 import matplotlib as mpl
 class Analyzer():
-    def __init__(self, imageROI=None,num='opyfPlot',mute=False,**args):
+    def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,**args):
         print('Dimensions :\n \t', 'Width :',
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
         self.num=num
@@ -58,7 +58,8 @@ class Analyzer():
         self.birdEyeMod=False
         self.stabilizeOn=False 
         self.mute=mute
-        self.reset(mute=mute)
+        self.close_at_reset=close_at_reset
+        self.reset(first=True)
         self.set_gridToInterpolateOn()
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
 
@@ -67,9 +68,12 @@ class Analyzer():
         self.fieldResults=None
         # plt.ion()
         self.visInit=np.copy(self.vis)
-
-        if mute==False:
-            self.opyfDisp.ax.imshow(cv2.cvtColor(self.vis, cv2.COLOR_BGR2RGB))
+        self.dumpShow()
+        
+    def dumpShow(self):
+        
+        if self.mute==False:
+            self.opyfDisp.ax.imshow(cv2.cvtColor(self.visInit, cv2.COLOR_BGR2RGB))
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
                 self.opyfDisp.fig.show()
             time.sleep(0.1)
@@ -125,8 +129,8 @@ class Analyzer():
                 v/(self.scale*self.fps/self.paramVecTime['step']) for v in vlim]
 
         self.paramPlot['vlim'] = vlim
-        plt.close(self.num)
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
+        self.opyfDisp.paramPlot['vlim']=vlim
+
         print('Velocity limits: ', vlim[0])
         print('\t minimum norm velocity: ', vlim[0])
         print('\t maximum norm velocity: ', vlim[1])
@@ -158,10 +162,11 @@ class Analyzer():
         self.vecX = self.grid_x[0, :]
         self.vecY = self.grid_y[:, 0]
         self.XT = Interpolate.npGrid2TargetPoint2D(self.grid_x, self.grid_y)
-
         self.paramPlot['vecX'] = self.vecX
         self.paramPlot['vecY'] = self.vecY
-        self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
+        self.opyfDisp.paramPlot['vecX']=self.vecX
+        self.opyfDisp.paramPlot['vecY']=self.vecY
+        self.opyfDisp.reset()
         self.Ux, self.Uy = np.zeros((self.Hgrid, self.Lgrid)), np.zeros(
             (self.Hgrid, self.Lgrid))
         self.gridMask = np.ones((self.Hgrid, self.Lgrid))
@@ -370,7 +375,7 @@ class Analyzer():
         self.scaleAndLogTracks(i)
 
     def extractTracks(self, display=False, saveImgPath=None, numberingOutput=False,imgFormat='png', **args):
-        self.reset(mute=self.mute)
+        self.reset()
         self.tracks = []
         self.vtracks = []
         if self.prevTracks is None:
@@ -506,22 +511,22 @@ class Analyzer():
             print('Displacement max = '+str(np.max(np.absolute(self.V))) +
                   ' '+self.unit[0]+'/'+self.unit[1])
 
-    def reset(self,mute=False):
-
+    def reset(self,first=False):
         self.Xdata = []
         self.Vdata = []
         self.tracks = []
         self.incr = 0
         self.UxTot = []
         self.UyTot = []
-        if mute==False:
+        if self.close_at_reset==True or first==True:
             plt.close(self.num)
             self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
                 self.opyfDisp.fig.show()
 
-    def extractGoodFeaturesAndDisplacements(self, display=False, saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
-        self.reset(mute=self.mute)
+    def extractGoodFeaturesAndDisplacements(self, display='quiver', saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
+
+        self.reset()
         k=0
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
@@ -544,7 +549,7 @@ class Analyzer():
                     time.sleep(0.1)
 
     def extractGoodFeaturesDisplacementsAndAccumulate(self, display='field', saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
-        self.reset(mute=self.mute)
+        self.reset()
         self.Xaccu = np.empty((0, 2))
         self.Vaccu = np.empty((0, 2))
         k=0
@@ -581,7 +586,7 @@ class Analyzer():
             self.interpolatedVelocities[:, 1], self.Lgrid, self.Hgrid)*self.gridMask
 
     def extractGoodFeaturesPositionsDisplacementsAndInterpolate(self, display='field', saveImgPath=None, numberingOutput=False, Type='norm', imgFormat='png', **args):
-        self.reset(mute=self.mute)
+        self.reset()
         k=0
         for pr, i in zip(self.prev, self.vec):
             self.stepGoodFeaturesToTrackandOpticalFlow(pr, i)
@@ -601,7 +606,7 @@ class Analyzer():
                     self.UyTot.append(self.Uy)
 
                 Field = Render.setField(self.Ux, self.Uy, Type)
-                if display == 'field':
+                if display == 'field' and self.mute==False:
                     self.opyfDisp.plotField(Field, vis=self.vis, **args)
                     if saveImgPath is not None:                  
                         if numberingOutput==True:
@@ -625,8 +630,7 @@ class Analyzer():
         self.UyTot.append(np.reshape(
             self.interpolatedVelocities[:, 1], (self.Hgrid, self.Lgrid)))
         self.Field = Render.setField(self.Ux, self.Uy, Type)
-        if display2 == 'field':
-
+        if display2 == 'field' and self.mute==False:
             self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
             if saveImgPath is not None:
                 self.opyfDisp.fig.savefig(saveImgPath+'/'+display2+'_'+format(
@@ -636,12 +640,12 @@ class Analyzer():
 
         self.fieldResults='accumulation'
         
-    def showXV(self, X, V, vis=None, display='quiver', displayColor=False, **args):
-        if display == 'quiver':
+    def showXV(self, X, V, vis=None, display='quiver', displayColor=True, **args):
+        if display == 'quiver' and self.mute==False:
             self.opyfDisp.plotQuiverUnstructured(
                 X, V, vis=vis, displayColor=displayColor, **args)
 
-        if display == 'points':
+        if display == 'points' and self.mute==False:
             self.opyfDisp.plotPointsUnstructured(
                 Xdata=X, Vdata=V, vis=vis, displayColor=displayColor, **args)
 
@@ -875,16 +879,17 @@ class Analyzer():
             fulldict, outFolder=outFolder, filename=None)
 
 
-    def set_stabilization(self,mask=None,vlim=[0,40]):
+    def set_stabilization(self,mask=None,vlim=[0,40],mute=True,close_at_reset=False):
         if mask is None:
             mask=np.ones((self.Hvis,self.Lvis))
         if self.processingMode=='video':
-            self.stab=opyf.videoAnalyzer(self.video_src,mute=True,num='stab')
+            self.stab=opyf.videoAnalyzer(self.video_src,mute=mute,close_at_reset=close_at_reset,num='stab')
         else:
-            self.stab=opyf.frameSequenceAnalyzer(self.folder_src,mute=True,num='stab')
+            self.stab=opyf.frameSequenceAnalyzer(self.folder_src,mute=mute,close_at_reset=close_at_reset,num='stab')
         self.stab.mask=mask
         self.stab.set_vlim(vlim)
         self.stab.set_goodFeaturesToTrackParams(qualityLevel=0.05)
+        
         self.stabilizeOn=True
         
         
@@ -892,7 +897,7 @@ class Analyzer():
         print('-------------Stabilization Start -------------')
         if s-self.vec[0]>0:
             self.stab.set_vecTime(Ntot=1,starting_frame=self.vec[0],step=s-self.vec[0])
-            self.stab.extractGoodFeaturesDisplacementsAccumulateAndInterpolate()
+            self.stab.extractGoodFeaturesAndDisplacements()
             transformation_rigid_matrix, rigid_mask =cv2.estimateAffine2D(self.stab.X+self.stab.V,self.stab.X)
             dst = cv2.warpAffine(self.stab.vis,transformation_rigid_matrix,(self.stab.Lvis,self.stab.Hvis))
             self.vis=dst
@@ -966,7 +971,8 @@ class Analyzer():
         ax2.imshow(img_wraped) 
         ax2.set_xlim([0,self.Lvis])
         ax2.set_ylim([self.Hvis,0])
-        fig.show()
+        if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
+            fig.show()
         time.sleep(0.1)
        
         if scale==True:
