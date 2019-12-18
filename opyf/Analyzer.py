@@ -16,7 +16,7 @@ import time
 import opyf
 import matplotlib as mpl
 class Analyzer():
-    def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,**args):
+    def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,mask=None,**args):
         print('Dimensions :\n \t', 'Width :',
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
         self.num=num
@@ -30,7 +30,11 @@ class Analyzer():
         self.cropFrameInit = self.frameInit[self.ROI[1]:(
             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
         self.Hvis, self.Lvis = self.cropFrameInit.shape
-        self.mask = np.ones(self.cropFrameInit.shape)
+        
+        self.set_mask(mask)
+
+                
+            
         self.frameAv = np.zeros(self.cropFrameInit.shape)
         self.set_goodFeaturesToTrackParams()
         self.set_opticalFlowParams()
@@ -61,7 +65,6 @@ class Analyzer():
         self.close_at_reset=close_at_reset
         self.reset(first=True)
         self.set_gridToInterpolateOn()
-        self.gridMask = np.ones((self.Hgrid, self.Lgrid))
 
         self.set_vecTime()
         print('number of frames : ' + str(self.number_of_frames))
@@ -70,8 +73,32 @@ class Analyzer():
         self.visInit=np.copy(self.vis)
         self.dumpShow()
         
-    def dumpShow(self):
+        """
+        loading an optional mask 
+        my default the mask set to one
+        the mask entry may be the path to the image mask or directly a numpy.array
+        It can be either of type boolean or uint8.
+        """
+    def set_mask(self,mask):
+        self.mask=mask
+        if type(mask) is str:
+            self.mask = cv2.imread(mask)
+            if self.mask is None:
+                print('Path to the Mask is wrong')
         
+        if type(self.mask)==np.ndarray:
+            if self.mask.dtype==bool:
+                if len(self.shape==3):
+                    self.mask=self.mask[:,:,0]
+                else:
+                    self.mask=self.mask
+            else:
+                self.mask=Tools.convertToGrayScale(self.mask)>100
+        else:
+            self.mask=np.ones_like(self.cropFrameInit) 
+        
+        
+    def dumpShow(self):  
         if self.mute==False:
             self.opyfDisp.ax.imshow(cv2.cvtColor(self.visInit, cv2.COLOR_BGR2RGB))
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
@@ -168,8 +195,8 @@ class Analyzer():
         self.opyfDisp.paramPlot['vecY']=self.vecY
         self.opyfDisp.reset()
         self.Ux, self.Uy = np.zeros((self.Hgrid, self.Lgrid)), np.zeros(
-            (self.Hgrid, self.Lgrid))
-        self.gridMask = np.ones((self.Hgrid, self.Lgrid))
+            (self.Hgrid, self.Lgrid))       
+        self.gridMask = cv2.resize(np.uint8(self.mask),(self.Lgrid,self.Hgrid))>0.5
 
     def set_imageParams(self, **args):
         self.rangeOfPixels = args.get('rangeOfPixels', [0, 255])
@@ -579,7 +606,7 @@ class Analyzer():
         self.interpolatedVelocities = Interpolate.npInterpolateVTK2D(
             X, V, self.XT, ParametreInterpolatorVTK=self.interp_params)
 
-        self.gridMask[np.where(self.gridMask == 0)] = np.nan
+        # self.gridMask[np.where(self.gridMask == 0)] = np.nan
         self.Ux = Interpolate.npTargetPoints2Grid2D(
             self.interpolatedVelocities[:, 0], self.Lgrid, self.Hgrid)*self.gridMask
         self.Uy = Interpolate.npTargetPoints2Grid2D(
@@ -607,6 +634,7 @@ class Analyzer():
 
                 self.Field = Render.setField(self.Ux, self.Uy, Type)
                 self.Field[np.where(self.Field==0)]=np.nan
+                self.Field=self.Field*self.gridMask
                 if display == 'field' and self.mute==False:
                     self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
                     if saveImgPath is not None:                  
@@ -632,6 +660,7 @@ class Analyzer():
             self.interpolatedVelocities[:, 1], (self.Hgrid, self.Lgrid)))
         self.Field = Render.setField(self.Ux, self.Uy, Type)
         self.Field[np.where(self.Field==0)]=np.nan
+        self.Field=self.Field*self.gridMask
         if display2 == 'field' and self.mute==False:
             self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
             if saveImgPath is not None:
