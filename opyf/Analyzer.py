@@ -605,9 +605,10 @@ class Analyzer():
                     self.UxTot.append(self.Ux)
                     self.UyTot.append(self.Uy)
 
-                Field = Render.setField(self.Ux, self.Uy, Type)
+                self.Field = Render.setField(self.Ux, self.Uy, Type)
+                self.Field[np.where(self.Field==0)]=np.nan
                 if display == 'field' and self.mute==False:
-                    self.opyfDisp.plotField(Field, vis=self.vis, **args)
+                    self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
                     if saveImgPath is not None:                  
                         if numberingOutput==True:
                             self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
@@ -630,6 +631,7 @@ class Analyzer():
         self.UyTot.append(np.reshape(
             self.interpolatedVelocities[:, 1], (self.Hgrid, self.Lgrid)))
         self.Field = Render.setField(self.Ux, self.Uy, Type)
+        self.Field[np.where(self.Field==0)]=np.nan
         if display2 == 'field' and self.mute==False:
             self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
             if saveImgPath is not None:

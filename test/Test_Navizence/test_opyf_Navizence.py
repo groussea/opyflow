@@ -9,11 +9,8 @@ import sys
 # if it is not installed where is the opyf folder?
 sys.path.append('../../')
 import opyf 
-import numpy as np
-import cv2,vtk,h5py
 #not required
 import matplotlib.pyplot as plt
-
 #On ipython try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline"
 
 plt.close('all')
@@ -31,7 +28,7 @@ this manipualtion create an object [video] that contains information deduced fro
 #%%######################
 
 
-video.set_vecTime(Ntot=5,shift=1,step=1,starting_frame=20)
+video.set_vecTime(Ntot=10,shift=1,step=2,starting_frame=20)
 print(video.vec,'\n',video.prev)
 """
 #Use .set_vecTime vector to define the processing plan 
@@ -51,7 +48,8 @@ to process the first two image of the video or the frame sequence and extract th
 # [starting_frame] specifies the first image
 # [step] specifies the number of image between 2 images of each pair. 
 # WARNING: if the step increases, the displacements necessarily increase
-# Note that, if the object is build from a video with videoAnalyzer, a lag is expected since each required images for the process are loaded in the memory for efficiency reasons
+# Note that, if the object is build from a video with videoAnalyzer, a lag is expected since each 
+    required images for the process are loaded in the memory for efficiency reasons
 # 
 # This function also defines video.Time, that is the time vector at which the velocity measurements are performed
 # =============================================================================
@@ -66,7 +64,7 @@ video.extractGoodFeaturesAndDisplacements(display='quiver',displayColor=True,wid
 
 #%%
 
-video.set_vlim([0,15])
+video.set_vlim([0,30])
 '''
 #set_vlim defines video.vlim and indicates the range of displacement expected with the processing plan (close link with step parameter in set_vecTime) 
 #you can run again the processing and see the difference with above
@@ -93,7 +91,7 @@ video.set_filtersParams(wayBackGoodFlag=4,RadiusF=20,maxDevInRadius=1,CLAHE=True
 #You can specify the goodFeatureToTracks params (more information on https://docs.opencv.org/master/d4/d8c/tutorial_py_shi_tomasi.html or 
 #Shi, Jianbo. "Good features to track." 1994 Proceedings of IEEE conference on computer vision and pattern recognition. IEEE, 1994.)
 '''
-video.set_goodFeaturesToTrackParams(maxCorners=50000,qualityLevel=0.01)
+video.set_goodFeaturesToTrackParams(maxCorners=50000,qualityLevel=0.001)
 #access to these parameters with:
 video.feature_params
 
@@ -174,8 +172,6 @@ video.showXV(video.X, video.V,display='points',displayColor=True)
 
 Field = opyf.Render.setField(video.UxTot[0], video.UyTot[0], 'norm')
 video.opyfDisp.plotField(Field, vis=video.vis)
-# these following matplotlib functions are requiredto update pyplot outputs
-video.opyfDisp.fig.canvas.draw()
 
 #%%
 
