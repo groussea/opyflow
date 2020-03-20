@@ -322,7 +322,7 @@ class opyfDisplayer:
         densx = int(np.round(res/resx))
         densy = int(np.round(res/resy))
         lvec = np.arange(densy/2, l-densy/2, densy, dtype=int)+(l % densy)//2
-        cvec = np.arange(densx/2, c-densx/2, densx, dtype=int)+(l % densx)//2
+        cvec = np.arange(densx/2, c-densx/2, densx, dtype=int)+(c % densx)//2
         new_grid_x = np.zeros(len(lvec))
         size = (len(lvec), len(cvec))
         temp_grid_x = grid_x[lvec, :]
