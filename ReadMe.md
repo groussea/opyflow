@@ -1,19 +1,16 @@
 ﻿
-## About
+# About
 
-OpyFlow : Python package for Optical FLow measurements.
+OpyFlow : Python package for Optical Flow measurements.
 
-It is based on openCV and VTK libraries to detect good features to track, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explanation below). The package contains also some rendering tools built with matplotlib tecplot, vtk, hdf5 readers and writers.
-For flow calculations, it is mainly inspired on the openCV python sample lktrack.py.
+This package is based on openCV and VTK libraries to detect good features to track, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explanation below). The package contains also some rendering tools built with matplotlib. Velocities can be exported with tecplot, vtk, hdf5 writers.
+For flow calculations, the process is mainly inspired on the openCV python sample lktrack.py.
 
 Author: Gauthier Rousseau
 
-This package has been developed in the course of my PhD at EPFL to study [Turbulent flows over rough permeable beds](https://infoscience.epfl.ch/record/264790/files/EPFL_TH9327.pdf). Outputs are visible in the manuscript and also on this [Video](https://www.youtube.com/watch?v=JmwE-kL0kTk) where videos and paraview animations have been rendered thanks to opyf outputs.
+This package has been developed in the course of my PhD at EPFL to study [Turbulent flows over rough permeable beds](https://infoscience.epfl.ch/record/264790/files/EPFL_TH9327.pdf). Outputs are visible in the manuscript as well as in this [Video](https://www.youtube.com/watch?v=JmwE-kL0kTk) where paraview animations have been rendered thanks to opyf outputs.
 
-corresponding e-mail : gauthier.rousseau@gmail.com
-
-
-"""
+Corresponding e-mail : gauthier.rousseau@gmail.com
 
 ## Quick start
 
@@ -23,12 +20,13 @@ Assuming that you already have an environment with python installed (<=3.7), run
 
 This should install opyf library and the main dependencies (vtk and opencv) automatically.
 
+From your image sequence
+
 After you may test:
 
 python /test/Test_case_PIV_Challenge_2014/CommandLines-Opyf-PIV-Challenge2014-Test_Simple.py
 
-For any problem, contact me please.
-
+For any problem feel free to contact me.
 
 ## Contents
 
@@ -48,8 +46,6 @@ The package Folder opyf:
     --custom_cmap.py
     --__init__.py
 
-
-   
 The test Folder:
 --test
 --Test_case_PIV_Challenge_2014
@@ -69,13 +65,10 @@ The test Folder:
    --The video must be downloaded from youtube with the package pytube
    --ReadMe_download_a_youtube_video.txt (instruction to download the video)
 
-
 Basic command lines:
 --CommandLines-Opyf-Default.py
 
-
-
-One test file performed on the PIV challenge 2014 caseA (images onhttp://www.pivchallenge.org/pivchallenge4.html#case_a):
+One test file performed on the PIV challenge 2014 caseA (images on<http://www.pivchallenge.org/pivchallenge4.html#case_a):>
 The results are compared to the main findings of the challenge:
 ``-Kähler CJ, Astarita T, Vlachos PP, Sakakibara J, Hain R, Discetti S, Foy RL, Cierpka C, 2016, Main results of the 4th International PIV Challenge, Experiments in Fluids, 57: 97.''
 
@@ -108,7 +101,6 @@ And then run spyder or directly ipython in the command prompt
 
 it is also possible to use anaconda software to use a GUI.
 
-
 ## Applications
 
 It is possible to test the algorithm on test case A of the python challenge.
@@ -128,9 +120,3 @@ matplotlib : 2.0.0
   year={2019},
   institution={EPFL}
 }
-
-
-
-
-
-

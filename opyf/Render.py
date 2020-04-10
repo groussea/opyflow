@@ -15,7 +15,7 @@ from opyf import MeshesAndTime, Track, Render, Files, Tools, Interpolate, Filter
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['axes.edgecolor'] = '0'
-plt.rcParams['axes.linewidth'] = 1.5
+plt.rcParams['axes.linewidth'] = 1.
 plt.rcParams['lines.linewidth']=2
 # plt.rc('text', usetex=True) may be activated if you prefer a Latex rendering font
 #plt.rc('font', family='arial')

@@ -5,13 +5,17 @@ Created on Mon Sep 30 12:40:10 2019
 
 @author: Gauthier
 """
-import sys
-# if it is not installed where is the opyf folder?
+#%%
+
+import sys, os
+os.chdir("./")
+# if opyf is not installed where is the opyf folder?
 sys.path.append('../../')
 import opyf 
-#not required
 import matplotlib.pyplot as plt
-#On ipython try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline"
+#On ipython try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline" for inline outputs
+
+
 
 plt.close('all')
 
@@ -25,7 +29,7 @@ this manipualtion create an object [video] that contains information deduced fro
 #if it is a frame sequence use: {opyf.frameSequenceAnalyzer(path)} and type the "path" where images are.
 '''
 
-#%%######################
+#%% ######################
 
 
 video.set_vecTime(Ntot=10,shift=1,step=2,starting_frame=20)
@@ -180,7 +184,6 @@ for plotting only the resulting averaged field, usefull if Ntot is longer
 '''
 video.set_vecTime(Ntot=10,shift=1,step=1,starting_frame=20)
 video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(display2='field',displayColor=True,scale=200)
-
 
 
 
