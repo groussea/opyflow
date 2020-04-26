@@ -10,6 +10,7 @@ import vtk
 import numpy as np
 import time
 from vtk.util.numpy_support import vtk_to_numpy
+from tqdm import tqdm
 
 
 def opyfBuildLocatorandStuff2D(X):
@@ -137,12 +138,12 @@ def opyfFindPointsWithinRadiusandDeviation(X, Value, R):
     Npoints = np.zeros(len(X), dtype=int)
     PointswhithinRadius = vtk.vtkIdList()
     stD = np.zeros(len(X))
-    print('Find Point with in Radius processing [may take a while if X large]')
-    for i in range(len(X)):
-
-        if (i) % (np.round(len(X)/10.)) == 0:
-            print('Processing ---- '+str((i)*100/len(X)+1)+'%')
-            time.sleep(0.001)
+    print('[I] Find Point within Radius processing may take a while if the number of points is too large)')
+    print('[I] Find Points within Radius='+ format(R,'2.2f')  +'- Processing ---- ')
+    for i in tqdm(range(len(X))):
+        # if (i) % (np.round(len(X)/3.)) == 0:
+            # print('[I]'+format((i)*100/len(X)+1,'2.0f')+'%')
+        time.sleep(0.00001)
         staticLocator.FindPointsWithinRadius(
             R, probePoints.GetPoint(i), PointswhithinRadius)
         tempind = []
@@ -166,14 +167,13 @@ def opyfFindPointsWithinRadiusandDeviation3D(X, Value, R):
     Npoints = np.zeros(len(X), dtype=int)
     PointswhithinRadius = vtk.vtkIdList()
     stD = np.zeros(len(X))
-    print('Find Point with in Radius processing (may take a while if X large)')
-    for i in range(len(X)):
-
-        if (i) % (np.round(len(X)/10.)) == 0:
-            print('Processing ---- '+str((i)*100/len(X)+1)+'%')
-            time.sleep(0.001)
-        staticLocator.FindPointsWithinRadius(
-            R, probePoints.GetPoint(i), PointswhithinRadius)
+    print('[I] Find Point within Radius processing may take a while if the number of points is too large)')
+    print('[I] Find Points within Radius='+ format(R,'2.2f')  +'- Processing ---- ')
+    for i in tqdm(range(len(X))):
+        # if (i) % (np.round(len(X)/3.)) == 0:
+            # print('[I]'+format((i)*100/len(X)+1,'2.0f')+'%')
+        time.sleep(0.00001)
+        staticLocator.FindPointsWithinRadius(R, probePoints.GetPoint(i), PointswhithinRadius)
         tempind = []
         Npoints[i] = PointswhithinRadius.GetNumberOfIds()
         for j in range(PointswhithinRadius.GetNumberOfIds()):

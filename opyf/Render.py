@@ -140,7 +140,7 @@ class opyfDisplayer:
         self.fig, self.ax = opyffigureandaxes(
             extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
         self.backend=mpl.get_backend()
-        
+        self.ax.set_aspect('equal', adjustable='box')
     def reset(self):
         if (len(self.paramPlot['vecX']) > 0 and len(self.paramPlot['vecY']) > 0):
             self.setGridXandGridY(
@@ -201,7 +201,8 @@ class opyfDisplayer:
             N = len(X)
         else:
             N = nvec
-            print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
+            print('only '+str(N)+'vectors ave been plotted because the number of velocity vectors is >' + str(nvec))
+            # print('use the *nvec* parameter to change the number of vecors displayed')
 
         ind = np.random.choice(np.arange(len(X)), N, replace=False)
         Xc = X[ind, :]
@@ -608,7 +609,8 @@ def opyfQuiverPointCloud(X, V, fig=None, ax=None, nvec=3000, normalize=False, **
         N = len(X)
     else:
         N = nvec
-        print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
+        print('only '+str(N)+'vectors ave been plotted because the number of velocity vectors is >' + str(nvec))
+        # print('use the *nvec* parameter to change the number of vecors displayed')
 #    scale=args.get('scale',None)
     if 'cmap' in args:
         del args['cmap']
@@ -642,8 +644,8 @@ def opyfQuiverPointCloudColored(X, V, fig=None, ax=None, nvec=3000, normalize=Fa
         N = len(X)
     else:
         N = nvec
-        print('only '+str(N)+'vectors plotted because length(X) >' + str(nvec))
-
+        print('only '+str(N)+'vectors ave been plotted because the number of velocity vectors is >' + str(nvec))
+        # print('use the *nvec* parameter to change the number of vecors displayed')
     ind = np.random.choice(np.arange(len(X)), N, replace=False)
     Xc = X[ind, :]
     Vc = V[ind, :]
@@ -923,7 +925,7 @@ def opyfColorBar(fig, im, label='Magnitude [px/Dt]', **args):
     return fig, cb
 
 
-def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=17, **args):
+def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=10, **args):
     Hframe = np.absolute(extent[3]-extent[2])
     Lframe = np.absolute(extent[1]-extent[0])
     Lfig = Lframe*Hfig/Hframe
@@ -941,7 +943,7 @@ def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=17, **args
     extx = Lframe*exty*A[1]/A[0]/Hframe
     axiswindow = [(1-extx)/2+0.02, 0.25, extx, exty]
 
-    fig = plt.figure(figsize=(A[0], A[1]), **args)
+    fig = plt.figure(figsize=(A[0], A[1]), dpi=142,**args)
     ax = plt.Axes(fig, axiswindow)
     fig.add_axes(ax)
     ax.set_ylabel('Y['+unit+']')

@@ -140,6 +140,7 @@ def write_csvTrack2D(csvTrackfile, X, V):
         writer.writerow(
             {'N': i+1, 'X': X[i][0], 'Y': X[i][1], 'Vx': V[i][0], 'Vy': V[i][1]})
     f.close()
+    print('[log] Data saved in '+csvTrackfile)
 
 # def write_csvTracks(csvTrackfile, tracks):
 #     f = open(csvTrackfile, 'w')

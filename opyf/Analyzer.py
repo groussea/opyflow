@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import time
 import opyf
 import matplotlib as mpl
+
 class Analyzer():
     def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,mask=None,**args):
         print('Dimensions :\n \t', 'Width :',
@@ -126,7 +127,7 @@ class Analyzer():
         print('Optical Flow Parameters:')
         for x in self.lk_params:
             print('\t- ', x, ':', self.lk_params[x])
-
+    # for the moment the radius must be given in px (more intuitive but should be clearer)
     def set_filtersParams(self, RadiusF=30, minNperRadius=0, maxDevInRadius=np.inf, wayBackGoodFlag=np.inf,CLAHE=False):
         self.filters_params = dict(RadiusF=RadiusF,
                                    minNperRadius=minNperRadius,
@@ -139,10 +140,15 @@ class Analyzer():
         for x in self.filters_params:
             print('\t- ', x, ':', self.filters_params[x])
 
-    def set_interpolationParams(self, Radius=30, Sharpness=8, kernel='Gaussian'):
-        self.interp_params = dict(Radius=Radius,  # it is not necessary to perform unterpolation on a high radius since we have a high number of values
+    # When the data set is scaled the radius must be gven in the good length unity (meter, cm, ....)
+    def set_interpolationParams(self, Radius=None, Sharpness=8, kernel='Gaussian'):
+        if Radius is None:
+            Radius = self.scale*30 # 30 px when the data set is not scaled
+            self.interp_params = dict(Radius=Radius,  # it is not necessary to perform unterpolation on a high radius since we have a high number of values
                                   Sharpness=Sharpness,
                                   kernel=kernel)
+    # set the a scaled value if the user does not introduce a Radius and the data set is scaled
+                                      
         print('')
         print('Interpolation Parameters:')
         for x in self.interp_params:
@@ -340,12 +346,21 @@ class Analyzer():
             l = self.listD[i]
             self.vis = cv2.imread(self.folder_src+'/'+l,
                                   self.imreadOption)  # 2 for tiff images
+            if self.vis is None:
+                print('')
+                sys.exit("Impossible to read the frame " + l)
         elif self.processingMode == 'video':
             self.vis = self.dictFrames[str(i)]
 
         self.vis = self.vis[self.ROI[1]:(
             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
-    
+
+        if self.rangeOfPixels != [0, 255]:
+            self.vis = np.array(self.vis, dtype='float32')
+            self.vis = ((self.vis-self.rangeOfPixels[0])/(self.rangeOfPixels[1]-self.rangeOfPixels[0]))*255
+            self.vis[np.where(self.vis< 0)] = 0
+            self.vis[np.where(self.vis > 255)] = 255
+            self.vis=np.uint16(self.vis)    
         if self.stabilizeOn==True:
             self.stabilize(i)
         if self.birdEyeMod==True:
@@ -387,8 +402,8 @@ class Analyzer():
     def stepTracks(self, pr, i):
         if pr == False:
             self.prev_gray = None
-
-        self.readFrame(i)
+        self.currentFrame=i
+        self.readFrame(self.currentFrame)
         self.substractAveragedFrame()
         self.tracks, self.vtracks, self.prev_gray, self.X, self.V = Track.opyfTrack(self.tracks, self.vtracks, self.gray, self.prev_gray,
                                                                                     self.incr, self.feature_params,
@@ -434,10 +449,9 @@ class Analyzer():
 
     def substractAveragedFrame(self):
         self.gray = Tools.convertToGrayScale(self.vis)
-        if self.rangeOfPixels != [0, 255] or self.frameAv is not None:
+        if  self.frameAv is not None:
             self.gray = np.array(self.gray, dtype='float32')
-            self.gray = (
-                (self.gray-self.rangeOfPixels[0])/(self.rangeOfPixels[1]-self.rangeOfPixels[0]))*255-self.frameAv
+            self.gray =self.gray- self.frameAv
             self.gray[np.where(self.gray < 0)] = 0
             self.gray[np.where(self.gray > 255)] = 255
             self.gray = np.array(self.gray, dtype='uint8')
@@ -467,28 +481,35 @@ class Analyzer():
         if pr == True:
 
             # filters ###### important since we have a low quality level for the Good Feature to track and a high Distance Good Flag
-            if self.filters_params['minNperRadius'] > 0:
-                Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
-                    self.X, (self.V[:, 0]**2+self.V[:, 1]**2), self.filters_params['RadiusF'])
-                self.X = Filters.opyfDeletePointCriterion(
-                    self.X, Npoints, climmin=self.filters_params['minNperRadius'])
-                self.V = Filters.opyfDeletePointCriterion(
-                    self.V, Npoints, climmin=self.filters_params['minNperRadius'])
-            if self.filters_params['maxDevInRadius'] != np.inf:
-                Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
-                    self.X, self.V[:, 1], self.filters_params['RadiusF'])
-                self.X = Filters.opyfDeletePointCriterion(
-                    self.X, Dev, climmax=self.filters_params['maxDevInRadius'])
-                self.V = Filters.opyfDeletePointCriterion(
-                    self.V, Dev, climmax=self.filters_params['maxDevInRadius'])
-                Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
-                    self.X, self.V[:, 0], self.filters_params['RadiusF'])
-                self.X = Filters.opyfDeletePointCriterion(
-                    self.X, Dev, climmax=self.filters_params['maxDevInRadius'])
-                self.V = Filters.opyfDeletePointCriterion(
-                    self.V, Dev, climmax=self.filters_params['maxDevInRadius'])
+            self.X,self.V=self.applyFilters(self.X,self.V)
             self.scaleAndLogFlow(i)
 
+    def applyFilters(self,X, V):
+        if self.filters_params['minNperRadius'] > 0:
+            print('[I] Number of point within radius (in px) filter')
+            Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
+                X, (V[:, 0]**2+V[:, 1]**2), self.filters_params['RadiusF'])
+            X = Filters.opyfDeletePointCriterion(
+                X, Npoints, climmin=self.filters_params['minNperRadius'])
+            V = Filters.opyfDeletePointCriterion(
+                V, Npoints, climmin=self.filters_params['minNperRadius'])
+        if self.filters_params['maxDevInRadius'] != np.inf:
+            print('[I] Deviation filter')
+            print('[I] Step vertical')
+            Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
+                X, V[:, 1], self.filters_params['RadiusF'])
+            X = Filters.opyfDeletePointCriterion(
+                X, Dev, climmax=self.filters_params['maxDevInRadius'])
+            V = Filters.opyfDeletePointCriterion(
+                V, Dev, climmax=self.filters_params['maxDevInRadius'])
+            print('[I] Step horizontal')
+            Dev, Npoints, stD = Filters.opyfFindPointsWithinRadiusandDeviation(
+                X, V[:, 0], self.filters_params['RadiusF'])
+            X = Filters.opyfDeletePointCriterion(
+                X, Dev, climmax=self.filters_params['maxDevInRadius'])
+            V = Filters.opyfDeletePointCriterion(
+                V, Dev, climmax=self.filters_params['maxDevInRadius'])
+        return X,V  
     def scaleAndLogTracks(self, i):
         if self.scaled == True and len(self.X) > 0:
             self.X = (self.X-np.array(self.origin))*self.scale
@@ -575,7 +596,7 @@ class Analyzer():
                     # self.opyfDisp.fig.show()
                     time.sleep(0.1)
 
-    def extractGoodFeaturesDisplacementsAndAccumulate(self, display='field', saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
+    def extractGoodFeaturesDisplacementsAndAccumulate(self, display='quiver', saveImgPath=None, numberingOutput=False, imgFormat='.png', **args):
         self.reset()
         self.Xaccu = np.empty((0, 2))
         self.Vaccu = np.empty((0, 2))
@@ -602,7 +623,7 @@ class Analyzer():
                     time.sleep(0.1)
 
     def interpolateOnGrid(self, X, V):
-
+        print('[I] '+str(len(X))+' vectors to interpolate')
         self.interpolatedVelocities = Interpolate.npInterpolateVTK2D(
             X, V, self.XT, ParametreInterpolatorVTK=self.interp_params)
 
@@ -631,6 +652,7 @@ class Analyzer():
                         (self.Hgrid, self.Lgrid))*np.nan
                     self.UxTot.append(self.Ux)
                     self.UyTot.append(self.Uy)
+                    print('no velocites on Good Features have been found during this step')
 
                 self.Field = Render.setField(self.Ux, self.Uy, Type)
                 self.Field[np.where(self.Field==0)]=np.nan
@@ -649,7 +671,7 @@ class Analyzer():
                     time.sleep(0.1)
         self.fieldResults='time-serie'
         
-        
+            
     def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(self, display1='quiver', display2='field', saveImgPath=None, Type='norm', imgFormat='png', **args):
         self.extractGoodFeaturesDisplacementsAndAccumulate(
             display=display1, **args)
@@ -669,8 +691,29 @@ class Analyzer():
             # self.opyfDisp.fig.show()
             time.sleep(0.1)
 
-        self.fieldResults='accumulation'
+        self.fieldResults = 'accumulation'
         
+    def filterAndInterpolate(self, Type='norm',display='field',saveImgPath=None,**args):
+        self.Xaccu, self.Vaccu=self.applyFilters(self.Xaccu, self.Vaccu)
+        self.interpolateOnGrid(self.Xaccu, self.Vaccu)
+        self.UxTot = []
+        self.UyTot = []
+        self.UxTot.append(np.reshape(
+            self.interpolatedVelocities[:, 0], (self.Hgrid, self.Lgrid)))
+        self.UyTot.append(np.reshape(
+            self.interpolatedVelocities[:, 1], (self.Hgrid, self.Lgrid)))
+        self.Field = Render.setField(self.Ux, self.Uy, Type)
+        self.Field[np.where(self.Field==0)]=np.nan
+        self.Field=self.Field*self.gridMask
+        if display == 'field' and self.mute==False:
+            self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
+            if saveImgPath is not None:
+                self.opyfDisp.fig.savefig(saveImgPath+'/'+display2+'_'+format(
+                    self.vec[0], '04.0f')+'_to_'+format(self.vec[-1], '04.0f')+'.'+imgFormat)
+            # self.opyfDisp.fig.show()
+            time.sleep(0.1)
+
+        self.fieldResults = 'accumulation'
     def showXV(self, X, V, vis=None, display='quiver', displayColor=True, **args):
         if display == 'quiver' and self.mute==False:
             self.opyfDisp.plotQuiverUnstructured(
@@ -679,6 +722,8 @@ class Analyzer():
         if display == 'points' and self.mute==False:
             self.opyfDisp.plotPointsUnstructured(
                 Xdata=X, Vdata=V, vis=vis, displayColor=displayColor, **args)
+
+
 
     def scaleData(self, framesPerSecond=1, metersPerPx=1, unit=['m', 's'], origin=None):
         
@@ -750,7 +795,9 @@ class Analyzer():
             self.Uy = -self.Uy
         if hasattr(self,'X')==True:
             self.X=self.X*np.array([1, -1])
-            self.V=self.V*np.array([1, -1])
+            self.V = self.V * np.array([1, -1])
+            self.Xaccu=self.Xaccu*np.array([1, -1])
+            self.Vaccu=self.Vaccu*np.array([1, -1])
             self.Xdata = [(X*np.array([1, -1])) for X in self.Xdata]
             self.Vdata = [(V*np.array([1, -1])) for V in self.Vdata]
         if hasattr(self,'UyTot'):
@@ -759,10 +806,14 @@ class Analyzer():
 
     def writeGoodFeaturesPositionsAndDisplacements(self, fileFormat='hdf5', outFolder='.', filename=None, fileSequence=False):
         self.filename=filename
-        XpROI=np.copy(self.Xdata)
-        if self.scaled==False:
-            XpROI[:,0]=self.Xdata[:,0]+self.ROI[0]
-            XpROI[:,1]=self.Xdata[:,1]+self.ROI[1]
+        
+        if self.scaled == False:
+            XpROI=[]
+            for x in self.Xdata:
+                XpROI.append(x[:,0:2]+self.ROI[0:2])
+            XpROI = np.array(XpROI)
+        else:
+            XpROI=np.copy(self.Xdata)
         if filename is None:
             filename = 'good_features_positions_and_opt_flow_from_frame' + str(self.vec[0]) + 'to' + str(
                 self.vec[-1]) + '_with_step_' + str(self.paramVecTime['step']) + '_and_shift_'+str(self.paramVecTime['shift'])
