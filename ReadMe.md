@@ -3,6 +3,8 @@
 
 OpyFlow : Python package for Optical Flow measurements.
 
+![PIV challenge](test/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
+
 Opyf is based on openCV and VTK libraries to detect good features to track, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explanation below). The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
 For flow calculations, the process is mainly inspired on the openCV python sample lktrack.py.
 
@@ -43,8 +45,7 @@ opyf package contains 2 frames and one video for testing and practicing your sel
 
 - Two frames from the Test case A of the *PIV Challenge 2014*
 
-When applied to the entire dataset, It can produce the following result (see [Test PIV Challenge 2014 - Case A](test/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure) :
-![PIV challenge](test/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
+When applied to the entire dataset, It can produce the following result (see [Test PIV Challenge 2014 - Case A](test/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
 
 - A bird eye view video of a stream river taken by a drone from which surface velocities can be extracted ([see the following python file for the different possible procedures](test/Test_Navizence/test_opyf_Navizence.py) ).
 
