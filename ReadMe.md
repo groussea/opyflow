@@ -48,7 +48,7 @@ When applied to the entire dataset, It can produce the following result (see [Te
 
 - A bird eye view video of a stream river taken by a drone from which surface velocities can be extracted ([see the following python file for the different possible procedures](test/Test_Navizence/test_opyf_Navizence.py) ).
 
-![bird eye view Navizence](test/Test_Navizence/gif/output.gif)
+![bird eye view Navizence](test/Test_Navizence/gif/example_Navizence_Drone.gif)
 
 ## Contents
 

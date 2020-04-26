@@ -182,9 +182,9 @@ video.opyfDisp.plotField(Field, vis=video.vis)
 '''
 for plotting only the resulting averaged field, usefull if Ntot is longer
 '''
+video.set_vlim([0,30])
 video.set_vecTime(Ntot=10,shift=1,step=1,starting_frame=20)
 video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(display2='field',displayColor=True,scale=200)
-
 
 
 #%% 
