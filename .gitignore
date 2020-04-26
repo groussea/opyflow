@@ -8,3 +8,15 @@ $ cat .gitignore
 /opyf/__pycache__
 test/Test_land_slide_youtube_video/Val Parghera Zeitraffer Mai 2013 - Januar 2015.mp4
 
+test/Test_Navizence/gif/test_opyf_Navizence_generate_gif.py
+test/Test_Navizence/gif/init.png
+test/Test_Navizence/test.pdf
+test/Test_Navizence/gif/_0000001-0120.mp4
+test/Test_Navizence/gif/forGif.blend
+test/Test_Navizence/gif/forGif.blend1
+test/Test_Navizence/gif/frame_final_3.png
+test/Test_case_PIV_Challenge_2014/gif/_0000001-0120.mp4
+test/Test_case_PIV_Challenge_2014/gif/Anylyze-Opyf-PIV-Challenge2014-Test_Simple_generate_gif.py
+test/Test_case_PIV_Challenge_2014/gif/forGif.blend
+test/Test_case_PIV_Challenge_2014/gif/frame_final_2.png
+test/Test_case_PIV_Challenge_2014/gif/frame_final.png
