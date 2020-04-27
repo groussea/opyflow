@@ -371,7 +371,12 @@ class opyfDisplayer:
 
 
 
-    def plot(self, Field=None, gridVx=None, gridVy=None, Xdata=None, Vdata=None, vis=None, Ptype='norm', Hfig=8, namefig='Opyf', scale=None, cmap=None, alpha=0.6, width=0.002, nvec=3000, res=32,
+    def plot(self, Field=None,
+             gridVx=None, gridVy=None,
+             Xdata=None, Vdata=None,
+             vis=None, Ptype='norm', Hfig=8,
+             namefig='Opyf', scale=None, cmap=None,
+             alpha=0.6, width=0.002, nvec=3000, res=32,
              c='k', s=10, ROIvis=None, **args):
 
         if len(self.ax.collections) > 0:
@@ -569,6 +574,11 @@ class opyfDisplayer:
 
         self.plot(Xdata=Xdata, Vdata=Vdata, vis=vis, **args)
 
+    def invertXYlabel(self):
+        xl = self.ax.get_xlabel()
+        yl = self.ax.get_ylabel()
+        self.ax.set_xlabel(yl)
+        self.ax.set_ylabel(xl)
 
 def opyfText(dictionary, ax=None, fig=None, pos=(0., 0.), esp=50, fontsize=12., addText=None, alpha=0.8):
     fig, ax = getax(fig=fig, ax=ax)
@@ -891,7 +901,7 @@ def opyfPointCloudColoredScatter(X, V, fig=None, ax=None, cmapCS=mpl.cm.coolwarm
 
 #    sc=ax.scatter(X[:,0], X[:,1],c=norme,color=cmapCS(norm(norme)),**args)
     sc = ax.scatter(X[:, 0], X[:, 1], c=norme, cmap=cmapCS, **args)
-
+    fig.show()
     return fig, ax, sc
 
 
@@ -946,8 +956,8 @@ def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=10, **args
     fig = plt.figure(figsize=(A[0], A[1]), dpi=142,**args)
     ax = plt.Axes(fig, axiswindow)
     fig.add_axes(ax)
-    ax.set_ylabel('Y['+unit+']')
-    ax.set_xlabel('X['+unit+']')
+    ax.set_ylabel('Y ['+unit+']')
+    ax.set_xlabel('X ['+unit+']')
     ax.axis('equal')
     ax.set_xlim(extent[0], extent[1])
     ax.set_ylim(extent[2], extent[3])
@@ -1006,7 +1016,7 @@ def getax(fig=None, ax=None, values=None):
         plt.pause(0.1)
 
     if fig is not None and ax is None:
-        fig.show()
+        # fig.show()
         if fig.get_axes() != [] and ax == None:
             ax = fig.get_axes()[-1]
         else:

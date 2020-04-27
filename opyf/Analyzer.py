@@ -34,7 +34,7 @@ class Analyzer():
         
         self.set_mask(mask)
 
-                
+        self.invertedXY=False        
             
         self.frameAv = np.zeros(self.cropFrameInit.shape)
         self.set_goodFeaturesToTrackParams()
@@ -98,10 +98,13 @@ class Analyzer():
         else:
             self.mask=np.ones_like(self.cropFrameInit) 
         
-        
+    def invertXYlabel(self):
+        self.invertedXY=bool(self.invertedXY-1)
+        self.opyfDisp.invertXYlabel()
+
     def dumpShow(self):  
         if self.mute==False:
-            self.opyfDisp.ax.imshow(cv2.cvtColor(self.visInit, cv2.COLOR_BGR2RGB))
+            self.opyfDisp.ax.imshow(cv2.cvtColor(self.vis, cv2.COLOR_BGR2RGB))
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
                 self.opyfDisp.fig.show()
             time.sleep(0.1)
@@ -261,7 +264,7 @@ class Analyzer():
                     self.dictFrames[str(self.sortedVec[k])] = vis
                     k += 1
         self.readFrame(self.vec[0])
-
+        self.dumpShow()
     def set_trackingFeatures(self, starting_frame=0, step=1, Ntot=10, track_length=10, detection_interval=10):
 
         self.tracks_params = {'track_len': track_length,
@@ -569,6 +572,8 @@ class Analyzer():
         if self.close_at_reset==True or first==True:
             plt.close(self.num)
             self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
+            if self.invertedXY==True:
+                self.opyfDisp.invertXYlabel()
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
                 self.opyfDisp.fig.show()
 
@@ -659,16 +664,15 @@ class Analyzer():
                 self.Field=self.Field*self.gridMask
                 if display == 'field' and self.mute==False:
                     self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
-                    if saveImgPath is not None:                  
-                        if numberingOutput==True:
-                            self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
-                            k+=1
-                        else: 
-                            self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(
-                            i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)
-                        
-                    # self.opyfDisp.fig.show()
                     time.sleep(0.1)
+                elif display == 'quiver_on_field' and self.mute==False:
+                    self.opyfDisp.plotQuiverField(self.Ux, self.Uy,  vis=self.vis,  **args)
+                if (saveImgPath!=None)*(display=='field' or display=='quiver_on_field'):                  
+                    if numberingOutput==True:
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
+                        k+=1
+                    else: 
+                        self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(i, '04.0f')+'_to_'+format(i+self.paramVecTime['step'], '04.0f')+'.'+imgFormat)                                    
         self.fieldResults='time-serie'
         
             
@@ -970,6 +974,7 @@ class Analyzer():
             self.stab=opyf.frameSequenceAnalyzer(self.folder_src,mute=mute,close_at_reset=close_at_reset,num='stab')
         self.stab.mask=mask
         self.stab.set_vlim(vlim)
+        self.stab.set_vecTime(starting_frame=self.vec[0])
         self.stab.set_goodFeaturesToTrackParams(qualityLevel=0.05)
         
         self.stabilizeOn=True
@@ -987,7 +992,12 @@ class Analyzer():
 
 
 
-    def set_birdEyeViewProcessing(self,image_points,model_points,pos_bird_cam,scale=True,framesPerSecond=30,saveOutPut=None):
+    def set_birdEyeViewProcessing(self, image_points,
+                                  model_points,
+                                  pos_bird_cam,
+                                  rotation=np.array([[1, 0, 0.],[0,-1,0.],[0.,0.,-1.]]),
+                                  scale=True, framesPerSecond=30, saveOutPut=None,
+                                  axisSize=5):
 
 
         focal_length = self.Lvis
@@ -1001,12 +1011,10 @@ class Analyzer():
         dist_coeffs = np.zeros((4,1))
         ret,self.rvec1,self.tvec1=cv2.solvePnP(model_points,image_points,camera_matrix ,dist_coeffs )
         self.R1,_=cv2.Rodrigues(self.rvec1)
-        self.RZ=np.array([[0,-1,0.],
-                  [1,0,0.],
-                  [0.,0.,1.]])
+        self.RZ=rotation
         self.rvec_z,_=cv2.Rodrigues(self.RZ)
-        self.tvec_z=np.array(pos_bird_cam,ndmin=2).transpose()
-        normal = np.array([0,0,1], ndmin=2)
+        self.tvec_z=np.array([-pos_bird_cam[0],-pos_bird_cam[1],-pos_bird_cam[2]],ndmin=2).transpose()
+        normal = np.array([0,0,-1], ndmin=2)
         self.normal1 = np.dot(self.R1,normal.transpose())
         origin=np.array([0,0,0], ndmin=2)
         origin1 = np.dot(self.R1,origin.transpose()) + self.tvec1
@@ -1015,15 +1023,18 @@ class Analyzer():
         homography_euclidean = Tools.computeHomography(self.R1, self.tvec1, self.RZ,self.tvec_z,self.d_inv1, self.normal1)
         homography = camera_matrix @ homography_euclidean @ camera_matrix_inv
         self.homography =homography /homography[2,2]
-        homography_euclidean =homography_euclidean /homography_euclidean[2,2]
-        img_wraped=np.copy(self.visInit)
-        img_vis=np.copy(self.visInit)
-        img_vis=cv2.drawFrameAxes(img_vis,camera_matrix,dist_coeffs,self.rvec1,self.tvec1,10)
+        homography_euclidean = homography_euclidean / homography_euclidean[2, 2]
+        self.homography=homography
+        img_wraped=np.copy(self.vis)
+        img_vis=np.copy(self.vis)
+        img_vis=cv2.drawFrameAxes(img_vis,camera_matrix,dist_coeffs,self.rvec1,self.tvec1,axisSize)
         img_wraped=cv2.warpPerspective(img_wraped, self.homography, (self.Lvis,self.Hvis))
        # self.opyfDisp.plotPointsUnstructured(axisPoints,axisPoints,vis=img_wraped)
-        fig, [ax1,ax2]=plt.subplots(2,1,num='Bird Eye Transformation')
-        fig.suptitle('Bird Eye Transformation')
-        fig.set_size_inches(10,20)
+        self.figBET, [ax1, ax2] = plt.subplots(2, 1, num='Bird Eye Transformation')
+        self.figBET.clear()
+        [ax1, ax2]=self.figBET.subplots(2,1)
+        self.figBET.suptitle('Bird Eye Transformation')
+        self.figBET.set_size_inches(10,20)
         ax1.imshow(img_vis)
         axisPoints, _ = cv2.projectPoints(model_points, self.rvec1, self.tvec1, camera_matrix, (0, 0, 0, 0))
 
@@ -1049,12 +1060,12 @@ class Analyzer():
             #   axisPoints[i][0,1],'        X: '+format(model_points[i][0],'2.2f')+' m Y: '+format(model_points[i][1],'2.2f')+' m Z: '+format(model_points[i][2],'2.2f')+' m   ',
             #   fontsize=6, bbox=props,zorder=1)
 
-        img_wraped=cv2.drawFrameAxes(img_wraped,camera_matrix,dist_coeffs,self.rvec_z,self.tvec_z,10)
+        img_wraped=cv2.drawFrameAxes(img_wraped,camera_matrix,dist_coeffs,self.rvec_z,self.tvec_z,axisSize)
         ax2.imshow(img_wraped) 
         ax2.set_xlim([0,self.Lvis])
-        ax2.set_ylim([self.Hvis,0])
+        ax2.set_ylim([self.Hvis,0]) # invert axis to obtain the correct view
         if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
-            fig.show()
+            self.figBET.show()
         time.sleep(0.1)
        
         if scale==True:
@@ -1066,11 +1077,10 @@ class Analyzer():
         self.birdEyeMod=True   
         
         if saveOutPut is not None:
-            fig.savefig(saveOutPut)
+            self.figBET.savefig(saveOutPut)
     def transformBirdEye(self):
         
         self.vis=cv2.warpPerspective(self.vis, self.homography, (self.Lvis,self.Hvis))
-
     
 
 # #    plt.subplot(121),plt.imshow(img),plt.title('Input')

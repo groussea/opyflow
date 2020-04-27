@@ -5,7 +5,7 @@ OpyFlow : Python package for Optical Flow measurements.
 
 ![PIV challenge](test/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
 
-Opyf is based on openCV and VTK libraries to detect good features to track, calculate the optical flow by Lukas Kanade method and interpolate them on a mesh (see explanation below). The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
+Opyf is based on openCV and VTK libraries to detect good features to track, calculate the optical flow by the Lukas Kanade method and interpolate them on a mesh. The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
 For flow calculations, the process is mainly inspired on the openCV python sample [lktrack.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).
 
 Author: Gauthier Rousseau
@@ -14,15 +14,15 @@ Corresponding e-mail : gauthier.rousseau@gmail.com
 
 ## Quick start
 
-Assuming that you already have an environment with python installed (<=3.7), run the following command from the package repository:
+Assuming that you already have an environment with python installed (<=3.7), run the following command from the package folder:
 
 ```shell
 python setup.py install
 ```
 
-This should install the opyf library and the main dependencies (vtk and opencv) automatically (for anaconda installaion see bellow).
+This should install the opyf library and the main dependencies (vtk and opencv) automatically.
 
-To analyze a frame sequence (*png*, *bmp*, *jpeg*, *tiff*) run the following script:
+To analyze a frame sequence (*png*, *bmp*, *jpeg*, *tiff*) you can run the following script:
 
 ```python
 import opyf
@@ -35,25 +35,25 @@ For a video (*mp4*, *avi*, *mkv*, ... ):
 analyzer=opyf.videoAnalyzer("video/file/path")
 ```
 
-To run your first analyze run :
+To perform your first analyze run :
 
 ```python
 analyzer.extractGoodFeaturesAndDisplacements()
 ```
 
-opyf package contains 2 frames and one video for testing and practicing your self :
+opyf package contains two frames and one video for testing and practicing yourself:
 
-- Two frames from the Test case A of the *PIV Challenge 2014*
+- The two frames were extracted from the frame sequence of the Test case A of the *PIV Challenge 2014*
 
 When applied to the entire dataset, It can produce the [above](#about) result (see [Test PIV Challenge 2014 - Case A](test/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
 
-- A bird eye view video of a stream river taken by a drone from which surface velocities can be extracted ([see the following python file for the different possible procedures](test/Test_Navizence/test_opyf_Navizence.py) ).
+- The video is a bird eye view video of a stream river taken by a drone and from which surface velocities can be extracted ([see the following python file for the different possible procedures](test/Test_Navizence/test_opyf_Navizence.py) ).
 
 ![bird eye view Navizence](test/Test_Navizence/gif/example_Navizence_Drone.gif)
 
 ## Contents
 
-This archive is organized as follow:
+This archive is organized as follows:
 
 The setup file:
 
@@ -127,10 +127,6 @@ conda create -n opyfenv vtk opencv matplotlib scipy tqdm (spyder)
 source activate opyfenv
 
 These command lines will install the an environnement with python 3.6.
-The soft has been developed on python 2.7 and modifications are still required.
-And then run spyder or directly ipython in the command prompt
-
-it is also possible to use anaconda software to use a GUI.
 
 Tested on:
 Python version: 2.7 and 3.6
@@ -150,5 +146,6 @@ This package has been developed in the course of my PhD at EPFL to study [Turbul
   institution={EPFL}
 }
 
-Contributors : Hugo Rousseau, Mohamed Nadeem  and others
-Credits UAV video : Bob de Graffenried
+Contributors : Hugo Rousseau, Mohamed Nadeem, LHE team and others
+
+Credits for UAV video : Bob de Graffenried
