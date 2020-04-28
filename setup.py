@@ -23,7 +23,7 @@ setup(
     name='opyf',
 
     # Versions should comply with PEP440.
-    version='0.1',
+    version='1.1',
 
     description='OpyFlow : Python package for Optical FLow measurements.',
     long_description=long_description,
@@ -61,10 +61,11 @@ setup(
         'Programming Language :: Python :: 3.4',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ],
 
     # What does your project relate to?
-    keywords='development',
+    keywords='optical flow',
 
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().

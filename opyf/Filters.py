@@ -143,7 +143,6 @@ def opyfFindPointsWithinRadiusandDeviation(X, Value, R):
     for i in tqdm(range(len(X))):
         # if (i) % (np.round(len(X)/3.)) == 0:
             # print('[I]'+format((i)*100/len(X)+1,'2.0f')+'%')
-        time.sleep(0.00001)
         staticLocator.FindPointsWithinRadius(
             R, probePoints.GetPoint(i), PointswhithinRadius)
         tempind = []
@@ -172,7 +171,6 @@ def opyfFindPointsWithinRadiusandDeviation3D(X, Value, R):
     for i in tqdm(range(len(X))):
         # if (i) % (np.round(len(X)/3.)) == 0:
             # print('[I]'+format((i)*100/len(X)+1,'2.0f')+'%')
-        time.sleep(0.00001)
         staticLocator.FindPointsWithinRadius(R, probePoints.GetPoint(i), PointswhithinRadius)
         tempind = []
         Npoints[i] = PointswhithinRadius.GetNumberOfIds()
