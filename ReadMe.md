@@ -1,11 +1,9 @@
 ﻿
 # About
 
-OpyFlow : Python package for Optical Flow measurements.
+OpyFlow : Python package for Optical Flow measurements
 
-![PIV challenge](test/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
-
-Opyf is based on openCV and VTK libraries to detect good features to track, calculate the optical flow by the Lukas Kanade method and interpolate them on a mesh. The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
+Opyflow is based on openCV and VTK libraries to detect good features to track, calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
 For flow calculations, the process is mainly inspired on the openCV python sample [lktrack.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).
 
 Author: Gauthier Rousseau
@@ -14,7 +12,13 @@ Corresponding e-mail : gauthier.rousseau@gmail.com
 
 ## Quick start
 
-Assuming that you already have an environment with python installed (<=3.7), run the following command from the package folder:
+Assuming that you already have an environment with python installed (<=3.7), run the following command on your terminal:
+
+```shell
+pip install opyf
+```
+
+or from the *opyflow* repository
 
 ```shell
 python setup.py install
@@ -45,7 +49,9 @@ opyf package contains two frames and one video for testing and practicing yourse
 
 - The two frames were extracted from the frame sequence of the Test case A of the *PIV Challenge 2014*
 
-When applied to the entire dataset, It can produce the [above](#about) result (see [Test PIV Challenge 2014 - Case A](test/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
+![PIV challenge](test/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
+
+When applied to the entire dataset, It can produce the above result (see [Test PIV Challenge 2014 - Case A](test/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
 
 - The video is a bird eye view video of a stream river taken by a drone and from which surface velocities can be extracted ([see the following python file for the different possible procedures](test/Test_Navizence/test_opyf_Navizence.py) ).
 
@@ -101,7 +107,7 @@ The test Folder:
     - [2018.07.04_Station_fixe_30m_sample.mp4](test/Test_Navizence/2018.07.04_Station_fixe_30m_sample.mp4)
     - [test_opyf_Navizence.py](test/Test_Navizence/test_opyf_Navizence.py)
 
-One test file performed on the PIV challenge 2014 caseA (images on<http://www.pivchallenge.org/pivchallenge4.html#case_a):>
+One test file performed on the [PIV challenge 2014 caseA](http://www.pivchallenge.org/pivchallenge4.html#case_a):
 The results are compared to the main findings of the challenge:
 ``-Kähler CJ, Astarita T, Vlachos PP, Sakakibara J, Hain R, Discetti S, Foy RL, Cierpka C, 2016, Main results of the 4th International PIV Challenge, Experiments in Fluids, 57: 97.''
 
