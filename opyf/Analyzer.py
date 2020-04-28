@@ -569,6 +569,8 @@ class Analyzer():
         self.incr = 0
         self.UxTot = []
         self.UyTot = []
+        self.Xaccu = np.empty((0, 2))
+        self.Vaccu = np.empty((0, 2))
         if self.close_at_reset==True or first==True:
             plt.close(self.num)
             self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
