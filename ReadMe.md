@@ -143,7 +143,7 @@ conda create -n opyfenv python=3.6 vtk opencv matplotlib scipy tqdm (spyder)
 source activate opyfenv
 ```
 
-These command lines will install an environment with python 3.6
+These command lines will install an environment with python 3.6 and the main dependencies.
 
 For python 3.7 you should use the *conda-forge* channel:
 
