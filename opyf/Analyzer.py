@@ -16,6 +16,10 @@ import time
 import opyf
 import matplotlib as mpl
 
+
+
+
+
 class Analyzer():
     def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,mask=None,**args):
         print('Dimensions :\n \t', 'Width :',
@@ -76,7 +80,6 @@ class Analyzer():
         
         """
         loading an optional mask 
-        my default the mask set to one
         the mask entry may be the path to the image mask or directly a numpy.array
         It can be either of type boolean or uint8.
         """
@@ -131,13 +134,19 @@ class Analyzer():
         for x in self.lk_params:
             print('\t- ', x, ':', self.lk_params[x])
     # for the moment the radius must be given in px (more intuitive but should be clearer)
-    def set_filtersParams(self, RadiusF=30, minNperRadius=0, maxDevInRadius=np.inf, wayBackGoodFlag=np.inf,CLAHE=False):
+    def set_filtersParams(self, RadiusF=30,
+                          minNperRadius=0,
+                          maxDevInRadius=np.inf, wayBackGoodFlag=np.inf,
+                          CLAHE=False,range_Vx=[-np.inf, np.inf],range_Vy=[-np.inf, np.inf]):
+
         self.filters_params = dict(RadiusF=RadiusF,
                                    minNperRadius=minNperRadius,
                                    maxDevInRadius=maxDevInRadius,
                                    wayBackGoodFlag=wayBackGoodFlag,
-                                   CLAHE=CLAHE)
-
+                                   CLAHE=CLAHE,
+                                   range_Vx=range_Vx,
+                                   range_Vy=range_Vy)
+        
         print('')
         print('Filters Params:')
         for x in self.filters_params:
@@ -483,10 +492,10 @@ class Analyzer():
 
         if pr == True:
 
-            # filters ###### important since we have a low quality level for the Good Feature to track and a high Distance Good Flag
-            self.X,self.V=self.applyFilters(self.X,self.V)
+            # filters ######             
             self.scaleAndLogFlow(i)
-
+            self.X,self.V=self.applyFilters(self.X,self.V)
+            
     def applyFilters(self,X, V):
         if self.filters_params['minNperRadius'] > 0:
             print('[I] Number of point within radius (in px) filter')
@@ -512,7 +521,23 @@ class Analyzer():
                 X, Dev, climmax=self.filters_params['maxDevInRadius'])
             V = Filters.opyfDeletePointCriterion(
                 V, Dev, climmax=self.filters_params['maxDevInRadius'])
-        return X,V  
+        if self.filters_params['range_Vx'][0] != -np.inf or self.filters_params['range_Vx'][1] != np.inf:
+            inDel=[]
+            for x, v, k in zip(X, V,range(len(V))):
+                if v[0] < self.filters_params['range_Vx'][0] or v[0] > self.filters_params['range_Vx'][1]:
+                    inDel.append(k)
+            X= np.delete(X, inDel, 0)
+            V = np.delete(V, inDel, 0)   
+        if self.filters_params['range_Vy'][0] != -np.inf or self.filters_params['range_Vy'][1] != np.inf:
+            inDel=[]
+            for x, v, k in zip(X, V,range(len(V))):
+                if v[1] < self.filters_params['range_Vy'][0] or v[1] > self.filters_params['range_Vy'][1]:
+                    inDel.append(k)
+            X= np.delete(X, inDel, 0)
+            V = np.delete(V, inDel, 0)  
+        return X, V
+        
+   
     def scaleAndLogTracks(self, i):
         if self.scaled == True and len(self.X) > 0:
             self.X = (self.X-np.array(self.origin))*self.scale
@@ -1123,7 +1148,6 @@ class Analyzer():
     #         if display == 'points':
     #             self.show(self, X, X, vis, display='points')
 
-
 class videoAnalyzer(Analyzer):
     def __init__(self, video_src, **args):
         self.processingMode = 'video'
@@ -1148,6 +1172,7 @@ class frameSequenceAnalyzer(Analyzer):
         self.frameInit = Tools.convertToGrayScale(self.frameInit)
 
         Analyzer.__init__(self, **args)
+
 
 #TODO    def writeGoodFeaturesPositionsAndExtraction(self,fileFormat='hdf5',imgFormat='png',outFolder='',filename=None,fileSequence=False):
 #        if filename is None:

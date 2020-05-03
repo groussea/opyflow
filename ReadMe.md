@@ -3,7 +3,11 @@
 
 OpyFlow : Python package for Optical Flow measurements
 
-Opyflow is based on openCV and VTK libraries to detect good features to track, calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
+Opyflow is a basic image velocimetry tool to simplify your video or frame sequences processing.
+
+It is based on openCV and VTK libraries to detect good features to track, calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. This method is sometimes called Feature Image Velocimetry. It is an alternative to the classical Particle Image Velocimetry (PIV).
+
+The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
 For flow calculations, the process is mainly inspired on the openCV python sample [lktrack.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).
 
 Author: Gauthier Rousseau
@@ -25,6 +29,8 @@ python setup.py install
 ```
 
 This should install the opyf library and the main dependencies (vtk and opencv) automatically.
+
+If you meet compatibility problems on your system, I recommend creating an *environment* via *conda* installation (see bellow [installation with anaconda](#installation-with-anaconda)).
 
 To analyze a frame sequence (*png*, *bmp*, *jpeg*, *tiff*) you can run the following script:
 
@@ -122,20 +128,30 @@ The main dependencies are :
 OpenCV
 VTK
 
-The code use last versions of VTK and openCV.
-However, pip (Python Package Index) doesn't have the last vtk yet.
-It is also a bit tricky to compile the source directly from the vtk website.
-However, the simplest way to install it is to use miniconda or anaconda and the last updated sources from conda-forge.
+The code uses recent versions of VTK and openCV.
 
-When miniconda/anaconda is installed type in the command prompt:
+If the `pip install opyf` command above does not work for you, the simplest way to deal with incompatibilities is using miniconda or anaconda.
 
-conda create -n opyfenv vtk opencv matplotlib scipy tqdm (spyder)
+When miniconda/anaconda is installed you may create an environment (here called *opyfenv*). To create the environment type in the terminal:
+
+```shell
+conda create -n opyfenv python=3.6 vtk opencv matplotlib scipy tqdm (spyder)
+```
+
+```shell
 source activate opyfenv
+```
 
-These command lines will install the an environnement with python 3.6.
+These command lines will install an environment with python 3.6
+
+For python 3.7 you should use the *conda-forge* channel:
+
+```shell
+conda create -n opyfenv python=3.7 vtk opencv matplotlib scipy tqdm (spyder) --channel conda-forge
+```
 
 Tested on:
-Python version: 2.7 and 3.6
+Python version: 3.6 and 3.7
 VTK : 7.0.1 and +
 opencv : 3.2 and +
 numpy: 1.17
