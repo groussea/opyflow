@@ -3,12 +3,13 @@
 
 OpyFlow : Python package for Optical Flow measurements
 
-Opyflow is a basic image velocimetry tool to simplify your video or frame sequences processing.
+Opyflow is a basic image velocimetry tool to simplify your *video* or *frame sequences* processing.
 
-It is based on openCV and VTK libraries to detect good features to track, calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. This method is sometimes called Feature Image Velocimetry. It is an alternative to the classical Particle Image Velocimetry (PIV).
+It is based on `opencv` and `vtk` libraries to detect Good Features to Track (GFT), calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. This method is sometimes called Feature Image Velocimetry. It is an alternative to the classical cross-correlation techniques employed in Particle Image Velocimetry (PIV). Compared to this technique, GFT+OpticalFlow may result in better performance when image qualities are poorer, i. e. when velocity information is non-uniform on images.
 
-The package contains also some rendering tools built with matplotlib. Velocities can be exported (csv,tecplot, vtk, hdf5).
-For flow calculations, the process is mainly inspired on the openCV python sample [lktrack.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).
+For flow calculations, the process is mainly inspired by the openCV python sample [lktrack.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).
+
+The package also contains some rendering tools built with matplotlib. Velocities can be exported (csv, tecplot, vtk, hdf5).
 
 Author: Gauthier Rousseau
 
@@ -30,9 +31,9 @@ python setup.py install
 
 This should install the opyf library and the main dependencies (vtk and opencv) automatically.
 
-If you meet compatibility problems on your system, I recommend creating an *environment* via *conda* installation (see bellow [installation with anaconda](#installation-with-anaconda)).
+If you meet compatibility problems on your system, it is recommended creating an *environment* via *conda* installation (see bellow [installation with anaconda](#installation-with-anaconda)).
 
-To analyze a frame sequence (*png*, *bmp*, *jpeg*, *tiff*) you can run the following script:
+To analyze a frame sequence (*png*, *bmp*, *jpeg*, *tiff*) you may run the following script:
 
 ```python
 import opyf
