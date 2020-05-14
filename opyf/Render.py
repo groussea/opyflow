@@ -385,6 +385,8 @@ class opyfDisplayer:
             del self.ax.lines[:]
         if len(self.ax.images) > 0:
             del self.ax.images[:]
+        if len(self.ax.texts) > 0:
+            del self.ax.texts[:]
         if len(self.fig.axes) > 1:
             self.fig.axes[1].remove()
         if self.backend[-14:]== 'backend_inline' or self.backend[-14:]== 'nbAgg' :  
@@ -935,7 +937,7 @@ def opyfColorBar(fig, im, label='Magnitude [px/Dt]', **args):
     return fig, cb
 
 
-def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=10, **args):
+def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=15, **args):
     Hframe = np.absolute(extent[3]-extent[2])
     Lframe = np.absolute(extent[1]-extent[0])
     Lfig = Lframe*Hfig/Hframe

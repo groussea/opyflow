@@ -21,10 +21,12 @@ import matplotlib as mpl
 
 
 class Analyzer():
-    def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,mask=None,**args):
+    def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,mask=None,display=True,**args):
         print('Dimensions :\n \t', 'Width :',
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
-        self.num=num
+        self.num = num
+        self.mute=mute       
+        self.display=display
         self.scaled = False
         self.scale= 1
         if imageROI is None:
@@ -66,7 +68,7 @@ class Analyzer():
                           'vlim': args.get('vlim', [0, 40])}
         self.birdEyeMod=False
         self.stabilizeOn=False 
-        self.mute=mute
+
         self.close_at_reset=close_at_reset
         self.reset(first=True)
         self.set_gridToInterpolateOn()
@@ -75,7 +77,8 @@ class Analyzer():
         print('number of frames : ' + str(self.number_of_frames))
         self.fieldResults=None
         # plt.ion()
-        self.visInit=np.copy(self.vis)
+        self.visInit = np.copy(self.vis)
+
         self.dumpShow()
         
         """
@@ -102,11 +105,12 @@ class Analyzer():
             self.mask=np.ones_like(self.cropFrameInit) 
         
     def invertXYlabel(self):
-        self.invertedXY=bool(self.invertedXY-1)
-        self.opyfDisp.invertXYlabel()
+        if self.display==True:
+            self.invertedXY = bool(self.invertedXY - 1)           
+            self.opyfDisp.invertXYlabel()
 
     def dumpShow(self):  
-        if self.mute==False:
+        if self.display==True or self.mute==False:
             self.opyfDisp.ax.imshow(cv2.cvtColor(self.vis, cv2.COLOR_BGR2RGB))
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
                 self.opyfDisp.fig.show()
@@ -174,7 +178,8 @@ class Analyzer():
                 v/(self.scale*self.fps/self.paramVecTime['step']) for v in vlim]
 
         self.paramPlot['vlim'] = vlim
-        self.opyfDisp.paramPlot['vlim']=vlim
+        if self.display==True:
+            self.opyfDisp.paramPlot['vlim']=vlim
 
         print('Velocity limits: ', vlim[0])
         print('\t minimum norm velocity: ', vlim[0])
@@ -209,9 +214,10 @@ class Analyzer():
         self.XT = Interpolate.npGrid2TargetPoint2D(self.grid_x, self.grid_y)
         self.paramPlot['vecX'] = self.vecX
         self.paramPlot['vecY'] = self.vecY
-        self.opyfDisp.paramPlot['vecX']=self.vecX
-        self.opyfDisp.paramPlot['vecY']=self.vecY
-        self.opyfDisp.reset()
+        if self.display==True:
+            self.opyfDisp.paramPlot['vecX']=self.vecX
+            self.opyfDisp.paramPlot['vecY']=self.vecY
+            self.opyfDisp.reset()
         self.Ux, self.Uy = np.zeros((self.Hgrid, self.Lgrid)), np.zeros(
             (self.Hgrid, self.Lgrid))       
         self.gridMask = cv2.resize(np.uint8(self.mask),(self.Lgrid,self.Hgrid))>0.5
@@ -239,7 +245,7 @@ class Analyzer():
                 'Consider that [starting_frame+step+(Ntot-1)*shift]  must be smaller than the number of frames')
             sys.exit()
         print('\n[The following image processing plan has been set]')
-        if self.processingMode == 'image sequence':
+        if self.processingMode == 'image sequence' and self.mute==False:
             for pr, i in zip(self.prev, self.vec):
                 if pr == False:
                     print(
@@ -249,7 +255,7 @@ class Analyzer():
                     print(
                         '--> diplacements measurement between images [' + file_prev + '] and [' + self.listD[i] + ']')
 
-        if self.processingMode == 'video':
+        if self.processingMode == 'video' and self.mute==False:
             for pr, i in zip(self.prev, self.vec):
                 if pr == False:
                     print(
@@ -447,7 +453,7 @@ class Analyzer():
                               [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
                 self.showXV(self.X, self.V, vis=self.vis,
                             display=display, **args)
-                if saveImgPath is not None:
+                if saveImgPath is not None and self.display==True:
                     if numberingOutput==True:
                         self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
                         k+=1
@@ -596,8 +602,8 @@ class Analyzer():
         self.UyTot = []
         self.Xaccu = np.empty((0, 2))
         self.Vaccu = np.empty((0, 2))
-        if self.close_at_reset==True or first==True:
-            plt.close(self.num)
+        if (self.close_at_reset==True or first==True) and self.display==True:
+            plt.close(self.num)            
             self.opyfDisp = Render.opyfDisplayer(**self.paramPlot, num=self.num)
             if self.invertedXY==True:
                 self.opyfDisp.invertXYlabel()
@@ -616,7 +622,7 @@ class Analyzer():
 
                 self.showXV(self.X, self.V, vis=self.vis,
                             display=display, **args)
-                if saveImgPath is not None:
+                if saveImgPath is not None and self.display==True:
                     if numberingOutput==True:
                         self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
                         k+=1
@@ -642,7 +648,7 @@ class Analyzer():
                 self.Vaccu = np.append(self.Vaccu, self.V, axis=0)
                 self.showXV(self.Xaccu, self.Vaccu, vis=self.vis,
                             display=display, **args)
-                if saveImgPath is not None:
+                if saveImgPath is not None and self.display==True:
                     if numberingOutput==True:
                         self.opyfDisp.fig.savefig(saveImgPath+'/'+display+'_'+format(k, '04.0f')+'.'+imgFormat) 
                         k+=1
@@ -689,10 +695,10 @@ class Analyzer():
                 self.Field = Render.setField(self.Ux, self.Uy, Type)
                 self.Field[np.where(self.Field==0)]=np.nan
                 self.Field=self.Field*self.gridMask
-                if display == 'field' and self.mute==False:
+                if display == 'field' and self.mute==False and self.display==True:
                     self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
                     time.sleep(0.1)
-                elif display == 'quiver_on_field' and self.mute==False:
+                elif display == 'quiver_on_field' and self.mute==False and self.display==True:
                     self.opyfDisp.plotQuiverField(self.Ux, self.Uy,  vis=self.vis,  **args)
                 if (saveImgPath!=None)*(display=='field' or display=='quiver_on_field'):                  
                     if numberingOutput==True:
@@ -714,7 +720,7 @@ class Analyzer():
         self.Field = Render.setField(self.Ux, self.Uy, Type)
         self.Field[np.where(self.Field==0)]=np.nan
         self.Field=self.Field*self.gridMask
-        if display2 == 'field' and self.mute==False:
+        if display2 == 'field' and self.mute==False and self.display==True:
             self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
             if saveImgPath is not None:
                 self.opyfDisp.fig.savefig(saveImgPath+'/'+display2+'_'+format(
@@ -736,7 +742,7 @@ class Analyzer():
         self.Field = Render.setField(self.Ux, self.Uy, Type)
         self.Field[np.where(self.Field==0)]=np.nan
         self.Field=self.Field*self.gridMask
-        if display == 'field' and self.mute==False:
+        if display == 'field' and self.mute==False and self.display==True:
             self.opyfDisp.plotField(self.Field, vis=self.vis, **args)
             if saveImgPath is not None:
                 self.opyfDisp.fig.savefig(saveImgPath+'/'+display2+'_'+format(
@@ -746,11 +752,11 @@ class Analyzer():
 
         self.fieldResults = 'accumulation'
     def showXV(self, X, V, vis=None, display='quiver', displayColor=True, **args):
-        if display == 'quiver' and self.mute==False:
+        if display == 'quiver' and self.mute==False and self.display==True:
             self.opyfDisp.plotQuiverUnstructured(
                 X, V, vis=vis, displayColor=displayColor, **args)
 
-        if display == 'points' and self.mute==False:
+        if display == 'points' and self.mute==False and self.display==True:
             self.opyfDisp.plotPointsUnstructured(
                 Xdata=X, Vdata=V, vis=vis, displayColor=displayColor, **args)
 
@@ -814,8 +820,10 @@ class Analyzer():
                                               -(self.paramPlot['extentFrame'][3]-self.origin[1])*self.scale, ],
                               'unit': unit,
                               'vlim': [vlim*self.scale*self.fps/self.paramVecTime['step'] for vlim in self.paramPlot['vlim']]}
-            plt.close(self.num)
-            self.opyfDisp = Render.opyfDisplayer(
+            
+            if self.display == True:
+                plt.close(self.num)
+                self.opyfDisp = Render.opyfDisplayer(
                 **self.paramPlot, num=self.num)
 
     def invertYaxis(self):
@@ -996,9 +1004,9 @@ class Analyzer():
         if mask is None:
             mask=np.ones((self.Hvis,self.Lvis))
         if self.processingMode=='video':
-            self.stab=opyf.videoAnalyzer(self.video_src,mute=mute,close_at_reset=close_at_reset,num='stab')
+            self.stab=opyf.videoAnalyzer(self.video_src,mute=mute,display=(mute==False),close_at_reset=close_at_reset,num='stab')
         else:
-            self.stab=opyf.frameSequenceAnalyzer(self.folder_src,mute=mute,close_at_reset=close_at_reset,num='stab')
+            self.stab=opyf.frameSequenceAnalyzer(self.folder_src,mute=mute,display=(mute==False),close_at_reset=close_at_reset,num='stab')
         self.stab.mask=mask
         self.stab.set_vlim(vlim)
         self.stab.set_vecTime(starting_frame=self.vec[0])

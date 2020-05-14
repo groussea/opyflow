@@ -5,7 +5,7 @@ OpyFlow : Python package for Optical Flow measurements
 
 Opyflow is a basic image velocimetry tool to simplify your *video* or *frame sequences* processing.
 
-It is based on `opencv` and `vtk` libraries to detect Good Features to Track (GFT), calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. This method is sometimes called Feature Image Velocimetry. It is an alternative to the classical cross-correlation techniques employed in Particle Image Velocimetry (PIV). Compared to this technique, GFT+OpticalFlow may result in better performance when image qualities are poor for velocimetry, i.e. when velocity information is non-uniform on frames.
+It is based on `opencv` and `vtk` libraries to detect Good Features to Track (GFT), calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. This method is sometimes called Feature Image Velocimetry. It is an alternative to the classical cross-correlation techniques employed in Particle Image Velocimetry (PIV). Compared to this technique, GFT+OpticalFlow may result in better performance when image qualities are poor for velocimetry, i.e. when velocity information on frames is non-uniform.
 
 For flow calculations, the process is mainly inspired by the openCV python sample [lktrack.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).
 
@@ -139,11 +139,15 @@ When miniconda/anaconda is installed you may create an environment (here called 
 conda create -n opyfenv python=3.6 vtk opencv matplotlib scipy tqdm (spyder)
 ```
 
+This command line will install an environment with python 3.6 and the main dependencies.
+
+You can access to your environment by typing:
+
 ```shell
 source activate opyfenv
 ```
 
-These command lines will install an environment with python 3.6 and the main dependencies.
+From there, you should be able to install opyf with `pip install opyf`.
 
 For python 3.7 you should use the *conda-forge* channel:
 
