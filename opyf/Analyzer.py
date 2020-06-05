@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import time
 import opyf
 import matplotlib as mpl
+import re
 
 
 
@@ -163,6 +164,8 @@ class Analyzer():
             self.interp_params = dict(Radius=Radius,  # it is not necessary to perform unterpolation on a high radius since we have a high number of values
                                   Sharpness=Sharpness,
                                   kernel=kernel)
+        else:
+            Radius = Radius
     # set the a scaled value if the user does not introduce a Radius and the data set is scaled
                                       
         print('')
@@ -762,7 +765,7 @@ class Analyzer():
 
 
 
-    def scaleData(self, framesPerSecond=1, metersPerPx=1, unit=['m', 's'], origin=None):
+    def scaleData(self, framesPerSecond=None, metersPerPx=None, unit=['m', 's'], origin=None):
         
 
         
@@ -774,7 +777,7 @@ class Analyzer():
             if origin is not None:
                 self.origin = origin
             else:
-                self.origin = [0, self.Hvis]
+                self.origin = [self.ROI[0], self.ROI[1]]
             self.fps = framesPerSecond
             self.scale = metersPerPx
             self.unit = unit
@@ -788,6 +791,7 @@ class Analyzer():
                 self.Xdata = [(X-np.array(self.origin)) *
                               self.scale for X in self.Xdata]
             if hasattr(self,'Ux')==True:
+                print('hihih')
                 self.Ux, self.Uy = self.Ux*self.scale*self.fps / \
                     self.paramVecTime['step'], self.Uy * \
                     self.scale*self.fps/self.paramVecTime['step']
@@ -1174,12 +1178,24 @@ class frameSequenceAnalyzer(Analyzer):
     def __init__(self,folder_src, **args):
         self.processingMode = 'image sequence'
         self.folder_src = folder_src
-        self.listD = np.sort(os.listdir(self.folder_src))
+        self.listD = os.listdir(self.folder_src)
+        self.listD = sorted(self.listD, key = self.natural_keys)
         self.number_of_frames = len(self.listD)
         self.frameInit = cv2.imread(self.folder_src+'/'+self.listD[0])
         self.frameInit = Tools.convertToGrayScale(self.frameInit)
 
         Analyzer.__init__(self, **args)
+    
+    def atoi(self, text):
+        return int(text) if text.isdigit() else text
+
+    def natural_keys(self, text):
+        '''
+        alist.sort(key=natural_keys) sorts in human order
+        http://nedbatchelder.com/blog/200712/human_sorting.html
+        (See Toothy's implementation in the comments)
+        '''
+        return [ self.atoi(c) for c in re.split(r'(\d+)', text) ]
 
 
 #TODO    def writeGoodFeaturesPositionsAndExtraction(self,fileFormat='hdf5',imgFormat='png',outFolder='',filename=None,fileSequence=False):
