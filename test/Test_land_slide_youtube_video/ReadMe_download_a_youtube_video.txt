@@ -1,4 +1,4 @@
-This test case aim to download any video and perform opyFlow on it.
+With this test case, any YouTube video may be download for performing flow measurments on it.
 
 #command lines To save the online youtube video of the land slide (or any other video) (you need the pytube package)
 # 'pip install pytube' on the cmd prompt
