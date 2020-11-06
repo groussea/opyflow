@@ -17,7 +17,7 @@ Corresponding e-mail : gauthier.rousseau@gmail.com
 
 ## Quick start
 
-Assuming that you already have an environment with python installed (<=3.7), run the following command on your terminal:
+Assuming that you already have an environment with python installed (<=3.9), run the following command on your terminal:
 
 ```shell
 pip install opyf
@@ -156,11 +156,11 @@ conda create -n opyfenv python=3.7 vtk opencv matplotlib scipy tqdm (spyder) --c
 ```
 
 Tested on:
-Python version: 3.6 and 3.7
+Python version: 3.6 and +
 VTK : 7.0.1 and +
 opencv : 3.2 and +
-numpy: 1.17
-matplotlib : 2.0.0
+numpy: 1.17 and +
+matplotlib : 2.0.0 and +
 
 ## Citation
 
@@ -171,6 +171,21 @@ This package has been developed in the course of my PhD at EPFL to study [Turbul
   author={Rousseau, Gauthier},
   year={2019},
   institution={EPFL}
+}
+
+An article pubished in *Experiments in Fluids* is available in Open Access : [Scanning PIV of turbulent flows over and through rough porous beds using refractive index matching](https://link.springer.com/article/10.1007/s00348-020-02990-y)
+
+Follow this [link](https://link.springer.com/article/10.1007/s00348-020-02990-y#appendices) to directly access to the annex of the article presenting the opyf algorithms and tests.
+
+@article{rousseau2020scanning,
+  title={Scanning PIV of turbulent flows over and through rough porous beds using refractive index matching},
+  author={Rousseau, Gauthier and Ancey, Christophe},
+  journal={Experiments in Fluids},
+  volume={61},
+  number={8},
+  pages={1--24},
+  year={2020},
+  publisher={Springer}
 }
 
 Contributors : Hugo Rousseau, Mohamed Nadeem, LHE team and others
