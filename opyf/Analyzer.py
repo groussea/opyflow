@@ -133,7 +133,7 @@ class Analyzer():
             self.opyfDisp.invertXYlabel()
 
     def dumpShow(self):
-        if self.display or self.mute == False:
+        if self.display or self.mute is False:
             self.opyfDisp.ax.imshow(cv2.cvtColor(self.vis, cv2.COLOR_BGR2RGB))
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
                 self.opyfDisp.fig.show()
@@ -857,9 +857,6 @@ class Analyzer():
                         fileN = str(saveImgPath + '/' + display + '_' + format(i, '04.0f') +
                         '_to_' + format(i + self.paramVecTime['step'], '04.0f') + '.' + imgFormat)
                         self.opyfDisp.fig.savefig(fileN)
-
-
-)
         self.fieldResults='time-serie'
 
     def extractGoodFeaturesDisplacementsAccumulateAndInterpolate(
@@ -870,6 +867,7 @@ class Analyzer():
             Type = 'norm',
             imgFormat = 'png',
             **args):
+        self.imgFormat = imgFormat
         self.extractGoodFeaturesDisplacementsAndAccumulate(
             display = display1, **args)
         self.interpolateOnGrid(self.Xaccu, self.Vaccu)
@@ -888,18 +886,18 @@ class Analyzer():
             # self.opyfDisp.fig.show()
             time.sleep(0.1)
 
-        self.fieldResults='accumulation'
+        self.fieldResults = 'accumulation'
 
     def filterAndInterpolate(
             self,
-            Type = 'norm',
-            display = 'field',
-            saveImgPath = None,
+            Type='norm',
+            display='field',
+            saveImgPath=None,
             **args):
-        self.Xaccu, self.Vaccu=self.applyFilters(self.Xaccu, self.Vaccu)
+        self.Xaccu, self.Vaccu = self.applyFilters(self.Xaccu, self.Vaccu)
         self.interpolateOnGrid(self.Xaccu, self.Vaccu)
-        self.UxTot=[]
-        self.UyTot=[]
+        self.UxTot = []
+        self.UyTot = [] 
         self.UxTot.append(np.reshape(
             self.interpolatedVelocities[:, 0], (self.Hgrid, self.Lgrid)))
         self.UyTot.append(np.reshape(
@@ -907,15 +905,8 @@ class Analyzer():
         self.Field=Render.setField(self.Ux, self.Uy, Type)
         self.Field[np.where(self.Field == 0)]=np.nan
         self.Field=self.Field * self.gridMask
-        if display == 'field' and self.mute == False and self.display == True:
-            self.opyfDisp.plotField(self.Field, vis = self.vis, **args)
-            if saveImgPath is not None:
-                self.opyfDisp.fig.savefig(saveImgPath + '/' + display2 + '_' + format(
-                    self.vec[0], '04.0f') + '_to_' + format(self.vec[-1], '04.0f') + '.' + imgFormat)
-            # self.opyfDisp.fig.show()
-            time.sleep(0.1)
 
-        self.fieldResults='accumulation'
+        self.fieldResults = 'accumulation'
 
     def showXV(self,
             X,
@@ -956,8 +947,7 @@ class Analyzer():
             self.Time=self.Time / self.fps
             if hasattr(self, 'X'):
                 self.X=(self.X - np.array(self.origin)) * self.scale
-                self.V=self.V * self.scale *
-                    self.fps / self.paramVecTime['step']
+                self.V=self.V * self.scale *self.fps / self.paramVecTime['step']
                 self.Vdata=[V * self.scale * self.fps /
                               self.paramVecTime['step'] for V in self.Vdata]
 
@@ -965,20 +955,14 @@ class Analyzer():
                               self.scale for X in self.Xdata]
             if hasattr(self, 'Ux'):
                 print('hihih')
-                self.Ux, self.Uy= self.Ux * self.scale * self.fps /
-                    self.paramVecTime['step'], self.Uy *
-                    self.scale * self.fps / self.paramVecTime['step']
+                self.Ux, self.Uy= self.Ux * self.scale * self.fps / self.paramVecTime['step'], self.Uy * self.scale * self.fps / self.paramVecTime['step']
                 self.vecX = (self.vecX - self.origin[0]) * self.scale
                 self.vecY = (self.vecY - self.origin[1]) * self.scale
-                self.gridVx, self.gridVy= self.gridVx * self.scale * self.fps /
-                    self.paramVecTime['step'], self.gridVy *
-                    self.scale * self.fps / self.paramVecTime['step']
+                self.gridVx, self.gridVy= self.gridVx * self.scale * self.fps / self.paramVecTime['step'], self.gridVy *self.scale * self.fps / self.paramVecTime['step']
             if hasattr(self, 'UyTot'):
                 for i in range(len(self.UyTot)):
-                    self.UyTot[i]= self.UyTot[i] * self.scale *
-                        self.fps / self.paramVecTime['step']
-                    self.UxTot[i]= self.UxTot[i] * self.scale *
-                        self.fps / self.paramVecTime['step']
+                    self.UyTot[i]= self.UyTot[i] * self.scale *   self.fps / self.paramVecTime['step']
+                    self.UxTot[i]= self.UxTot[i] * self.scale * self.fps / self.paramVecTime['step']
 
             self.grid_y, self.grid_x = (
                 self.grid_y - self.origin[1]) * self.scale, (self.grid_x - self.origin[0]) * self.scale
