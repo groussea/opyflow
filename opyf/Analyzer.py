@@ -142,7 +142,8 @@ class Analyzer():
     def set_filtersParams(self, RadiusF=30,
                           minNperRadius=0,
                           maxDevInRadius=np.inf, wayBackGoodFlag=np.inf,
-                          CLAHE=False,range_Vx=[-np.inf, np.inf],range_Vy=[-np.inf, np.inf]):
+                          CLAHE=False,range_Vx=[-np.inf, np.inf],range_Vy=[-np.inf, np.inf],
+                          clplim= 3, gridSize= (20,20)):
 
         self.filters_params = dict(RadiusF=RadiusF,
                                    minNperRadius=minNperRadius,
@@ -150,7 +151,9 @@ class Analyzer():
                                    wayBackGoodFlag=wayBackGoodFlag,
                                    CLAHE=CLAHE,
                                    range_Vx=range_Vx,
-                                   range_Vy=range_Vy)
+                                   range_Vy=range_Vy,
+                                   clplim=clplim,
+                                   gridSize=gridSize)
         
         print('')
         print('Filters Params:')
@@ -271,18 +274,26 @@ class Analyzer():
         # initilize self.vis with the first frame of the set
 
         if self.processingMode == 'video':
-            self.dictFrames = {}
-            self.cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            self.sortedVec = np.sort(np.unique(self.vec))
-            k = 0
-            while k < len(self.sortedVec):
-                indF = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
-                ret, vis = self.cap.read()
-                if indF == self.sortedVec[k]:
-                    self.dictFrames[str(self.sortedVec[k])] = vis
-                    k += 1
+            self.loadDict(0)
         self.readFrame(self.vec[0])
         self.dumpShow()
+
+    def loadDict(self, iL):
+        self.dictFrames = {}
+        self.sortedVec = np.sort(np.unique(self.vec))
+        self.cap.set(cv2.CAP_PROP_POS_FRAMES, max(0,iL-self.paramVecTime['step']))
+        k = 0
+        while self.sortedVec[k]<iL:
+            k+=1
+        self.totDictByte=0
+        while k < len(self.sortedVec) and self.totDictByte<self.limitRAMinMByte:
+            indF = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
+            ret, vis = self.cap.read()
+            if indF == self.sortedVec[k]:
+                self.dictFrames[str(self.sortedVec[k])] = vis
+                k += 1
+                self.totDictByte+=sys.getsizeof(vis.tobytes())/1e6
+
     def set_trackingFeatures(self, starting_frame=0, step=1, Ntot=10, track_length=10, detection_interval=10):
 
         self.tracks_params = {'track_len': track_length,
@@ -371,7 +382,11 @@ class Analyzer():
                 print('')
                 sys.exit("Impossible to read the frame " + l)
         elif self.processingMode == 'video':
-            self.vis = self.dictFrames[str(i)]
+            try:
+                self.vis = self.dictFrames[str(i)]
+            except:
+                self.loadDict(i)
+                self.vis = self.dictFrames[str(i)]
 
         self.vis = self.vis[self.ROI[1]:(
             self.ROI[3]+self.ROI[1]), self.ROI[0]:(self.ROI[2]+self.ROI[0])]
@@ -486,7 +501,7 @@ class Analyzer():
 
         if self.filters_params['CLAHE']==True:
              self.gray= Render.CLAHEbrightness(
-             self.gray, 0, tileGridSize=(20, 20), clipLimit=2)
+             self.gray, 0, tileGridSize=self.filters_params['gridSize'], clipLimit=self.filters_params['clplim'])
 #             self.vis=Render.CLAHEbrightness(self.vis,0,tileGridSize=(20,20),clipLimit=2)
 
         self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(self.gray,
@@ -1166,12 +1181,15 @@ class videoAnalyzer(Analyzer):
         self.video_src = video_src
         self.cap = cv2.VideoCapture(self.video_src)
         self.ret, self.frameInit = self.cap.read()
+        self.sizeFrameInMByte=sys.getsizeof(self.frameInit)/1e6
+        self.limitRAMinMByte=2000
         if self.ret == False:
             print('Error: the video file path might be wrong')
-            sys.exit()
+            # sys.exit()
         self.frameInit = Tools.convertToGrayScale(self.frameInit)
         self.number_of_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
         Analyzer.__init__(self, **args)
+        
 
 
 class frameSequenceAnalyzer(Analyzer):
