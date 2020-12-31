@@ -22,7 +22,14 @@ import re
 
 
 class Analyzer():
-    def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,mask=None,display=True,**args):
+    def __init__(self, imageROI=None,num='opyfPlot',mute=False,close_at_reset=True,mask=None,display=True,frameInit=None,number_of_frames=0, processingMode='',listD=[],folder_src='',cap=None,**args):
+        self.cap=cap
+        self.limitRAMinMByte=2000
+        self.processingMode=processingMode
+        self.listD=listD
+        self.folder_src=folder_src
+        self.frameInit=frameInit
+        self.number_of_frames=number_of_frames
         print('Dimensions :\n \t', 'Width :',
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
         self.num = num
@@ -96,7 +103,7 @@ class Analyzer():
         
         if type(self.mask)==np.ndarray:
             if self.mask.dtype==bool:
-                if len(self.shape==3):
+                if len(self.mask.shape==3):
                     self.mask=self.mask[:,:,0]
                 else:
                     self.mask=self.mask
@@ -251,6 +258,7 @@ class Analyzer():
                 'Consider that [starting_frame+step+(Ntot-1)*shift]  must be smaller than the number of frames')
             sys.exit()
         print('\n[The following image processing plan has been set]')
+        file_prev=''
         if self.processingMode == 'image sequence' and self.mute==False:
             for pr, i in zip(self.prev, self.vec):
                 if pr == False:
@@ -849,7 +857,7 @@ class Analyzer():
         self.vecY = -self.vecY
         self.grid_y = -self.grid_y
         if hasattr(self,'Ux')==True:
-            self.gridVx = -self.gridVx
+            self.gridVx = - self.gridVx
             self.Uy = -self.Uy
         if hasattr(self,'X')==True:
             self.X=self.X*np.array([1, -1])
@@ -1177,32 +1185,32 @@ class Analyzer():
 
 class videoAnalyzer(Analyzer):
     def __init__(self, video_src, **args):
-        self.processingMode = 'video'
+        processingMode = 'video'
         self.video_src = video_src
-        self.cap = cv2.VideoCapture(self.video_src)
-        self.ret, self.frameInit = self.cap.read()
-        self.sizeFrameInMByte=sys.getsizeof(self.frameInit)/1e6
-        self.limitRAMinMByte=2000
+        cap = cv2.VideoCapture(self.video_src)
+        self.ret, frameInit = cap.read()
+        self.sizeFrameInMByte=sys.getsizeof(frameInit)/1e6
         if self.ret == False:
             print('Error: the video file path might be wrong')
             # sys.exit()
-        self.frameInit = Tools.convertToGrayScale(self.frameInit)
-        self.number_of_frames = int(self.cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        Analyzer.__init__(self, **args)
+        frameInit = Tools.convertToGrayScale(frameInit)
+        number_of_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        super().__init__(frameInit=frameInit,number_of_frames=number_of_frames,
+        processingMode=processingMode,cap=cap,**args)
+        # Analyzer.__init__(self, **args)
         
 
 
 class frameSequenceAnalyzer(Analyzer):
     def __init__(self,folder_src, **args):
-        self.processingMode = 'image sequence'
-        self.folder_src = folder_src
-        self.listD = os.listdir(self.folder_src)
-        self.listD = sorted(self.listD, key = self.natural_keys)
-        self.number_of_frames = len(self.listD)
-        self.frameInit = cv2.imread(self.folder_src+'/'+self.listD[0])
-        self.frameInit = Tools.convertToGrayScale(self.frameInit)
-
-        Analyzer.__init__(self, **args)
+        processingMode = 'image sequence'
+        listD = os.listdir(folder_src)
+        listD = sorted(listD, key = self.natural_keys)
+        number_of_frames = len(listD)
+        frameInit = cv2.imread(folder_src+'/'+listD[0])
+        frameInit = Tools.convertToGrayScale(frameInit)
+        super().__init__(frameInit=frameInit,number_of_frames=number_of_frames,processingMode=processingMode,listD=listD,folder_src=folder_src,**args)
+        # Analyzer.__init__(self, **args)
     
     def atoi(self, text):
         return int(text) if text.isdigit() else text
