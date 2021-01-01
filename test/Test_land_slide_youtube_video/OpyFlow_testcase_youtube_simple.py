@@ -7,7 +7,7 @@ Created on Wed Nov 22 08:24:12 2017
 """
 
 # WARNING : to work properly you must run this script from 'Test_land_slide_youtube_video' FOlder
-
+#%%
 import sys
 import os
 sys.path.append('../../')

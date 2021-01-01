@@ -208,7 +208,7 @@ class Analyzer():
             kernel='Gaussian'):
         if Radius is None:
             Radius = self.scale * 30  # 30 px when the data set is not scaled
-            self.interp_params = dict(Radius=Radius,  # it is not necessary to perform unterpolation on a high radius since we have a high number of values
+            self.interp_params = dict(Radius=Radius,  
                                       Sharpness=Sharpness,
                                       kernel=kernel)
         else:
