@@ -954,7 +954,6 @@ class Analyzer():
                 self.Xdata = [(X - np.array(self.origin)) *
                               self.scale for X in self.Xdata]
             if hasattr(self, 'Ux'):
-                print('hihih')
                 self.Ux, self.Uy= self.Ux * self.scale * self.fps / self.paramVecTime['step'], self.Uy * self.scale * self.fps / self.paramVecTime['step']
                 self.vecX = (self.vecX - self.origin[0]) * self.scale
                 self.vecY = (self.vecY - self.origin[1]) * self.scale

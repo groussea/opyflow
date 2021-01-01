@@ -6,7 +6,7 @@ Created on Mon Sep 30 12:40:10 2019
 @author: Gauthier
 """
 #%%
-
+%matplotlib qt5
 import sys, os
 os.chdir("./")
 # if opyf is not installed where is the opyf folder?

@@ -18,8 +18,7 @@ with open(path.join(here, "ReadMe.md"),"r") as f:
 
 setup(
     name="opyf",
-
-    version="1.2",
+    version="1.3",
     author="Gauthier Rousseau",
     author_email="gauthier.rousseau@gmail.com",
 
@@ -41,9 +40,8 @@ setup(
         #   4 - Beta
         #   5 - Production/Stable
         "Development Status :: 4 - Beta",
-        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
         "Topic :: Software Development :: Libraries :: Python Modules",
-
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3"
     ],
