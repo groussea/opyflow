@@ -387,8 +387,12 @@ class opyfDisplayer:
             del self.ax.images[:]
         if len(self.ax.texts) > 0:
             del self.ax.texts[:]
+        if len(self.ax.patches) > 0:
+            del self.ax.patches[:]
         if len(self.fig.axes) > 1:
             self.fig.axes[1].remove()
+
+
         if self.backend[-14:]== 'backend_inline' or self.backend[-14:]== 'nbAgg' :  
             self.fig, self.ax = opyffigureandaxes(
             extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])

@@ -44,8 +44,10 @@ class Analyzer():
         print('Dimensions :\n \t', 'Width :',
               self.frameInit.shape[1], 'Height :', self.frameInit.shape[0])
         self.num = num
-        self.mute = mute
         self.display = display
+        self.mute = mute
+        if self.display is False:
+            self.mute = True
         self.scaled = False
         self.scale = 1
         if imageROI is None:

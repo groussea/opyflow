@@ -6,7 +6,7 @@ Created on Mon Sep 30 12:40:10 2019
 @author: Gauthier
 """
 #%%
-%matplotlib qt5
+# %matplotlib qt5
 import sys, os
 os.chdir("./")
 # if opyf is not installed where is the opyf folder?
@@ -161,7 +161,7 @@ opyf.hdf5_Read(video.filename+'.hdf5')
 #%% ##############3
 
 
-video.scaleData(framesPerSecond=20, metersPerPx=0.1, unit=['m', 's'], origin=[0,video.Hvis])
+video.scaleData(framesPerSecond=25, metersPerPx=0.02, unit=['m', 's'], origin=[0,video.Hvis])
 
 '''
 # the scaling function if you want to scale data, i.e., give the fps and the length scale
