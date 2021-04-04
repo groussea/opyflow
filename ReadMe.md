@@ -64,6 +64,11 @@ When applied to the entire dataset, It can produce the above result (see [Test P
 
 ![bird eye view Navizence](test/Test_Navizence/gif/example_Navizence_Drone.gif)
 
+- A guide to obtain the free surface velocity in a river from two amateur video is also provided here :  
+[Stabilization, orthorectification (brid eye view transformation) and free surface velocity estimation on the Brague river with opyFlow](test/Test_Brague_flood/test_opyf_LSPIV_Brague)
+
+![bird eye view Navizence](test/Test_Brague_flood/figure_Brague.png)
+
 ## Contents
 
 This archive is organized as follows:
@@ -191,3 +196,5 @@ Follow this [link](https://link.springer.com/article/10.1007/s00348-020-02990-y#
 Contributors : Hugo Rousseau, Mohamed Nadeem, LHE team and others
 
 Credits for UAV video : Bob de Graffenried
+
+Credits for 2019 flood video on Brague River (Biot, French Riviera) : Pierre Brigode

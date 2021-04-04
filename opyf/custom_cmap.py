@@ -30,7 +30,7 @@ def make_cmap(colors, position=None, bit=False, res=256):
     '''
     import matplotlib as mpl
 
-    bit_rgb = np.linspace(0, 1, res)
+    bit_rgb = np.linspace(0, 1, 256)
     if position == None:
         position = np.linspace(0, 1, len(colors))
     else:
