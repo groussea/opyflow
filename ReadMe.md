@@ -64,7 +64,7 @@ When applied to the entire dataset, It can produce the above result (see [Test P
 
 ![bird eye view Navizence](test/Test_Navizence/gif/example_Navizence_Drone.gif)
 
-- A guide to obtain the free surface velocity in a river from two amateur video is also provided here :  
+- A guide to obtain the free surface velocity in a river from two amateur video is also provided :  
 [Stabilization, orthorectification (brid eye view transformation) and free surface velocity estimation on the Brague river with opyFlow](test/Test_Brague_flood/test_opyf_LSPIV_Brague.md)
 
 []()<img src="test/Test_Brague_flood/figure_Brague.png" width=400>

@@ -117,10 +117,12 @@ video.filterAndInterpolate()
 
 ### Citation
 
-This velocity extraction have been made for the paper entitled:
+This velocimetry analysis have been made for the paper entitled:
 
-*Comparison of streamflow estimated by image analysis (LSPIV) and by hydrologic and hydraulic modelling on the French Riviera during november 2019 flood*.
-by  VIGOUREUX et .al  for the *SimHydro 2021: Models for complex and global water issues - Practices and expectations 16-18 June 2021, Sophia Antipolis*
+*Comparison of streamflow estimated by image analysis (LSPIV) and by hydrologic and hydraulic modelling on the French Riviera during November 2019 flood*.
+by  VIGOUREUX et .al  
+
+for the *SimHydro 2021: Models for complex and global water issues - Practices and expectations 16-18 June 2021, Sophia Antipolis*
 
 ### Technical informations
 
