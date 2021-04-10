@@ -5,7 +5,7 @@ OpyFlow : Python package for Optical Flow measurements
 
 Opyflow is a basic image velocimetry tool to simplify your *video* or *frame sequences* processing.
 
-It is based on `opencv` and `vtk` libraries to detect Good Features to Track (GFT), calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. This method is sometimes called Feature Image Velocimetry. It is an alternative to the classical cross-correlation techniques employed in Particle Image Velocimetry (PIV). Compared to this technique, GFT+OpticalFlow may result in better performance when image qualities are poor for velocimetry, i.e. when velocity information on frames is non-uniform.
+It is based on `opencv` and `vtk` libraries to detect Good Features to Track (GFT), calculate their displacements by the Lukas Kanade method and interpolate them on a mesh. This method is sometimes called Feature Image Velocimetry or Feature Tracking. It is an alternative to the classical cross-correlation techniques employed in Particle Image Velocimetry (PIV). Compared to this technique, GFT+OpticalFlow may result in better performance when image qualities are poor for velocimetry, i.e. when velocity information on frames is non-uniform.
 
 For flow calculations, the process is mainly inspired by the openCV python sample [lktrack.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py).
 
@@ -31,7 +31,7 @@ python setup.py install
 
 This should install the opyf library and the main dependencies (vtk and opencv) automatically.
 
-If you meet compatibility problems on your system, it is recommended creating an *environment* via *conda* installation (see bellow [installation with anaconda](#installation-with-anaconda)).
+If you meet compatibility problems on your system, it is recommended to create an *environment* via *conda* installation (see bellow [installation with anaconda](#installation-with-anaconda)).
 
 To analyze a frame sequence (*png*, *bmp*, *jpeg*, *tiff*) you may run the following script:
 
@@ -67,11 +67,11 @@ When applied to the entire dataset, It can produce the above result (see [Test P
 - A guide to obtain the free surface velocity in a river from two amateur video is also provided :  
 [Stabilization, orthorectification (brid eye view transformation) and free surface velocity estimation on the Brague river with opyFlow](test/Test_Brague_flood/test_opyf_LSPIV_Brague.md)
 
-[]()<img src="test/Test_Brague_flood/figure_Brague.png" width=400>
+[]()<img src="test/Test_Brague_flood/figure_Brague.png" width=700>
 
 ## Contents
 
-This archive is organized as follows:
+This repository is organized as follows:
 
 The setup file:
 
@@ -79,62 +79,28 @@ The setup file:
 
 The package Folder opyf:
 
-- opyf
-
+- opyf 
+  - Analyzer.py
   - Track.py
   - Interpolate.py
   - Files.py
   - Filters.py
   - Render.py
+  - Tools.py
   - custom_cmap.py (based on Chris Slocum file)
 
-The test Folder:
-
 - test
-
   - Test_case_PIV_Challenge_2014
-
-    - CommandLines-Opyf-PIV-Challenge2014-Test.py
-
-    - CommandLines-Opyf-PIV-Challenge2014-Test_Simple.py
-
-    - mask.tiff
-
-    - images (sample of 2 source images)
-
-      - A_00001_a.tif
-      - A_00001_b.tif
-    - ReadMe_Download_Images.txt (instruction to download the entire image sequence of the test)
-    - meanFlow.png (Results for the CommandLines)
-    - rms.png
-    - [testPIVChallengeCaseA.md](test/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md)
-
   - Test_land_slide_youtube_video
-    - OpyFlow_testcase_youtube_MA.py
-    - OpyFlow_testcase_youtube_simple.py
-    - mask.png
-    - The video must be downloaded from youtube with the package pytube
-    - ReadMe_download_a_youtube_video.txt (instruction to download the video)
   - Test_Navizence
-    - [2018.07.04_Station_fixe_30m_sample.mp4](test/Test_Navizence/2018.07.04_Station_fixe_30m_sample.mp4)
-    - [test_opyf_Navizence.py](test/Test_Navizence/test_opyf_Navizence.py)
+  - Test_Brague_flood
 
-One test file performed on the [PIV challenge 2014 caseA](http://www.pivchallenge.org/pivchallenge4.html#case_a):
-The results are compared to the main findings of the challenge:
-``-Kähler CJ, Astarita T, Vlachos PP, Sakakibara J, Hain R, Discetti S, Foy RL, Cierpka C, 2016, Main results of the 4th International PIV Challenge, Experiments in Fluids, 57: 97.''
 
 A test on synthetic images is still required.
 
 ## Installation with anaconda
 
-The package requires python and basic python package: csv, numpy, matplotlib, tqdm
-
-The main dependencies are :
-
-OpenCV
-VTK
-
-The code uses recent versions of VTK and openCV.
+The package requires python and basic python package: csv, numpy, matplotlib, tqdm, hdf5. Main dependencies are: OpenCV and VTK.
 
 If the `pip install opyf` command above does not work for you, the simplest way to deal with incompatibilities is using miniconda or anaconda.
 
@@ -178,7 +144,7 @@ This package has been developed in the course of my PhD at EPFL to study [Turbul
   institution={EPFL}
 }
 
-An article pubished in *Experiments in Fluids* is available in Open Access : [Scanning PIV of turbulent flows over and through rough porous beds using refractive index matching](https://link.springer.com/article/10.1007/s00348-020-02990-y)
+An article published in *Experiments in Fluids* is available in Open Access : [Scanning PIV of turbulent flows over and through rough porous beds using refractive index matching](https://link.springer.com/article/10.1007/s00348-020-02990-y)
 
 Follow this [link](https://link.springer.com/article/10.1007/s00348-020-02990-y#appendices) to directly access to the annex of the article presenting the opyf algorithms and tests.
 
