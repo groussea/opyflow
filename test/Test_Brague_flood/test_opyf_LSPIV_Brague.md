@@ -136,7 +136,6 @@ Two videos of the Brague river flood at Biot have been analyzed with the opyflow
 
 []()<img src="figure_Brague.png"  width="800">
 
-The above results have been processed using the following [python file]([apply_opyf_1139_1142.py](https://github.com/groussea/opyflow/blob/master/test/Test_Brague_flood/apply_opyf_1139_1142.py)).
+The above results have been processed using the following [python file -> apply_opyf_1139_1142.py](https://github.com/groussea/opyflow/blob/master/test/Test_Brague_flood/apply_opyf_1139_1142.py)
 
 To obtain the Flow discharge it is required to use the Digital Terrain Model (DTM) and orthorectified images that are large files. Feel free to ask the authors the DTM to reproduce this result.
-
