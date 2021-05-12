@@ -254,6 +254,7 @@ class Analyzer():
             pixDown = self.Hvis
         if stepGrid is not None:
             stepVert, stepHor = stepGrid, stepGrid
+
         if ROI is not None:
             self.ROImeasure = ROI
             pixLeft, pixRight, pixUp, pixDown = ROI[0], ROI[0] + \
@@ -266,8 +267,6 @@ class Analyzer():
                 pixDown - pixUp]
         self.grid_y, self.grid_x, self.gridVx, self.gridVy, self.Hgrid, self.Lgrid = MeshesAndTime.set_gridToInterpolateOn(
             pixLeft, pixRight, stepHor, pixUp, pixDown, stepVert)
-        self.grid_x = self.grid_x
-        self.grid_y = self.grid_y
 
         if self.scaled:
             self.grid_y, self.grid_x = - \
@@ -910,13 +909,8 @@ class Analyzer():
 
         self.fieldResults = 'accumulation'
 
-    def showXV(self,
-            X,
-            V,
-            vis = None,
-            display = 'quiver',
-            displayColor = True,
-            **args):
+    def showXV(self, X, V, vis = None,
+            display = 'quiver', displayColor = True, **args):
         if display == 'quiver' and self.mute == False and self.display == True:
             self.opyfDisp.plotQuiverUnstructured(
                 X, V, vis = vis, displayColor = displayColor, **args)
@@ -925,14 +919,9 @@ class Analyzer():
             self.opyfDisp.plotPointsUnstructured(
                 Xdata = X, Vdata = V, vis = vis, displayColor = displayColor, **args)
 
-    def scaleData(
-            self,
-            framesPerSecond = None,
+    def scaleData( self, framesPerSecond = None,
             metersPerPx = None,
-            unit = [
-                'm',
-                's'],
-            origin = None):
+            unit = [ 'm', 's'], origin = None):
 
         if self.scaled:
             print('datas already scaled')
@@ -1006,8 +995,7 @@ class Analyzer():
             for i in range(len(self.UyTot)):
                 self.UyTot[i] = -self.UyTot[i]
 
-    def writeGoodFeaturesPositionsAndDisplacements(
-            self,
+    def writeGoodFeaturesPositionsAndDisplacements(self,
             fileFormat='hdf5',
             outFolder='.',
             filename=None,
@@ -1037,22 +1025,7 @@ class Analyzer():
                 Files.mkdir2(outFolder + '/' + filename)
                 for x, v, t in zip(XpROI, self.Vdata, self.Time):
                     Files.write_csvTrack2D(
-                        outFolder +
-                        '/' +
-                        filename +
-                        '/' +
-                        format(
-                            t,
-                            '04.0f') +
-                        '_to_' +
-                        format(
-                            t +
-                            self.paramVecTime['step'],
-                            '04.0f') +
-                        '.' +
-                        fileFormat,
-                        x,
-                        v)
+                        outFolder + '/' + filename + '/' + format( t,'04.0f') + '_to_' +  format(   t + self.paramVecTime['step'],   '04.0f') + '.' + fileFormat, x, v)
 
         self.writeImageProcessingParamsJSON(outFolder=outFolder)
 
@@ -1067,8 +1040,7 @@ class Analyzer():
         # not been attributed
         self.filename = filename
         if len(self.UxTot) == 0:
-            sys.exit(
-                '[Warning] the following method should be run to produce an interpolated field that can be saved {extractGoodFeaturesPositionsDisplacementsAndInterpolate} or {extractGoodFeaturesDisplacementsAccumulateAndInterpolate}')
+            sys.exit( '[Warning] the following method should be run to produce an interpolated field that can be saved {extractGoodFeaturesPositionsDisplacementsAndInterpolate} or {extractGoodFeaturesDisplacementsAccumulateAndInterpolate}')
 
         vecXpROI = np.copy(self.vecX)
         vecYpROI = np.copy(self.vecY)
@@ -1083,53 +1055,22 @@ class Analyzer():
             if filename is None:
                 self.filename = 'velocity_field_from_frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
                     self.paramVecTime['step']) + '_and_shift_' + str(self.paramVecTime['shift'])
-            self.variables = [['Ux_[' +
-                               self.unit[0] +
-                               '.' +
-                               self.unit[1] +
-                               '-1]', self.UxTot], ['Uy_[' +
-                                                    self.unit[0] +
-                                                    '.' +
-                                                    self.unit[1] +
-                                                    '-1]', self.UyTot]]
+            self.variables = [['Ux_[' + self.unit[0] +'.' +self.unit[1] +
+                               '-1]', self.UxTot], ['Uy_[' +  self.unit[0] +'.' +self.unit[1] + '-1]', self.UyTot]]
             if fileFormat == 'hdf5':
-                Files.hdf5_Write(outFolder +
-                                 '/' +
-                                 self.filename +
-                                 '.' +
-                                 fileFormat, [['T_[' +
-                                               self.unit[0] +
-                                               ']', self.Time], ['X_[' +
-                                                                 self.unit[0] +
-                                                                 ']', vecXpROI], ['Y_[' +
-                                                                                  self.unit[0] +
-                                                                                  ']', vecYpROI]], self.variables)
+                Files.hdf5_Write(outFolder +     '/' +   self.filename +'.' +fileFormat, [['T_[' + self.unit[1] +']', self.Time], ['X_[' +self.unit[0] +']', vecXpROI], ['Y_[' +self.unit[0] +']', vecYpROI]], self.variables)
 
             if fileFormat == 'tecplot' or fileFormat == 'csv' or fileFormat == 'tec':
                 for k in range(len(self.Time)):
                     VT = Interpolate.npGrid2TargetPoint2D(
                         self.UxTot[k], self.UyTot[k])
-                    variablesTecplot = [['Ux_[' +
-                                         self.unit[0] +
-                                         '.' +
-                                         self.unit[1] +
-                                         '^{-1}]', VT[:, 0]], ['Uy_[' +
-                                                               self.unit[0] +
-                                                               '.' +
-                                                               self.unit[1] +
-                                                               '-1]', VT[:, 1]]]
+                    variablesTecplot = [['Ux_[' + self.unit[0] + '.' + self.unit[1] + '^{-1}]', VT[:, 0]], ['Uy_[' + self.unit[0] +  '.' + self.unit[1] +  '-1]', VT[:, 1]]]
                     self.filename = 'velocity_field_from_frame_' + \
                         str(self.vec[2 * k]) + '_to_' + str(self.vec[2 * k + 1])
                     if fileFormat == 'tecplot' or fileFormat == 'tec':
-                        Files.tecplot_WriteRectilinearMesh(str(outFolder +'/' + format(k, '04.0f') +'_' + self.filename + '.' + fileFormat),
-                            vecXpROI,
-                            vecYpROI,
-                            variablesTecplot)
+                        Files.tecplot_WriteRectilinearMesh(str(outFolder +'/' + format(k, '04.0f') +'_' + self.filename + '.' + fileFormat), vecXpROI, vecYpROI, variablesTecplot)
                     if fileFormat == 'csv':
-                        Files.csv_WriteRectilinearMesh(str(outFolder + '/' +  format( k, '04.0f') + '_' + self.filename + '.' + fileFormat),
-                            vecXpROI,
-                            vecYpROI,
-                            variablesTecplot)
+                        Files.csv_WriteRectilinearMesh(str(outFolder + '/' +  format( k, '04.0f') + '_' + self.filename + '.' + fileFormat), vecXpROI, vecYpROI, variablesTecplot)
 
         elif self.fieldResults == 'accumulation':
             VT = Interpolate.npGrid2TargetPoint2D(self.UxTot[0], self.UyTot[0])
@@ -1139,38 +1080,15 @@ class Analyzer():
                 # '_and_shift_'+str(self.paramVecTime['shift'])
                 self.filename = 'frame_' + str(self.vec[0]) + '_to_' + str(self.vec[-1]) + '_with_step_' + str(
                     self.paramVecTime['step']) + '_and_shift_' + str(self.paramVecTime['shift'])
-            self.variables = [['Ux_[' +
-                               self.unit[0] +
-                               '.' +
-                               self.unit[1] +
-                               '-1]', self.UxTot], ['Uy_[' +
-                                                    self.unit[0] +
-                                                    '.' +
-                                                    self.unit[1] +
-                                                    '-1]', self.UyTot]]
+            self.variables = [['Ux_[' + self.unit[0] + '.' + self.unit[1] +
+                               '-1]', self.UxTot], ['Uy_[' +  self.unit[0] + '.' + self.unit[1] + '-1]', self.UyTot]]
             if fileFormat == 'hdf5':
-                Files.hdf5_Write(outFolder +
-                                 '/' +
-                                 self.filename +
-                                 '.' +
-                                 fileFormat, [['T_[' +
-                                               self.unit[0] +
-                                               ']', self.Time], ['X_[' +
-                                                                 self.unit[0] +
-                                                                 ']', vecXpROI], ['Y_[' +
-                                                                                  self.unit[0] +
-                                                                                  ']', vecYpROI]], self.variables)
+                Files.hdf5_Write(outFolder + '/' + self.filename + '.' +
+                                 fileFormat, [['T_[' +  self.unit[1] + ']', self.Time], ['X_[' + self.unit[0] + ']', vecXpROI], ['Y_[' +  self.unit[0] +']', vecYpROI]], self.variables)
 
             if fileFormat == 'tecplot' or fileFormat == 'csv' or fileFormat == 'tec':
-                variablesTecplot = [['Ux_[' +
-                                     self.unit[0] +
-                                     '.' +
-                                     self.unit[1] +
-                                     '^{-1}]', VT[:, 0]], ['Uy_[' +
-                                                           self.unit[0] +
-                                                           '.' +
-                                                           self.unit[1] +
-                                                           '^{-1}]', VT[:, 1]]]
+                variablesTecplot = [['Ux_[' + self.unit[0] + '.' + self.unit[1] + '^{-1}]', VT[:, 0]], ['Uy_[' +   self.unit[0] +  '.' +  self.unit[1] + '^{-1}]', VT[:, 1]]]
+
                 if fileFormat == 'tecplot' or fileFormat == 'tec':
                     Files.tecplot_WriteRectilinearMesh(
                         outFolder +
@@ -1181,6 +1099,7 @@ class Analyzer():
                         vecXpROI,
                         vecYpROI,
                         variablesTecplot)
+
                 if fileFormat == 'csv':
                     Files.csv_WriteRectilinearMesh(
                         outFolder +
@@ -1207,8 +1126,7 @@ class Analyzer():
 #
 # TODO export this method in Files
 
-    def writeTracks(
-            self,
+    def writeTracks( self,
             filename=None,
             fileFormat='csv',
             outFolder='.',
@@ -1281,12 +1199,9 @@ class Analyzer():
         Files.writeImageProcessingParamsJSON(
             fulldict, outFolder=outFolder, filename=None)
 
-    def set_stabilization(
-            self,
+    def set_stabilization( self,
             mask=None,
-            vlim=[
-                0,
-                40],
+            vlim=[  0, 40],
             mute=True,
             close_at_reset=False):
         if mask is None:
@@ -1387,14 +1302,9 @@ class Analyzer():
         self.color = []
         props = dict(facecolor=(1, 1, 1), alpha=0.5, pad=2)
         for i in range(len(axisPoints)):
-            self.color.append(
-                [np.random.uniform(), np.random.uniform(), np.random.uniform()])
-            ax1.scatter(axisPoints[i,
-                                   0,
-                                   0],
-                        axisPoints[i,
-                                   0,
-                                   1],
+            self.color.append( [np.random.uniform(), np.random.uniform(), np.random.uniform()])
+            ax1.scatter(axisPoints[i, 0, 0],
+                        axisPoints[i,  0, 1],
                         s=200,
                         linewidths=0.5,
                         marker='+',
@@ -1405,9 +1315,7 @@ class Analyzer():
                      axisPoints[i][0,
                                    1],
                      '        X: ' + format(model_points[i][0],
-                                            '2.2f') + ' m Y: ' + format(model_points[i][1],
-                                                                        '2.2f') + ' m Z: ' + format(model_points[i][2],
-                                                                                                    '2.2f') + ' m   ',
+                                            '2.2f') + ' m Y: ' + format(model_points[i][1],   '2.2f') + ' m Z: ' + format(model_points[i][2], '2.2f') + ' m   ',
                      fontsize=6,
                      bbox=props,
                      zorder=1)
@@ -1421,12 +1329,8 @@ class Analyzer():
                     linewidths=0.5, marker='P', color=(1, 1, 1, 0.7), zorder=2)
 
         for i in range(len(axisPoints)):
-            ax2.scatter(axisPoints[i,
-                                   0,
-                                   0],
-                        axisPoints[i,
-                                   0,
-                                   1],
+            ax2.scatter(axisPoints[i,  0,  0],
+                        axisPoints[i,  0,  1],
                         s=200,
                         linewidths=0.5,
                         marker='+',
@@ -1465,7 +1369,6 @@ class Analyzer():
             self.figBET.savefig(saveOutPut)
 
     def transformBirdEye(self):
-
         self.vis = cv2.warpPerspective(
             self.vis, self.homography, (self.Lvis, self.Hvis))
 
