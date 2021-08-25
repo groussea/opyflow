@@ -421,8 +421,8 @@ def findClosestPointsTwoLists(X_source,X_target):
     staticLocator.BuildLocator()
 
     staticClosestN = vtk.vtkIdList()
-    ind = np.zeros(len(X), dtype=np.int)
-    D = np.zeros(len(X))
+    ind = np.zeros(len(X_target), dtype=np.int)
+    D = np.zeros(len(X_target))
     math = vtk.vtkMath()
     x = [0, 0, 0]
     p = [0, 0, 0]
