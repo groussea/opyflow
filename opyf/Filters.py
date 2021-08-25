@@ -388,3 +388,51 @@ def opyfFindBlobs3D_structured(scalars, th1, th2=None, R=1., minArea=None, Cente
         AreaBlob = AreaBlob[np.where(AreaBlob > minArea)]
 
     return blob3Dout, C, AreaBlob
+
+
+def findClosestPointsTwoLists(X_source,X_target):
+    '''return the closest points indexes in X_source from the X_target points,
+    indexes output has the same length than X_target'''
+
+    listPoints = X_source
+    points = vtk.vtkPoints()
+    points.SetDataTypeToDouble()
+
+    listProbePoints=X_target
+    probePoints = vtk.vtkPoints()
+    probePoints.SetDataTypeToDouble()
+
+
+
+    for [x, y] in listPoints:
+        points.InsertNextPoint(x, y, 0.)
+    for [x, y] in listProbePoints:
+        probePoints.InsertNextPoint(x, y, 0.)
+
+    polydata = vtk.vtkPolyData()
+    polydata.SetPoints(points)
+    points.ComputeBounds()
+
+    staticLocator = vtk.vtkStaticPointLocator()
+    staticLocator.SetDataSet(polydata)
+    staticLocator.SetNumberOfPointsPerBucket(5)
+    staticLocator.AutomaticOn()
+
+    staticLocator.BuildLocator()
+
+    staticClosestN = vtk.vtkIdList()
+    ind = np.zeros(len(X), dtype=np.int)
+    D = np.zeros(len(X))
+    math = vtk.vtkMath()
+    x = [0, 0, 0]
+    p = [0, 0, 0]
+    staticClosestN = vtk.vtkIdList()
+    for i in range(len(X_target)):
+        staticLocator.FindClosestNPoints(
+            1, probePoints.GetPoint(i), staticClosestN)
+        ind[i] = staticClosestN.GetId(0)  # we then select the closest point
+        points.GetPoint(ind[i], x)
+        probePoints.GetPoint(i, p)
+        D[i] = math.Distance2BetweenPoints(x, p)**0.5
+
+    return ind, D

@@ -134,11 +134,14 @@ class opyfDisplayer:
                           'Hfig': args.get('Hfig', 8),
                           'num': args.get('num', 'opyfPlot'),
                           'grid': args.get('grid', True),
-                          'vlim': args.get('vlim', None)}
+                          'vlim': args.get('vlim', None),
+                          'force_figsize': args.get('force_figsize', None),}
         self.cmap= plt.get_cmap('hot')
         self.reset()
+
         self.fig, self.ax = opyffigureandaxes(
-            extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'])
+            extent=self.paramPlot['extentFrame'], Hfig=self.paramPlot['Hfig'], unit=self.paramPlot['unit'][0], num=self.paramPlot['num'], 
+            force_figsize=self.paramPlot['force_figsize'])
         self.backend=mpl.get_backend()
         self.ax.set_aspect('equal', adjustable='box')
     def reset(self):
@@ -167,7 +170,7 @@ class opyfDisplayer:
         self.paramPlot['extentFrame'] = extent
 
     def opyfColorBar(self,label='Magnitude [px/Dt]', **args):
-        self.cbaxes = self.fig.add_axes([0.15, 0.1, 0.70, 0.03])
+        self.cbaxes = self.fig.add_axes([0.15, 0.15, 0.70, 0.03])
         self.cb = self.fig.colorbar(self.im, cax=self.cbaxes, orientation='horizontal', **args)
         self.cb.set_label(label)
 
@@ -473,11 +476,13 @@ class opyfDisplayer:
             self.cb.draw_all()
         
         # self.fig.show()
+
         self.fig.canvas.draw()
         self.fig.canvas.start_event_loop(0.01)
         self.fig.canvas.flush_events()
         if self.backend[-14:]== 'backend_inline' or self.backend[-14:]== 'nbAgg' :  
             plt.pause(0.05)
+        
 
     def FieldInitializer(self, vecX, vecY, Field):
         if (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None) or (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None):
@@ -935,13 +940,13 @@ def opyfPointCloud(X, fig=None, ax=None, **args):
 
 
 def opyfColorBar(fig, im, label='Magnitude [px/Dt]', **args):
-    cbaxes = fig.add_axes([0.15, 0.1, 0.70, 0.03])
+    cbaxes = fig.add_axes([0.15, 0.3, 0.70, 0.03])
     cb = fig.colorbar(im, cax=cbaxes, orientation='horizontal', **args)
     cb.set_label(label)
     return fig, cb
 
 
-def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=15, **args):
+def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8,  sizemax=15, force_figsize=None, **args):
     Hframe = np.absolute(extent[3]-extent[2])
     Lframe = np.absolute(extent[1]-extent[0])
     Lfig = Lframe*Hfig/Hframe
@@ -957,9 +962,10 @@ def opyffigureandaxes(extent=[0, 1, 0, 1], unit='px', Hfig=8, sizemax=15, **args
         A = coeff*A
     exty = 0.65
     extx = Lframe*exty*A[1]/A[0]/Hframe
-    axiswindow = [(1-extx)/2+0.02, 0.25, extx, exty]
-
-    fig = plt.figure(figsize=(A[0], A[1]), dpi=142,**args)
+    axiswindow = [(1-extx)/2+0.02, 0.3, extx, exty]
+    if force_figsize is not None:
+        A=force_figsize
+    fig = plt.figure(figsize=(A[0], A[1]), dpi=142, **args)
     ax = plt.Axes(fig, axiswindow)
     fig.add_axes(ax)
     ax.set_ylabel('Y ['+unit+']')

@@ -81,15 +81,11 @@ class Analyzer():
         self.set_imageParams(**args)
         self.paramPlot = {
             'ScaleVectors': args.get(
-                'ScaleVectors', 0.1), 'vecX': [], 'vecY': [], 'extentFrame': args.get(
-                'extentFrame', [
-                    0, self.Lvis, self.Hvis, 0]), 'unit': args.get(
-                    'unit', [
-                        'px', 'deltaT']), 'Hfig': args.get(
-                            'Hfig', 8), 'grid': args.get(
-                                'grid', True), 'vlim': args.get(
-                                    'vlim', [
-                                        0, 40])}
+            'ScaleVectors', 0.1), 'vecX': [], 'vecY': [], 
+            'extentFrame': args.get('extentFrame', [0, self.Lvis, self.Hvis, 0]), 
+            'unit': args.get('unit', ['px', 'deltaT']), 'Hfig': args.get('Hfig', 8),
+            'force_figsize': args.get('force_figsize', None),'grid': args.get( 'grid', True), 
+            'vlim': args.get('vlim', [ 0, 40])}
         self.birdEyeMod = False
         self.stabilizeOn = False
 
