@@ -3,27 +3,29 @@
 """
 Created on Mon Sep 30 12:40:10 2019
 
+Thi
+
 @author: Gauthier
 """
 #%%
 # %matplotlib qt5
-import sys, os
+import opyf
+import matplotlib.pyplot as plt
+import sys
+import os
 os.chdir("./")
 # if opyf is not installed where is the opyf folder?
 sys.path.append('../../')
-import opyf 
-import matplotlib.pyplot as plt
 #On ipython try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline" for inline outputs
-
 
 
 plt.close('all')
 
 
 #Path toward the video file
-filePath='./2018.07.04_Station_fixe_30m_sample.mp4'
+filePath = './2018.07.04_Station_fixe_30m_sample.mp4'
 #set the object information
-video=opyf.videoAnalyzer(filePath)
+video = opyf.videoAnalyzer(filePath)
 '''
 this manipualtion create an object [video] that contains information deduced from the video file.
 #if it is a frame sequence use: {opyf.frameSequenceAnalyzer(path)} and type the "path" where images are.
@@ -32,8 +34,8 @@ this manipualtion create an object [video] that contains information deduced fro
 #%% ######################
 
 
-video.set_vecTime(Ntot=10,shift=1,step=2,starting_frame=20)
-print(video.vec,'\n',video.prev)
+video.set_vecTime(Ntot=10, shift=1, step=2, starting_frame=20)
+print(video.vec, '\n', video.prev)
 """
 #Use .set_vecTime vector to define the processing plan 
 #This method define video.vec and video.prev, two vecotrs required for the image processing:
@@ -59,7 +61,8 @@ to process the first two image of the video or the frame sequence and extract th
 # =============================================================================
 """
 #%%
-video.extractGoodFeaturesAndDisplacements(display='quiver',displayColor=True,width=0.002)
+video.extractGoodFeaturesAndDisplacements(
+    display='quiver', displayColor=True, width=0.002)
 '''
 #the method {.extractGoodFeaturesAndDisplacements} applied to the object video will detect the good feature to track and calculate the optical flow according 
 #to the processing plan defined by set_vecTime. The option 'quiver' display the velocity vectors corresponding to the feature to track, while display='points'
@@ -68,16 +71,18 @@ video.extractGoodFeaturesAndDisplacements(display='quiver',displayColor=True,wid
 
 #%%
 
-video.set_vlim([0,30])
+video.set_vlim([0, 30])
 '''
 #set_vlim defines video.vlim and indicates the range of displacement expected with the processing plan (close link with step parameter in set_vecTime) 
 #you can run again the processing and see the difference with above
 
 '''
 
-video.extractGoodFeaturesAndDisplacements(display='quiver',displayColor=True,width=0.002)
+video.extractGoodFeaturesAndDisplacements(
+    display='quiver', displayColor=True, width=0.002)
 #%%
-video.set_filtersParams(wayBackGoodFlag=4,RadiusF=20,maxDevInRadius=1,CLAHE=True)
+video.set_filtersParams(wayBackGoodFlag=4, RadiusF=20,
+                        maxDevInRadius=1, CLAHE=True)
 '''
 # =============================================================================
 # Now you may want to apply some filters to erase outliers
@@ -95,7 +100,7 @@ video.set_filtersParams(wayBackGoodFlag=4,RadiusF=20,maxDevInRadius=1,CLAHE=True
 #You can specify the goodFeatureToTracks params (more information on https://docs.opencv.org/master/d4/d8c/tutorial_py_shi_tomasi.html or 
 #Shi, Jianbo. "Good features to track." 1994 Proceedings of IEEE conference on computer vision and pattern recognition. IEEE, 1994.)
 '''
-video.set_goodFeaturesToTrackParams(maxCorners=50000,qualityLevel=0.001)
+video.set_goodFeaturesToTrackParams(maxCorners=50000, qualityLevel=0.001)
 #access to these parameters with:
 video.feature_params
 
@@ -110,9 +115,10 @@ video.set_opticalFlowParams(maxLevel=3)
 video.lk_params
 
 
-#%% 
+#%%
 
-video.extractGoodFeaturesPositionsDisplacementsAndInterpolate(display='field',displayColor=True,scale=80,width=0.005)
+video.extractGoodFeaturesPositionsDisplacementsAndInterpolate(
+    display='field', displayColor=True, scale=80, width=0.005)
 '''
 #Extract the velocity field by interpolating the displacements of the 'goodFeaturesToTrack' on a field defined by the method {set_gridToInterpolateOn}. 
 #By default, this grid is set at (pixLeft=0, pixRight=0, stepHor=2, pixUp=0, pixDown=0, stepVert=2)
@@ -120,10 +126,20 @@ video.extractGoodFeaturesPositionsDisplacementsAndInterpolate(display='field',di
 #Interpolated datas with accumulation are stored in video.UxTot[k] and video.UyTot[k], for velocities at video.Time[k]
 '''
 
-#%% 
+#%%
 
+#%%
+# To increase the quality of the treatment (obtain a converged flow fields) you may increase the number of pairs of frames treated Ntot. 
+# Here we set Ntot at 88 instead of 10 in the first example.
+# video.set_vecTime(starting_frame=10,step=2,shift=1,Ntot=88)
+# A convergence of flow statistics wis obtained in at least for 3 seconds (see the Annex F of Rousseau (2019) for more explanations) https://infoscience.epfl.ch/record/264790
 
-video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(display1='quiver',display2='field',displayColor=True,scale=200)
+# smoothness of the data may also be regulated via the interpolator parameter by reducing the Sharpness
+# video.set_interpolationParams(Sharpness=10,Radius=40)
+
+video.set_vecTime(starting_frame=20,step=2,shift=1,Ntot=10)
+video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(
+    display1='quiver', display2='field', displayColor=True, scale=200)
 '''
 #If the method {extractGoodFeaturesDisplacementsAccumulateAndInterpolate} is applied, only one field will be produced at the end of the processing
 #display 1='quiver' displays the GFT at each time step
@@ -134,7 +150,7 @@ video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(display1='quiver'
 #Interpolated datas with accumulation are stored in video.UxTot[0] and video.UyTot[0]
 '''
 
-#%% 
+#%%
 '''
 To extract field data use
 '''
@@ -157,21 +173,22 @@ video.writeVelocityField(fileFormat='hdf5')
 opyf.hdf5_Read(video.filename+'.hdf5')
 
 
-
 #%% ##############3
 
 
-video.scaleData(framesPerSecond=25, metersPerPx=0.02, unit=['m', 's'], origin=[0,video.Hvis])
+video.scaleData(framesPerSecond=25, metersPerPx=0.02,
+                unit=['m', 's'], origin=[0, video.Hvis])
 
 '''
 # the scaling function if you want to scale data, i.e., give the fps and the length scale
 method is applied, there is no possibility to go back to Unscale, however it is possible to continue to process with scaling
 
+Here the scale is 2 cemtimeters per px.
 
 #The Y axis is now oriented upward
 #check that with 
 '''
-video.showXV(video.X, video.V,display='points',displayColor=True)
+video.showXV(video.X, video.V, display='points', displayColor=True)
 #or the averaged velocity field
 
 Field = opyf.Render.setField(video.UxTot[0], video.UyTot[0], 'norm')
@@ -182,13 +199,15 @@ video.opyfDisp.plotField(Field, vis=video.vis)
 '''
 for plotting only the resulting averaged field, usefull if Ntot is longer
 '''
-video.set_vlim([0,30])
-video.set_vecTime(Ntot=10,shift=1,step=1,starting_frame=20)
-video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(display2='field',displayColor=True,scale=200)
+video.set_vlim([0, 30])
+video.set_vecTime(Ntot=10, shift=1, step=1, starting_frame=20)
+video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(
+    display2='field', displayColor=True, scale=200)
 
 
-#%% 
-video.set_trackingFeatures(Ntot=10,step=1, starting_frame=1, track_length=5, detection_interval=10)
+#%%
+video.set_trackingFeatures(
+    Ntot=10, step=1, starting_frame=1, track_length=5, detection_interval=10)
 '''
 # the method {extractTracks} is available to extract tracks on images. The principle is inspired by the openCv sample lktrack.py (https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py)
 #The main difference rely on the possibility to store the tracks 
@@ -196,12 +215,9 @@ video.set_trackingFeatures(Ntot=10,step=1, starting_frame=1, track_length=5, det
 It might be a technic to better filter relevant velocities since it is possible to follow these patterns for multiple frames 
 '''
 opyf.mkdir2('./export_Tracks/')
-video.set_filtersParams(wayBackGoodFlag=1,CLAHE=False)
-video.extractTracks(display='quiver',displayColor=True, saveImgPath='./export_Tracks/',numberingOutput=True)
+video.set_filtersParams(wayBackGoodFlag=1, CLAHE=False)
+video.extractTracks(display='quiver', displayColor=True,
+                    saveImgPath='./export_Tracks/', numberingOutput=True)
 # tracks can be saved in csv file
 video.writeTracks(outFolder='./export_Tracks')
 #when wrtiting it is possible to specify the out folder
-
-
-
-

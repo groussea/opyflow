@@ -5,6 +5,7 @@ Created on Wed Nov 29 14:58:58 2017
 
 @author: Gauthier ROUSSEAU
 """
+#%%
 
 import vtk
 import numpy as np

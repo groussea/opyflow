@@ -206,14 +206,13 @@ class Analyzer():
             kernel='Gaussian'):
         if Radius is None:
             Radius = self.scale * 30  # 30 px when the data set is not scaled
-            self.interp_params = dict(Radius=Radius,  
-                                      Sharpness=Sharpness,
-                                      kernel=kernel)
         else:
             Radius = Radius
     # set the a scaled value if the user does not introduce a Radius and the
     # data set is scaled
-
+        self.interp_params = dict(Radius=Radius,  
+                                      Sharpness=Sharpness,
+                                      kernel=kernel)
         print('')
         print('Interpolation Parameters:')
         for x in self.interp_params:
