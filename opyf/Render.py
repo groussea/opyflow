@@ -365,10 +365,10 @@ class opyfDisplayer:
         if self.ax.get_ylim()[0] > self.ax.get_ylim()[1]:
             Velocities[:, 1] = -Velocities[:, 1]
         if normalize == False:
-            qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1], Velocities[:,
+            self.qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1], Velocities[:,
                                                                             0], Velocities[:, 1], color=cmap(norm(Norme)), **args)
         else:
-            qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1], Velocities[:, 0] /
+            self.qv = self.ax.quiver(TargetPoints[:, 0], TargetPoints[:, 1], Velocities[:, 0] /
                         Norme[:], Velocities[:, 1]/Norme[:], color=cmap(norm(Norme)), **args)
 
 
@@ -464,7 +464,7 @@ class opyfDisplayer:
             self.opyfPointCloudScatter(Xdata, Vdata, s=s, color=c, **infoPlotPointCloud)
 
         if self.paramDisp['QuiverOnPoints'] == True and Xdata is not None and Vdata is not None:
-            self.fig, self.ax, qv = opyfQuiverPointCloud(
+            self.fig, self.ax, self.qv = opyfQuiverPointCloud(
                 Xdata, Vdata, ax=self.ax, nvec=nvec, color=c, normalize=normalize, **infoPlotQuiver)
 
         if self.paramDisp['QuiverOnPointsColored'] == True and Xdata is not None and Vdata is not None:
@@ -486,8 +486,7 @@ class opyfDisplayer:
 
     def FieldInitializer(self, vecX, vecY, Field):
         if (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None) or (len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is None):
-            print(
-                'If you initialize with new coordinates you must specifiy vecX and vecY')
+            print('If you initialize with new coordinates you must specifiy vecX and vecY')
         if len(self.paramPlot['vecX']) == 0 and vecX is not None and vecY is not None:
             self.paramPlot['vecX'] = vecX
             self.paramPlot['vecY'] = vecY

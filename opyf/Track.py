@@ -50,7 +50,7 @@ def opyfTrack(tracks, vtracks, gray, prev_gray, incr, feature_params, lk_params,
             if maskFrame is not None:
                 if maskFrame[int(y), int(x)] == 0:
                     continue
-            tr.append((x+vx/2, y+vy/2))
+            tr.append((x, y))
             vtr.append((vx, vy))
             if len(tr) > tracks_params['track_len']:
                 del tr[0]

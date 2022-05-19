@@ -5,7 +5,7 @@ Created on Wed Jul 10 08:59:41 2019
 
 @author: Gauthier ROUSSEAU
 """
-
+#%%
 import os
 import sys
 import numpy as np
@@ -16,7 +16,7 @@ import time
 import opyf
 import matplotlib as mpl
 import re
-
+#%%
 
 class Analyzer():
     def __init__(
@@ -198,11 +198,11 @@ class Analyzer():
             print('\t- ', x, ':', self.filters_params[x])
 
     # When the data set is scaled the radius must be gven in the good length
-    # unity (meter, cm, ....)
+    # unity (meter, cm, ....) 
     def set_interpolationParams(
             self,
             Radius=None,
-            Sharpness=8,
+            Sharpness=8,  
             kernel='Gaussian'):
         if Radius is None:
             Radius = self.scale * 30  # 30 px when the data set is not scaled
@@ -376,11 +376,11 @@ class Analyzer():
                                    'Ntot': Ntot}
 
         self.vecTracks, self.prevTracks = MeshesAndTime.set_vecTimeTracks(
-            starting_frame=starting_frame, step=step, Ntot=Ntot)
+            starting_frame=starting_frame, step=step,  Ntot=Ntot)
 
         print(
             '\nTracking processing \nTracking operates only in succesives images sperated with [step] frames')
-        if self.vec[-1] > self.number_of_frames:
+        if self.vecTracks[-1] > self.number_of_frames:
             print('----- Error ----')
             print('Your tracking plan is not compatible with the frame set')
             print(
@@ -414,7 +414,7 @@ class Analyzer():
                 if indF == self.sortedVec[k]:
                     self.dictFrames[str(self.sortedVec[k])] = vis
                     k += 1
-        self.readFrame(self.vec[0])
+        self.readFrame(self.vecTracks[0])
 
     def initializeAveragedFrameFromFile(self, file, imreadOption=1):
         frameav = cv2.imread(file, imreadOption)
@@ -514,15 +514,7 @@ class Analyzer():
         self.currentFrame = i
         self.readFrame(self.currentFrame)
         self.substractAveragedFrame()
-        self.tracks, self.vtracks, self.prev_gray, self.X, self.V = Track.opyfTrack(self.tracks, self.vtracks, self.gray, self.prev_gray,
-                                                                                    self.incr, self.feature_params,
-                                                                                    self.lk_params, self.tracks_params,
-                                                                                    ROI=self.ROImeasure,
-                                                                                    vmin=self.vlimPx[0],
-                                                                                    vmax=self.vlimPx[1],
-                                                                                    mask=self.mask,
-                                                                                    wayBackGoodFlag=self.filters_params['wayBackGoodFlag'])
-
+        self.tracks, self.vtracks, self.prev_gray, self.X, self.V = Track.opyfTrack(self.tracks, self.vtracks, self.gray, self.prev_gray, self.incr, self.feature_params, self.lk_params, self.tracks_params, ROI=self.ROImeasure, vmin=self.vlimPx[0], vmax=self.vlimPx[1], mask=self.mask, wayBackGoodFlag=self.filters_params['wayBackGoodFlag'])
         self.scaleAndLogTracks(i)
 
     def extractTracks(
@@ -536,8 +528,7 @@ class Analyzer():
         self.tracks = []
         self.vtracks = []
         if self.prevTracks is None:
-            print(
-                '\n \nWARNING : To run the extractTracks() method, it is mandatory to define the tracking plan through the method [set_trackingFeatures()]\n\n')
+            print( '\n \nWARNING : To run the extractTracks() method, it is mandatory to define the tracking plan through the method [set_trackingFeatures()]\n\n')
             sys.exit()
         k = 0
         for pr, i in zip(self.prevTracks, self.vecTracks):
@@ -546,8 +537,7 @@ class Analyzer():
                 self.Xdata.append(self.X)
                 self.Vdata.append(self.V)
 
-                cv2.polylines(self.vis, [np.int32(tr)
-                                         for tr in self.tracks], False, (0, 255, 0))
+                cv2.polylines(self.vis, [np.int32(tr) for tr in self.tracks], False, (0, 255, 0))
                 self.showXV(self.X, self.V, vis=self.vis,
                             display=display, **args)
                 if saveImgPath is not None and self.display:
@@ -580,24 +570,14 @@ class Analyzer():
 
         if self.filters_params['CLAHE']:
             self.gray = Render.CLAHEbrightness(
-                self.gray,
-                0,
+                self.gray, 0,
                 tileGridSize=self.filters_params['gridSize'],
                 clipLimit=self.filters_params['clplim'])
 #             self.vis=Render.CLAHEbrightness(self.vis,0,tileGridSize=(20,20),clipLimit=2)
 
-        self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(self.gray,
-                                                                self.prev_gray,
-                                                                self.feature_params,
-                                                                self.lk_params,
-                                                                ROI=self.ROImeasure,
-                                                                vmin=self.vlimPx[0],
-                                                                vmax=self.vlimPx[1],
-                                                                mask=self.mask,
-                                                                wayBackGoodFlag=self.filters_params['wayBackGoodFlag'])
+        self.prev_gray, self.X, self.V = Track.opyfFlowGoodFlag(self.gray, self.prev_gray, self.feature_params, self.lk_params, ROI=self.ROImeasure, vmin=self.vlimPx[0],  vmax=self.vlimPx[1], mask=self.mask, wayBackGoodFlag=self.filters_params['wayBackGoodFlag'])
 
         if pr:
-
             # filters ######
             self.scaleAndLogFlow(i)
             self.X, self.V = self.applyFilters(self.X, self.V)
@@ -657,26 +637,15 @@ class Analyzer():
               str(self.paramVecTimeTracks['Ntot']) + '] --------------')
 
         if self.processingMode == 'image sequence':
-            print('------- From frame [' +
-                  self.listD[i -
-                             self.paramVecTimeTracks['step']] +
-                  '] to frame [' +
-                  self.listD[i] +
-                  '] -------')
+            print('------- From frame [' + self.listD[i - self.paramVecTimeTracks['step']] + '] to frame [' + self.listD[i] + '] -------')
         if self.processingMode == 'video':
-            print('------- From frame [' +
-                  str(i -
-                      self.paramVecTimeTracks['step']) +
-                  '] to frame [' +
-                  str(i) +
-                  '] -------')
+            print('------- From frame [' + str(i -  self.paramVecTimeTracks['step']) + '] to frame [' + str(i) + '] -------')
         print('Number of Good Feature To Track = ' + str(len(self.X)))
         if len(self.V) == 0:
             print(
                 'No displacements measured (consider changing parameters set if displacements expected between these two frames)')
         else:
-            print('Displacement max = ' + str(np.max(np.absolute(self.V))) +
-                  ' ' + self.unit[0] + '/' + self.unit[1])
+            print('Displacement max = ' + str(np.max(np.absolute(self.V))) +  ' ' + self.unit[0] + '/' + self.unit[1])
 
     def scaleAndLogFlow(self, i):
         if self.scaled:
@@ -690,18 +659,9 @@ class Analyzer():
               str(self.paramVecTime['Ntot']) + '] --------------')
         if self.processingMode == 'image sequence':
             print('------- From frame [' +
-                  self.listD[i -
-                             self.paramVecTime['step']] +
-                  '] to frame [' +
-                  self.listD[i] +
-                  '] -------')
+                  self.listD[i - self.paramVecTime['step']] + '] to frame [' + self.listD[i] + '] -------')
         if self.processingMode == 'video':
-            print('------- From frame [' +
-                  str(i -
-                      self.paramVecTime['step']) +
-                  '] to frame [' +
-                  str(i) +
-                  '] -------')
+            print('------- From frame [' + str(i - self.paramVecTime['step']) +  '] to frame [' + str(i) + '] -------')
         print('Number of Good Feature To Track = ' + str(len(self.X)))
         if len(self.V) == 0:
             print(
@@ -1225,7 +1185,7 @@ class Analyzer():
                 step=s - self.vec[0])
             self.stab.extractGoodFeaturesAndDisplacements()
             transformation_rigid_matrix, rigid_mask = cv2.estimateAffine2D(
-                self.stab.X + self.stab.V, self.stab.X)
+                self.stab.X + self.stab.V/2, self.stab.X + self.stab.V/2 ) #because the position of the displacement is half the distance btw GFTs
             dst = cv2.warpAffine(
                 self.stab.vis,
                 transformation_rigid_matrix,
