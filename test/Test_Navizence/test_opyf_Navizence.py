@@ -3,15 +3,15 @@
 """
 Created on Mon Sep 30 12:40:10 2019
 
-Thi
-
 @author: Gauthier
 """
 #%%
 # %matplotlib qt5
+import sys
+sys.path.append('D:\programs\gitHub\opyflow')
 import opyf
 import matplotlib.pyplot as plt
-import sys
+plt.ion()
 import os
 os.chdir("./")
 # if opyf is not installed where is the opyf folder?
@@ -63,6 +63,7 @@ to process the first two image of the video or the frame sequence and extract th
 #%%
 video.extractGoodFeaturesAndDisplacements(
     display='quiver', displayColor=True, width=0.002)
+
 '''
 #the method {.extractGoodFeaturesAndDisplacements} applied to the object video will detect the good feature to track and calculate the optical flow according 
 #to the processing plan defined by set_vecTime. The option 'quiver' display the velocity vectors corresponding to the feature to track, while display='points'
@@ -83,6 +84,7 @@ video.extractGoodFeaturesAndDisplacements(
 #%%
 video.set_filtersParams(wayBackGoodFlag=4, RadiusF=20,
                         maxDevInRadius=1, CLAHE=True)
+
 '''
 # =============================================================================
 # Now you may want to apply some filters to erase outliers
@@ -119,6 +121,7 @@ video.lk_params
 
 video.extractGoodFeaturesPositionsDisplacementsAndInterpolate(
     display='field', displayColor=True, scale=80, width=0.005)
+
 '''
 #Extract the velocity field by interpolating the displacements of the 'goodFeaturesToTrack' on a field defined by the method {set_gridToInterpolateOn}. 
 #By default, this grid is set at (pixLeft=0, pixRight=0, stepHor=2, pixUp=0, pixDown=0, stepVert=2)
@@ -140,6 +143,7 @@ video.extractGoodFeaturesPositionsDisplacementsAndInterpolate(
 video.set_vecTime(starting_frame=20,step=2,shift=1,Ntot=10)
 video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(
     display1='quiver', display2='field', displayColor=True, scale=200)
+
 '''
 #If the method {extractGoodFeaturesDisplacementsAccumulateAndInterpolate} is applied, only one field will be produced at the end of the processing
 #display 1='quiver' displays the GFT at each time step
@@ -199,7 +203,7 @@ video.opyfDisp.plotField(Field, vis=video.vis)
 '''
 for plotting only the resulting averaged field, usefull if Ntot is longer
 '''
-video.set_vlim([0, 30])
+# video.set_vlim([0, 30])
 video.set_vecTime(Ntot=10, shift=1, step=1, starting_frame=20)
 video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(
     display2='field', displayColor=True, scale=200)

@@ -915,9 +915,16 @@ class Analyzer():
             self.XT = Interpolate.npGrid2TargetPoint2D(
                 self.grid_x, self.grid_y)
 
-            self.interp_params = dict(Radius=self.interp_params['Radius'] * self.scale,  # it is not necessary to perform interpolation on a high radius since we have a high number of values
+            self.interp_params = dict(Radius=self.interp_params['Radius'] * self.scale,  
                                       Sharpness=self.interp_params['Sharpness'],
                                       kernel='Gaussian')
+            self.filters_params['RadiusF'] = self.filters_params['RadiusF']* self.scale
+            self.filters_params['range_Vx'][0] = self.filters_params['range_Vx'][0]* self.scale* self.fps
+            self.filters_params['range_Vx'][1] = self.filters_params['range_Vx'][1]* self.scale* self.fps
+
+            self.filters_params['range_Vy'][0] = self.filters_params['range_Vy'][0]* self.scale* self.fps
+            self.filters_params['range_Vy'][1] = self.filters_params['range_Vy'][1]* self.scale* self.fps
+             
             self.paramPlot = {'vecX': self.vecX,
                               'vecY': self.vecY,
                               'extentFrame': [(self.paramPlot['extentFrame'][0] - self.origin[0]) * self.scale,
