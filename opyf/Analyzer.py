@@ -1156,7 +1156,7 @@ class Analyzer():
 
     def set_stabilization( self,
             mask=None,
-            vlim=[  0, 40],
+            vlim=[  0, 80],
             mute=True,
             close_at_reset=False):
         if mask is None:

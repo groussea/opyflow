@@ -102,36 +102,38 @@ A test on synthetic images is still required.
 
 The package requires python and basic python package: csv, numpy, matplotlib, tqdm, hdf5. Main dependencies are: OpenCV and VTK.
 
-If the `pip install opyf` command above does not work for you, the simplest way to deal with incompatibilities is using miniconda or anaconda.
+If the `pip install opyf` command above does not work for you, an alternative way to deal with dependencies is using miniconda or anaconda.
 
 When miniconda/anaconda is installed you may create an environment (here called *opyfenv*). To create the environment type in the terminal:
 
 ```shell
-conda create -n opyfenv python=3.6 vtk opencv matplotlib scipy tqdm (spyder)
+conda create -n opyfenv python=3.11
 ```
+
 
 This command line will install an environment with python 3.6 and the main dependencies.
 
 You can access to your environment by typing:
 
 ```shell
-source activate opyfenv
+conda activate opyfenv
 ```
 
 From there, you should be able to install opyf with `pip install opyf`.
 
-For python 3.7 you should use the *conda-forge* channel:
+Or you could also install the libraries individually with pip:
 
 ```shell
-conda create -n opyfenv python=3.7 vtk opencv matplotlib scipy tqdm (spyder) --channel conda-forge
+pip install ipython vtk opencv-python tqdm h5py matplotlib scipy
 ```
 
+
 Tested on:
-Python version: 3.6 and +
-VTK : 7.0.1 and +
-opencv : 3.2 and +
-numpy: 1.17 and +
-matplotlib : 2.0.0 and +
+Python version: 3.11 
+VTK : 9.2.6 
+opencv : 4.7
+numpy: 1.24
+matplotlib : 3.7.1
 
 ## Citation
 

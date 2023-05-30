@@ -383,15 +383,20 @@ class opyfDisplayer:
              c='k', s=10, ROIvis=None, **args):
 
         if len(self.ax.collections) > 0:
-            del self.ax.collections[:]
+            for c in self.ax.collections:
+                c.remove()
         if len(self.ax.lines) > 0:
-            del self.ax.lines[:]
+            for c in self.ax.lines:
+                c.remove()
         if len(self.ax.images) > 0:
-            del self.ax.images[:]
+            for c in self.ax.images:
+                c.remove()
         if len(self.ax.texts) > 0:
-            del self.ax.texts[:]
+            for c in self.ax.texts:
+                c.remove()
         if len(self.ax.patches) > 0:
-            del self.ax.patches[:]
+            for c in self.ax.patches:
+                c.remove()
         if len(self.fig.axes) > 1:
             self.fig.axes[1].remove()
 
