@@ -4,9 +4,9 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opyf"
-version = "0.0.1"
+version = "1.6"
 authors = [
-  { name="Example Author", email="author@example.com" },
+  { name="Gauthier Rousseau", email="gauthier.rousseau@gmail.com" },
 ]
 description = "OpyFlow - Python package for Optical Flow measurements."
 readme = "ReadMe.md"
@@ -17,8 +17,17 @@ classifiers = [
         "Topic :: Software Development :: Libraries :: Python Modules",
         "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Programming Language :: Python :: 3"
-    ]
     
+dependencies = [
+                "ipython>7.0.0", 
+                "vtk>9.0.0", 
+                "opencv-python>4.0.0",
+                "tqdm>4.0",
+                "h5py>3.0.0",
+                "matplotlib>3.0.0",
+                "scipy>1.9.0",
+                "PyQt5>5.0.0"
+                ]
 [project.urls]
 "Homepage" = "https://github.com/groussea/opyflow"
 "Bug Tracker" = "https://github.com/groussea/opyflow/issues"

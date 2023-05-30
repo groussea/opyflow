@@ -65,6 +65,8 @@ to process the first two image of the video or the frame sequence and extract th
 #%%
 video.extractGoodFeaturesAndDisplacements(
     display='quiver', displayColor=True, width=0.002)
+
+
 '''
 #the method {.extractGoodFeaturesAndDisplacements} applied to the object video will detect the good feature to track and calculate the optical flow according 
 #to the processing plan defined by set_vecTime. The option 'quiver' display the velocity vectors corresponding to the feature to track, while display='points'

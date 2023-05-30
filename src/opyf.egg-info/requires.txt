@@ -1,0 +1,8 @@
+ipython>7.0.0
+vtk>9.0.0
+opencv-python>4.0.0
+tqdm>4.0
+h5py>3.0.0
+matplotlib>3.0.0
+scipy>1.9.0
+PyQt5>5.0.0
