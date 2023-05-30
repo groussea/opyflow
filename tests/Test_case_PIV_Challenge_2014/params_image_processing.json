@@ -1,0 +1,52 @@
+{
+    "lk_params": {
+        "winSize": [
+            16,
+            16
+        ],
+        "maxLevel": 3,
+        "criteria": [
+            3,
+            50,
+            0.03
+        ]
+    },
+    "feature_params": {
+        "maxCorners": 40000,
+        "qualityLevel": 0.005,
+        "minDistance": 5,
+        "blockSize": 16
+    },
+    "filters_params": {
+        "RadiusF": 30,
+        "minNperRadius": 0,
+        "maxDevInRadius": Infinity,
+        "wayBackGoodFlag": 1,
+        "CLAHE": false,
+        "range_Vx": [
+            -Infinity,
+            Infinity
+        ],
+        "range_Vy": [
+            -Infinity,
+            Infinity
+        ],
+        "clplim": 3,
+        "gridSize": [
+            20,
+            20
+        ]
+    },
+    "interp_parameter": {
+        "Radius": 30,
+        "Sharpness": 8,
+        "kernel": "Gaussian"
+    },
+    "vecTime_params": {
+        "starting_frame": 0,
+        "step": 1,
+        "shift": 1,
+        "Ntot": 1
+    },
+    "fieldResults": "time-serie"
+}

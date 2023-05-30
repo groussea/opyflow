@@ -18,7 +18,7 @@ with open(path.join(here, "ReadMe.md"),"r") as f:
 
 setup(
     name="opyf",
-    version="1.3",
+    version="1.4",
     author="Gauthier Rousseau",
     author_email="gauthier.rousseau@gmail.com",
 
