@@ -15,59 +15,60 @@ Author: Gauthier Rousseau
 
 Corresponding e-mail : <gauthier.rousseau@gmail.com>
 
-## Quick start
+## Quick Start
 
-Assuming that you already have an environment with python installed, run the following command on your terminal:
+To quickly get started with OpyFlow, follow these steps:
 
-```shell
-pip install opyf
-```
+1. Ensure you have Python installed in your environment.
+2. Open your terminal and run the following command to install OpyFlow and its main dependencies (matplotlib, vtk, and opencv):
 
-or from the *opyflow* repository
+   ```shell
+   pip install opyf
+   ```
 
-```shell
-python3 -m pip install ./
-```
+   Alternatively, if you have the OpyFlow repository cloned locally, you can run:
 
-This should install the *opyf* library and the main dependencies (matplotlib, vtk and opencv) automatically.
+   ```shell
+   python3 -m pip install ./
+   ```
 
-If you meet compatibility problems on your system, it is recommended to create an *environment* via *conda* installation (see bellow [installation with anaconda](#installation-with-anaconda)).
+3. This will automatically install the OpyFlow library and its dependencies.
 
-To analyze a frame sequence (*png*, *bmp*, *jpeg*, *tiff*) you may run the following script:
+To analyze a frame sequence (e.g., PNG, BMP, JPEG, TIFF), use the following code:
 
 ```python
 import opyf
-analyzer=opyf.frameSequenceAnalyzer("folder/toward/images")
+analyzer = opyf.frameSequenceAnalyzer("folder/toward/images")
 ```
 
-For a video (*mp4*, *avi*, *mkv*, ... ):
+For analyzing a video (e.g., MP4, AVI, MKV), use the following code:
 
 ```python
-analyzer=opyf.videoAnalyzer("video/file/path")
+analyzer = opyf.videoAnalyzer("video/file/path")
 ```
 
-To perform your first analyze run :
+To perform your first analysis, run the following code:
 
 ```python
 analyzer.extractGoodFeaturesAndDisplacements()
 ```
 
-opyf package contains two frames and one video for testing and practicing yourself:
+OpyFlow package includes two frames and one video for testing and self-practice:
 
-- The two frames were extracted from the frame sequence of the Test case A of the *PIV Challenge 2014*
+1. The two frames were extracted from the frame sequence of the Test case A of the *PIV Challenge 2014*:
 
-![PIV challenge](tests/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
+   ![PIV challenge](tests/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
 
-When applied to the entire dataset, It can produce the above result (see [Test PIV Challenge 2014 - Case A](tests/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
+   When applied to the entire dataset, OpyFlow can produce the above result (see [Test PIV Challenge 2014 - Case A](tests/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
 
-- The video is a bird eye view video of a stream river taken by a drone and from which surface velocities can be extracted (see this [tutorias](tests/Test_Navizence/opyf_Navizence_velocimetry_UAV.md)  for the different possible procedures or the following [python file](tests/Test_Navizence/test_opyf_Navizence.py)).
+2. The video is a bird's eye view video of a stream river taken by a drone, from which surface velocities can be extracted (see this [tutorial](tests/Test_Navizence/opyf_Navizence_velocimetry_UAV.md) for different possible procedures or the following [python file](tests/Test_Navizence/test_opyf_Navizence.py)):
 
-![bird eye view Navizence](tests/Test_Navizence/gif/example_Navizence_Drone.gif)
+   ![bird's eye view Navizence](tests/Test_Navizence/gif/example_Navizence_Drone.gif)
 
-- A guide to obtain the free surface velocity in a river from two amateur video is also provided :  
-[Stabilization, orthorectification (brid eye view transformation) and free surface velocity estimation on the Brague river with opyFlow](tests/Test_Brague_flood/test_opyf_LSPIV_Brague.md)
+3. A guide is also provided to obtain the free surface velocity in a river from two amateur videos:  
+   [Stabilization, orthorectification (bird's eye view transformation), and free surface velocity estimation on the Brague river with OpyFlow](tests/Test_Brague_flood/test_opyf_LSPIV_Brague.md)
 
-[]()<img src="tests/Test_Brague_flood/figure_Brague.png" width=700>
+   []()<img src="tests/Test_Brague_flood/figure_Brague.png" width=700>
 
 ## Contents
 
@@ -126,7 +127,7 @@ source opyfenv/bin/activate
 
 From you environment, you should be able to install opyf with `pip install opyf`.
 
-For developement mode, you may also install the libraries individually with pip:
+For development mode, you may also install the libraries individually with pip:
 
 ```shell
 pip install ipython vtk opencv-python tqdm h5py matplotlib scipy ipykernel
@@ -140,11 +141,11 @@ sys.path.append("path/toward/opyf/src")
 ```
 
 Tested on:
-Python version: 3.11
-VTK : 9.2.6
-opencv : 4.7
-numpy: 1.24
-matplotlib : 3.7.1
+   - Python: 3.11
+   - VTK: 9.2.6
+   - OpenCV: 4.7
+   - NumPy: 1.24
+   - Matplotlib: 3.7.1
 
 ## Citation
 
