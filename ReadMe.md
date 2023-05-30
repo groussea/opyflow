@@ -13,11 +13,11 @@ The package also contains some rendering tools built with matplotlib. Velocities
 
 Author: Gauthier Rousseau
 
-Corresponding e-mail : gauthier.rousseau@gmail.com
+Corresponding e-mail : <gauthier.rousseau@gmail.com>
 
 ## Quick start
 
-Assuming that you already have an environment with python installed (<=3.9), run the following command on your terminal:
+Assuming that you already have an environment with python installed, run the following command on your terminal:
 
 ```shell
 pip install opyf
@@ -26,10 +26,10 @@ pip install opyf
 or from the *opyflow* repository
 
 ```shell
-python setup.py install
+python3 -m pip install ./
 ```
 
-This should install the opyf library and the main dependencies (vtk and opencv) automatically.
+This should install the *opyf* library and the main dependencies (matplotlib, vtk and opencv) automatically.
 
 If you meet compatibility problems on your system, it is recommended to create an *environment* via *conda* installation (see bellow [installation with anaconda](#installation-with-anaconda)).
 
@@ -79,7 +79,7 @@ The setup file:
 
 The package Folder opyf:
 
-- opyf 
+- opyf
   - Analyzer.py
   - Track.py
   - Interpolate.py
@@ -95,7 +95,6 @@ The package Folder opyf:
   - Test_Navizence
   - Test_Brague_flood
 
-
 A test on synthetic images is still required.
 
 ## Installation with anaconda
@@ -110,8 +109,7 @@ When miniconda/anaconda is installed you may create an environment (here called 
 conda create -n opyfenv python=3.11
 ```
 
-
-This command line will install an environment with python 3.6 and the main dependencies.
+This command line will install an environment with python 3.11 and the main dependencies.
 
 You can access to your environment by typing:
 
@@ -119,18 +117,31 @@ You can access to your environment by typing:
 conda activate opyfenv
 ```
 
-From there, you should be able to install opyf with `pip install opyf`.
-
-Or you could also install the libraries individually with pip:
+You can standard python protocol (run the command where you want to put the environement)
 
 ```shell
-pip install ipython vtk opencv-python tqdm h5py matplotlib scipy
+python -m venv opyfenv
+source opyfenv/bin/activate
 ```
 
+From you environment, you should be able to install opyf with `pip install opyf`.
+
+For developement mode, you may also install the libraries individually with pip:
+
+```shell
+pip install ipython vtk opencv-python tqdm h5py matplotlib scipy ipykernel
+```
+
+And set the opyf repository in your PATH or in the begining of your python script using:
+
+```python
+import sys
+sys.path.append("path/toward/opyf/src")
+```
 
 Tested on:
-Python version: 3.11 
-VTK : 9.2.6 
+Python version: 3.11
+VTK : 9.2.6
 opencv : 4.7
 numpy: 1.24
 matplotlib : 3.7.1
