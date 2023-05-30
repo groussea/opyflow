@@ -8,7 +8,7 @@ Created on Mon Sep 30 12:40:10 2019
 #%%
 # %matplotlib qt5
 import sys
-sys.path.append('D:\programs\gitHub\opyflow')
+# sys.path.append('/folder/toward/opyf') (eventually add directly the opyf package folder if not installed)
 import opyf
 import matplotlib.pyplot as plt
 plt.ion()

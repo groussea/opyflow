@@ -56,18 +56,18 @@ opyf package contains two frames and one video for testing and practicing yourse
 
 - The two frames were extracted from the frame sequence of the Test case A of the *PIV Challenge 2014*
 
-![PIV challenge](test/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
+![PIV challenge](tests/Test_case_PIV_Challenge_2014/gif/example_PIV_challenge.gif)
 
-When applied to the entire dataset, It can produce the above result (see [Test PIV Challenge 2014 - Case A](test/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
+When applied to the entire dataset, It can produce the above result (see [Test PIV Challenge 2014 - Case A](tests/Test_case_PIV_Challenge_2014/testPIVChallengeCaseA.md) for details on the procedure).
 
-- The video is a bird eye view video of a stream river taken by a drone and from which surface velocities can be extracted ([see the following python file for the different possible procedures](test/Test_Navizence/test_opyf_Navizence.py) ).
+- The video is a bird eye view video of a stream river taken by a drone and from which surface velocities can be extracted (see this [tutorias](tests/Test_Navizence/opyf_Navizence_velocimetry_UAV.md)  for the different possible procedures or the following [python file](tests/Test_Navizence/test_opyf_Navizence.py)).
 
-![bird eye view Navizence](test/Test_Navizence/gif/example_Navizence_Drone.gif)
+![bird eye view Navizence](tests/Test_Navizence/gif/example_Navizence_Drone.gif)
 
 - A guide to obtain the free surface velocity in a river from two amateur video is also provided :  
-[Stabilization, orthorectification (brid eye view transformation) and free surface velocity estimation on the Brague river with opyFlow](test/Test_Brague_flood/test_opyf_LSPIV_Brague.md)
+[Stabilization, orthorectification (brid eye view transformation) and free surface velocity estimation on the Brague river with opyFlow](tests/Test_Brague_flood/test_opyf_LSPIV_Brague.md)
 
-[]()<img src="test/Test_Brague_flood/figure_Brague.png" width=700>
+[]()<img src="tests/Test_Brague_flood/figure_Brague.png" width=700>
 
 ## Contents
 
