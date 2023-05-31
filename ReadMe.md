@@ -130,7 +130,7 @@ From you environment, you should be able to install opyf with `pip install opyf`
 For development mode, you may also install the libraries individually with pip:
 
 ```shell
-pip install ipython vtk opencv-python tqdm h5py matplotlib scipy ipykernel
+pip install ipython vtk opencv-python tqdm h5py matplotlib scipy ipykernel PyQt5
 ```
 
 And set the opyf repository in your PATH or in the begining of your python script using:
