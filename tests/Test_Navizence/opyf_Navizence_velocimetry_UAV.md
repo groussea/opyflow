@@ -102,13 +102,14 @@ The `set_filtersParams` method allows you to set various filters:
 
 ## Good Features to Track
 
-You can specify the  parameters for "Good Features to Track" which is a function provided by the `opencv`package (more information available in [the `opencv` tutorial for good features to track algorithm Shi, Tomasi (1994)](https://docs.opencv.org/4.x/d4/d8c/tutorial_py_shi_tomasi.html)).
+You can specify the parameters for "[Good Features to Track](https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga1d6bb77486c8f92d79c8793ad995d541)" which is a function provided by the `opencv` package (more information available in [the `opencv` tutorial for good features to track algorithm Shi, Tomasi (1994)](https://docs.opencv.org/4.x/d4/d8c/tutorial_py_shi_tomasi.html)).
 
 ```python
 video.set_goodFeaturesToTrackParams(maxCorners=50000, qualityLevel=0.001)
 ```
 
 You can access these parameters using `video.feature_params`.
+
 
 ## Optical Flow
 
