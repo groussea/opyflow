@@ -135,7 +135,7 @@ opyf.hdf5_WriteUnstructured2DTimeserie(export_H5,[0], [Xtot],[Vtot] )
 Ntot = (Vtot[:,0]**2+Vtot[:,1]**2)**0.5
 
 
-#%% load MNT
+#%% load MNT (can be downloaded here https://drive.switch.ch/index.php/s/cWnga5fAlucoZug)
 import csv
 f = open('MNT.xyz', 'r')
 reader = csv.reader(f, delimiter='\t')

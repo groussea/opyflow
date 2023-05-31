@@ -7,7 +7,7 @@ $ cat .gitignore
 /dist
 /opyf/__pycache__
 test/Test_land_slide_youtube_video/Val Parghera Zeitraffer Mai 2013 - Januar 2015.mp4
-
+/src/opyf.egg-info
 test/Test_Navizence/gif/test_opyf_Navizence_generate_gif.py
 test/Test_Navizence/gif/init.png
 test/Test_Navizence/test.pdf
@@ -21,13 +21,5 @@ test/Test_case_PIV_Challenge_2014/gif/forGif.blend
 test/Test_case_PIV_Challenge_2014/gif/frame_final_2.png
 test/Test_case_PIV_Challenge_2014/gif/frame_final.png
 realese-v1.1.md
-opyf_groussea.egg-info/dependency_links.txt
-opyf_groussea.egg-info/PKG-INFO
-opyf_groussea.egg-info/requires.txt
-opyf_groussea.egg-info/SOURCES.txt
-opyf_groussea.egg-info/top_level.txt
-opyflow.egg-info/dependency_links.txt
-opyflow.egg-info/PKG-INFO
-opyflow.egg-info/requires.txt
-opyflow.egg-info/SOURCES.txt
-opyflow.egg-info/top_level.txt
+opyf_groussea.egg-info
+opyflow.egg-info
