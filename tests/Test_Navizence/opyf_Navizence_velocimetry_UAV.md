@@ -66,9 +66,7 @@ video.extractGoodFeaturesAndDisplacements(
     display='quiver', displayColor=True, width=0.002)
 ```
 
-The method `.extractGoodFeaturesAndDisplacements` applied to the `video` object will detect the "good features to track" and calculate the optical flow according to the processing plan defined by `set_vecTime`. The option `display='quiver'` displays the velocity vectors corresponding to the features, while `display='points'` shows only the positions. The `displayColor` option introduces
-
- a colormap corresponding to the velocity magnitude. You can use the usual arguments for plotting with `plt.quiver` for the quiver plot or `plt.scatter` for the points. We can observe that the processing plan is really not optimal.
+The method `.extractGoodFeaturesAndDisplacements` applied to the `video` object will detect the "good features to track" and calculate the optical flow according to the processing plan defined by `set_vecTime`. The option `display='quiver'` displays the velocity vectors corresponding to the features, while `display='points'` shows only the positions. The `displayColor` option introduces a colormap corresponding to the velocity magnitude. You can use the usual arguments for plotting with `plt.quiver` for the quiver plot or `plt.scatter` for the points. We can observe that the processing plan is really not optimal.
 
 ## Norm Velocity Limits
 
