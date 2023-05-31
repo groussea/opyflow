@@ -102,7 +102,7 @@ The `set_filtersParams` method allows you to set various filters:
 
 ## Good Features to Track
 
-You can specify the parameters for "Good Features to Track" (more information available in [Shi, Jianbo (1994)](https://www.researchgate.net/publication/34775305_Good_features_to_track)).
+You can specify the  parameters for "Good Features to Track" which is a function provided by the `opencv`package (more information available in [the `opencv` tutorial for good features to track algorithm Shi, Tomasi (1994)](https://docs.opencv.org/4.x/d4/d8c/tutorial_py_shi_tomasi.html)).
 
 ```python
 video.set_goodFeaturesToTrackParams(maxCorners=50000, qualityLevel=0.001)
@@ -112,7 +112,7 @@ You can access these parameters using `video.feature_params`.
 
 ## Optical Flow
 
-You may also specify the parameters for optical flow. The default parameters are set by `video.set_opticalFlowParams(winSize=(16, 16), maxLevel=3)`. For more information on optical flow, refer to the [OpenCV documentation](https://docs.opencv.org/3.4/d4/dee/tutorial_optical_flow.html).
+You may also specify the parameters for optical flow. The default parameters are set by `video.set_opticalFlowParams(winSize=(16, 16), maxLevel=3)`. For more information on optical flow, refer to the [lukas kanade optical flowOpenCV documentation](https://docs.opencv.org/3.4/d4/dee/tutorial_optical_flow.html).
 
 ```python
 video.set_opticalFlowParams(maxLevel=3)
@@ -201,7 +201,7 @@ video.set_trackingFeatures(Ntot=10, step=1, starting_frame=1, track_length=5, de
 
 ## Tracking
 
-The `extractTracks` method is available for extracting tracks on images. The principle is inspired by the `lktrack.py` sample from OpenCV's repository ([source](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py)). The main difference is the ability to store the tracks.
+The `extractTracks` method is available for extracting tracks on images. The principle is inspired by the `lktrack.py` sample from OpenCV's repository ([lk_track.py](https://github.com/opencv/opencv/blob/master/samples/python/lk_track.py)). The main difference is the ability to store the tracks.
 
 Note that if the object is built from a video using `videoAnalyzer`, there might be a lag since each required image is loaded into memory for efficiency reasons. It is a technique to better filter relevant velocities, as it is possible to track these patterns for multiple frames. Note also that if the vector field was accumulated over `Ntot` images, the track will only have `Ntot-1` positions.
 
