@@ -198,9 +198,6 @@ video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(display2='field',
 video.set_trackingFeatures(Ntot=10, step=1, starting_frame=1, track_length=5, detection_interval=10)
 ```
 
-## Tracking
-
-The method `extractTracks` is available to extract tracks from the images. The principle is inspired by the OpenCV sample `lktrack.py`. The main difference is that you have the option to store the tracks.
 
 ## Tracking
 
@@ -209,8 +206,6 @@ The `extractTracks` method is available for extracting tracks on images. The pri
 Note that if the object is built from a video using `videoAnalyzer`, there might be a lag since each required image is loaded into memory for efficiency reasons. It is a technique to better filter relevant velocities, as it is possible to track these patterns for multiple frames. Note also that if the vector field was accumulated over `Ntot` images, the track will only have `Ntot-1` positions.
 
 ```python
-import opycle as opyf
-
 opyf.mkdir2('./export_Tracks/')
 video.set_filtersParams(wayBackGoodFlag=1, CLAHE=False)
 video.extractTracks(display='quiver', displayColor=True, saveImgPath='./export_Tracks/', numberingOutput=True)
