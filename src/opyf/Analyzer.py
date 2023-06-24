@@ -313,26 +313,17 @@ class Analyzer():
                         '--> detect Good Features to Track on image [' + self.listD[i] + ']')
                     file_prev = self.listD[i]
                 else:
-                    print(
-                        '--> diplacements measurement between images [' +
-                        file_prev +
-                        '] and [' +
-                        self.listD[i] +
-                        ']')
+                    print('--> diplacements measurement between images [' +file_prev +
+                        '] and [' +self.listD[i] +']')
 
         if self.processingMode == 'video' and self.mute == False:
             for pr, i in zip(self.prev, self.vec):
                 if not pr:
-                    print(
-                        '--> detect Good Features to Track on frame [' + str(i) + ']')
+                    print( '--> detect Good Features to Track on frame [' + str(i) + ']')
                     file_prev = str(i)
                 else:
-                    print(
-                        '--> diplacements measurement between frame [' +
-                        file_prev +
-                        '] and [' +
-                        str(i) +
-                        ']')
+                    print('--> diplacements measurement between frame [' +
+                        file_prev +'] and [' +str(i) +']')
         self.Time = (self.vec[0:-1:2] + self.vec[1::2]) / 2
         # initilize self.vis with the first frame of the set
 
@@ -351,14 +342,16 @@ class Analyzer():
         while self.sortedVec[k] < iL:
             k += 1
         self.totDictByte = 0
+        vis=0
         while k < len(
-                self.sortedVec) and self.totDictByte < self.limitRAMinMByte:
+                self.sortedVec) and self.totDictByte < self.limitRAMinMByte and vis is not None:
             indF = int(self.cap.get(cv2.CAP_PROP_POS_FRAMES))
             ret, vis = self.cap.read()
             if indF == self.sortedVec[k]:
                 self.dictFrames[str(self.sortedVec[k])] = vis
                 k += 1
-                self.totDictByte += sys.getsizeof(vis.tobytes()) / 1e6
+                if vis is not None:
+                    self.totDictByte += sys.getsizeof(vis.tobytes()) / 1e6
 
     def set_trackingFeatures(
             self,

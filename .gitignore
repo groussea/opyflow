@@ -23,3 +23,16 @@ test/Test_case_PIV_Challenge_2014/gif/frame_final.png
 realese-v1.1.md
 opyf_groussea.egg-info
 opyflow.egg-info
+tests/Test_Navizence/frame_20_to_31_with_step_2_and_shift_1.csv
+tests/Test_Navizence/frame_20_to_31_with_step_2_and_shift_1.hdf5
+tests/Test_Navizence/tracks_from_frame6to10_with_step_1
+tests/Test_Navizence/export_Tracks/params_image_processing.json
+tests/Test_Navizence/export_Tracks/quiver_0000.png
+tests/Test_Navizence/export_Tracks/quiver_0001.png
+tests/Test_Navizence/export_Tracks/quiver_0002.png
+tests/Test_Navizence/export_Tracks/quiver_0003.png
+tests/Test_Navizence/export_Tracks/quiver_0004.png
+tests/Test_Navizence/export_Tracks/quiver_0005.png
+tests/Test_Navizence/export_Tracks/quiver_0006.png
+tests/Test_Navizence/export_Tracks/quiver_0007.png
+tests/Test_Navizence/export_Tracks/quiver_0008.png
