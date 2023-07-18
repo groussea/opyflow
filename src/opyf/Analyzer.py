@@ -131,7 +131,7 @@ class Analyzer():
             self.opyfDisp.invertXYlabel()
 
     def dumpShow(self):
-        if self.display or self.mute is False:
+        if self.display and self.mute is False:
             self.opyfDisp.ax.imshow(cv2.cvtColor(self.vis, cv2.COLOR_BGR2RGB))
             if plt.rcParams['backend'] in mpl.rcsetup.interactive_bk:
                 self.opyfDisp.fig.show()
@@ -1152,7 +1152,7 @@ class Analyzer():
             'vecTime_params': self.paramVecTime}
         fulldict['fieldResults'] = self.fieldResults
         Files.writeImageProcessingParamsJSON(
-            fulldict, outFolder=outFolder, filename=None)
+            fulldict, outFolder=outFolder, filename=filename)
 
     def set_stabilization( self,
             mask=None,
