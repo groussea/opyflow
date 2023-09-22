@@ -961,7 +961,7 @@ class Analyzer():
             XpROI = []
             for x in self.Xdata:
                 XpROI.append(x[:, 0:2] + self.ROI[0:2])
-            XpROI = np.array(XpROI)
+            XpROI = np.array(XpROI,dtype=object)
         else:
             XpROI = np.copy(self.Xdata)
         if filename is None:
