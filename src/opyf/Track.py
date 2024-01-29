@@ -77,7 +77,7 @@ def opyfTrack(tracks, vtracks, gray, prev_gray, incr, feature_params, lk_params,
             for x, y in np.float32(p).reshape(-1, 2):
                 tracks.append([(x, y)])
                 vtracks.append([('nan', 'nan')])
-    if X == []:
+    if len(X) == 0:
         X = np.empty((0, 2))
         V = np.empty((0, 2))
     X = np.array(X)

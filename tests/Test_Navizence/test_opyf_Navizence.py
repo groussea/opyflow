@@ -6,26 +6,29 @@ Created on Mon Sep 30 12:40:10 2019
 @author: Gauthier
 """
 #%%
-# %matplotlib qt5
 import sys
 # sys.path.append('/folder/toward/opyf') (eventually add directly the opyf package folder if not installed)
 import opyf
 import matplotlib.pyplot as plt
-plt.ion()
+# plt.ion()
 import os
-os.chdir("./")
-# if opyf is not installed where is the opyf folder?
-sys.path.append('../../')
-#On ipython try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline" for inline outputs
+os.chdir("./") # if run in the folder of the video
+# os.chdir(os.path.dirname(os.path.abspath(__file__))) # set path regarding the path of the python file, only works on jupyter
+## For plotting backend, the possibility on where you run the python file
+#### when directly using "python test_opyf_Navizence.py" in a terminal use the matplotlib function to define the 
+import matplotlib
+matplotlib.use('TkAgg') # try 'TkAgg' or 'QtAgg' 
+# matplotlib.use('module://matplotlib_inline.backend_inline') # only work with jupyter notebook, might be equivalent to the magic command %matplotlib qt5
+# or matplotlib.use('QtAgg')
+#On ipython/jupyter try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline" for inline outputs
 
-
+plt.ion()
 plt.close('all')
-
 
 #Path toward the video file
 filePath = './2018.07.04_Station_fixe_30m_sample.mp4'
 #set the object information
-video = opyf.videoAnalyzer(filePath)
+video = opyf.videoAnalyzer(filePath) # An error may appear on usual python
 '''
 this manipualtion create an object [video] that contains information deduced from the video file.
 #if it is a frame sequence use: {opyf.frameSequenceAnalyzer(path)} and type the "path" where images are.
@@ -204,7 +207,7 @@ video.opyfDisp.plotField(Field, vis=video.vis)
 for plotting only the resulting averaged field, usefull if Ntot is longer
 '''
 # video.set_vlim([0, 30])
-video.set_vecTime(Ntot=10, shift=1, step=1, starting_frame=20)
+video.set_vecTime(Ntot=5, shift=1, step=1, starting_frame=20)
 video.extractGoodFeaturesDisplacementsAccumulateAndInterpolate(
     display2='field', displayColor=True, scale=200)
 

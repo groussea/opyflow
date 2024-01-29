@@ -117,8 +117,9 @@ You can access to your environment by typing:
 ```shell
 conda activate opyfenv
 ```
+### Installation using the standard python protocol to create a virtual environment
 
-You can standard python protocol (run the command where you want to put the environement)
+You can also use the standard python protocol (run the command where you want to put the environment):
 
 ```shell
 python -m venv opyfenv
@@ -133,7 +134,7 @@ For development mode, you may also install the libraries individually with pip:
 pip install ipython vtk opencv-python tqdm h5py matplotlib scipy ipykernel PyQt6
 ```
 
-And set the opyf repository in your PATH or in the begining of your python script using:
+And set the opyf repository in your PATH or in the beginning of your python script using:
 
 ```python
 import sys

@@ -632,7 +632,7 @@ figp, ax, im = opyf.Render.opyfField(
 figp, cb = opyf.Render.opyfColorBar(
     fig, im, label=' DX rms (in '+setPlot['unit']+'/DeltaT)')
 cb.set_alpha(0.8)
-cb.draw_all()
+# cb.draw_all()
 
 
 plt.pause(0.1)

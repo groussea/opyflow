@@ -93,7 +93,7 @@ def opyfPlot(grid_x, grid_y, gridVx, gridVy, Xdata, Vdata, setPlot, vis=None, Pt
         figp, cb = opyfColorBar(fig, sc, label=Ptype +
                                 ' velocity (in '+setPlot['unit']+'/DeltaT)')
         cb.set_alpha(0.8)
-        cb.draw_all()
+        # cb.draw_all()
 
     if setPlot['DisplayPoints'] == True:
         figp, ax = opyfPointCloudScatter(
@@ -109,7 +109,7 @@ def opyfPlot(grid_x, grid_y, gridVx, gridVy, Xdata, Vdata, setPlot, vis=None, Pt
         figp, cb = opyfColorBar(
             fig, sm, label='Amplitude (in '+setPlot['unit']+'/DeltaT)')
         cb.set_alpha(0.8)
-        cb.draw_all()
+        # cb.draw_all()
 
     return fig, ax
 
@@ -463,7 +463,7 @@ class opyfDisplayer:
             self.opyfPointCloudColoredScatter(Xdata, Vdata, s=10,  **infoPlotPointCloud)
             self.opyfColorBar(label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
             self.cb.set_alpha(0.8)
-            self.cb.draw_all()
+            # self.cb.draw_all()
     #
         if self.paramDisp['DisplayPoints'] == True and Xdata is not None and Vdata is not None:
             self.opyfPointCloudScatter(Xdata, Vdata, s=s, color=c, **infoPlotPointCloud)
@@ -478,7 +478,7 @@ class opyfDisplayer:
             self.opyfColorBar(
                  label=Ptype+' velocity (in '+self.paramPlot['unit'][0]+'/'+self.paramPlot['unit'][1] + ')')
             self.cb.set_alpha(0.8)
-            self.cb.draw_all()
+            # self.cb.draw_all() # bug with matplotlib 3.8
         
         # self.fig.show()
 
@@ -1198,7 +1198,7 @@ def opyfPlotRectilinear(vecX, vecY, gridVx, gridVy, setPlot, Xdata=None, Vdata=N
         figp, cb = opyfColorBar(
             fig, sc, label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1] + ')')
         cb.set_alpha(0.8)
-        cb.draw_all()
+        # cb.draw_all()
 #
     if setPlot['DisplayPoints'] == True and Xdata is not None and Vdata is not None:
         figp, ax = opyfPointCloudScatter(
@@ -1214,6 +1214,6 @@ def opyfPlotRectilinear(vecX, vecY, gridVx, gridVy, setPlot, Xdata=None, Vdata=N
         figp, cb = opyfColorBar(
             fig, sc, label=Ptype+' velocity (in '+setPlot['unit'][0]+'/'+setPlot['unit'][1] + ')')
         cb.set_alpha(0.8)
-        cb.draw_all()
+        # cb.draw_all()
 
     return fig, ax
