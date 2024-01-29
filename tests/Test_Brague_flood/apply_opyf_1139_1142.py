@@ -10,16 +10,19 @@ Created on April 26 2020
 #%%
 # %matplotlib qt5
 import sys, os
-os.chdir(os.path.dirname(os.path.abspath(__file__)))
+os.chdir("./") # if run in the folder of the video
+# os.chdir(os.path.dirname(os.path.abspath(__file__))) # set path regarding the path of the python file, only works on jupyter
 import opyf
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib
+matplotlib.use('TkAgg')
 plt.close('all')
 
 #%%
 
-
+os.chdir("./1139")
 video=opyf.videoAnalyzer('IMG_1139.MOV')
 
 #extract a a picture to build a mask
@@ -68,8 +71,8 @@ V1139=np.copy(video.Vaccu)
 norm1139=(V1139[:, 0]** 2 + V1139[:, 1]** 2)** 0.5
 
 #%% perfomed measurments on 1142
-
-video=opyf.videoAnalyzer('1142/IMG_1142.MOV')
+os.chdir("./1142")
+video=opyf.videoAnalyzer('IMG_1142.MOV')
 
 video.set_vecTime(Ntot=25,starting_frame=0)
 video.set_goodFeaturesToTrackParams(qualityLevel=0.001)
