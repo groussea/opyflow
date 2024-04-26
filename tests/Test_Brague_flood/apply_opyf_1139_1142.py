@@ -29,7 +29,7 @@ video=opyf.videoAnalyzer('IMG_1139.MOV')
 # cv2.imwrite('for_mask_1142.png',video.vis)
 
 
-video.set_vecTime(Ntot=25,starting_frame=200)
+video.set_vecTime(Ntot=10,starting_frame=200)
 
 video.set_interpolationParams(Sharpness=2)
 video.set_goodFeaturesToTrackParams(qualityLevel=0.01)
@@ -71,10 +71,10 @@ V1139=np.copy(video.Vaccu)
 norm1139=(V1139[:, 0]** 2 + V1139[:, 1]** 2)** 0.5
 
 #%% perfomed measurments on 1142
-os.chdir("./1142")
+os.chdir("./../1142")
 video=opyf.videoAnalyzer('IMG_1142.MOV')
 
-video.set_vecTime(Ntot=25,starting_frame=0)
+video.set_vecTime(Ntot=10,starting_frame=0)
 video.set_goodFeaturesToTrackParams(qualityLevel=0.001)
 
 video.set_interpolationParams(Sharpness=2)

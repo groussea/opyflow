@@ -22,13 +22,15 @@ matplotlib.use('TkAgg') # try 'TkAgg' or 'QtAgg'
 # or matplotlib.use('QtAgg')
 #On ipython/jupyter try the magic command "%matplotlib qt5" for external outputs or "%matplotlib inline" for inline outputs
 
+
 plt.ion()
 plt.close('all')
 
 #Path toward the video file
 filePath = './2018.07.04_Station_fixe_30m_sample.mp4'
 #set the object information
-video = opyf.videoAnalyzer(filePath) # An error may appear on usual python
+video = opyf.videoAnalyzer(filePath) # 
+# video = opyf.videoAnalyzer(filePath, imageROI=[100, 200, 1000, 600]) # 
 '''
 this manipualtion create an object [video] that contains information deduced from the video file.
 #if it is a frame sequence use: {opyf.frameSequenceAnalyzer(path)} and type the "path" where images are.

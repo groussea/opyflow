@@ -1185,7 +1185,7 @@ class Analyzer():
                 step=s - self.vec[0])
             self.stab.extractGoodFeaturesAndDisplacements()
             transformation_rigid_matrix, rigid_mask = cv2.estimateAffine2D(
-                self.stab.X + self.stab.V/2, self.stab.X + self.stab.V/2 ) #because the position of the displacement is half the distance btw GFTs
+                self.stab.X + self.stab.V/2, self.stab.X - self.stab.V/2 ) #because the position of the displacement is half the distance btw GFTs
             dst = cv2.warpAffine(
                 self.stab.vis,
                 transformation_rigid_matrix,
@@ -1425,3 +1425,5 @@ class frameSequenceAnalyzer(Analyzer):
 #           folderFrame=outFolder+'/'+filename+'/'+format(t,'04.0f')+'_to_'+format(t+self.paramVecTime['step']
 #           Files.mkdir2()
 #           cv2.imwrite()
+
+# %%
