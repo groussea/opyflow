@@ -224,7 +224,7 @@ bathy_new[:,2]=bathy_new[:,2]-zwater
 
 import rasterio as rio
 
-filePath='Ortho.tif'
+filePath='Ortho.tif' #(can be downloaded here https://drive.switch.ch/index.php/s/PXMQZRZloI5Ab2v)
 with rio.open(filePath) as img :
     imagea= img.read()
     imgmeta=img.meta

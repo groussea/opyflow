@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "opyf"
-version = "1.6"
+version = "1.7"
 authors = [
   { name="Gauthier Rousseau", email="gauthier.rousseau@gmail.com" },
 ]
