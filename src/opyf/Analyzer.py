@@ -563,7 +563,7 @@ class Analyzer():
 
         if self.filters_params['CLAHE']:
             self.gray = Render.CLAHEbrightness(
-                self.gray, 0,mask=cv2.imread('mask_1139.png')
+                self.gray, 0,
                 tileGridSize=self.filters_params['gridSize'],
                 clipLimit=self.filters_params['clplim'])
 #             self.vis=Render.CLAHEbrightness(self.vis,0,tileGridSize=(20,20),clipLimit=2)
