@@ -174,7 +174,22 @@ Follow this [link](https://link.springer.com/article/10.1007/s00348-020-02990-y#
   publisher={Springer}
 }
 
-Contributors : Hugo Rousseau, Mohamed Nadeem, LHE team and others
+## Other research utilizing opyFlow
+
+[Rousseau G, Ancey C. An experimental investigation of turbulent free-surface flows over a steep permeable bed. Journal of Fluid Mechanics. 2022;941:A51. doi:10.1017/jfm.2022.310 ](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/an-experimental-investigation-of-turbulent-freesurface-flows-over-a-steep-permeable-bed/E7D19E212687A82479AABD0852FE3DC5)
+
+[Rousseau G, Métivet T, Rousseau H, Daviet G, Bertails-Descoubes F. Revisiting the role of friction coefficients in granular collapses: confrontation of 3-D non-smooth simulations with experiments. Journal of Fluid Mechanics. 2023;975:A14. doi:10.1017/jfm.2023.835
+](https://www.cambridge.org/core/journals/journal-of-fluid-mechanics/article/revisiting-the-role-of-friction-coefficients-in-granular-collapses-confrontation-of-3d-nonsmooth-simulations-with-experiments/AC4302004B88F409DD3616DFA075994A)
+
+[Vigoureux, S. et al. (2022). Comparison of Streamflow Estimated by Image Analysis (LSPIV) and by Hydrologic and Hydraulic Modelling on the French Riviera During November 2019 Flood. In: Gourbesville, P., Caignaert, G. (eds) Advances in Hydroinformatics. Springer Water. Springer, Singapore. https://doi.org/10.1007/978-981-19-1600-7_16](https://link.springer.com/chapter/10.1007/978-981-19-1600-7_16)
+
+[Rousseau G, Pascal I., Ancey C, Modeling turbulent stream flows over rough permeable beds, River Flow 2020 ](https://hal.science/hal-03109313/document)
+
+[You Tube Video of River Flow 2020 talk by Rousseau G on the EPFL-LHE Channel](https://www.youtube.com/watch?v=zZKKZUPFIFM)
+
+### Contributors and credits
+
+Hugo Rousseau, Mohamed Nadeem, LHE team and others
 
 Credits for UAV video : Bob de Graffenried
 
